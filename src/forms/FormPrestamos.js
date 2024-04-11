@@ -10,7 +10,6 @@ import { useRoute } from "@react-navigation/native"
 import ServicePrestamos from '../services/ServicePrestamos';
 import ServiceClientes from '../services/ServiceClientes';
 import CurrencyInput from 'react-native-currency-input';
-import {Dimensions} from 'react-native';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { AutocompleteDropdownContextProvider } from 'react-native-autocomplete-dropdown';
@@ -153,11 +152,9 @@ const FormPrestamos = ({navigation}) => {
             'coords_lat':new_coords_lat,
             'coords_lon':new_coords_lon
         }
-
         const data = await service.registrar_prestamo(nuevo_prestamo=nuevo_prestamo)
-        console.log(data)
         ToastAndroid.show('Prestamo Registrado', ToastAndroid.SHORT);
-        //navigation.goBack()
+        navigation.goBack()
     },[])
     function newCliente(){
         navigation.navigate("NuevoCliente",{ type: 0 });
@@ -169,19 +166,21 @@ const FormPrestamos = ({navigation}) => {
         navigation.goBack()
     }
     function getGps(){
-        (async () => {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                setCoords(0)
-                return;
-            }
-        })();
-        (async () => {
-            let location = await Location.getCurrentPositionAsync({});
-            if(coords!= '0'){
-                navigation.navigate("Mapa",{ lat: location.coords.latitude, lon: location.coords.longitude, editable: editable});
-            }
-        })();
+        if(coords!= '0'){
+            (async () => {
+                let { status } = await Location.requestForegroundPermissionsAsync();
+                if (status !== 'granted') {
+                    setCoords(0)
+                    return;
+                }
+            })();
+            (async () => {
+                let location = await Location.getCurrentPositionAsync({});
+                if(coords!= '0'){
+                    navigation.navigate("Mapa",{ lat: location.coords.latitude, lon: location.coords.longitude, editable: editable});
+                }
+            })();
+        }
     }
     function getINE(){
         if(editable == true){

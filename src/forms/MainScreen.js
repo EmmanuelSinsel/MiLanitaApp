@@ -10,7 +10,7 @@ const MainScreen = ({navigation}) => {
         navigation.navigate("FormPrestamos");
     }
     function nuevoClienteFunc() {
-        navigation.navigate("NuevoCliente");
+        navigation.navigate("FormClientes");
     }
     function nuevoAcuerdoFunc(){
         navigation.navigate("Acuerdo")

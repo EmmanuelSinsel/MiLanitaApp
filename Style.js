@@ -564,6 +564,16 @@ const styles = StyleSheet.create({
         backgroundColor:"gray",
         zIndex:10,
         justifyContent:"center"
+    },
+    topBarSaveButton:{
+        alignContent:"center",
+        alignItems:"center",
+        justifyContent:"center",
+        alignSelf:"flex-end",
+        width:"30%",
+        height:40,
+        backgroundColor:"#378804",
+        borderRadius:15,
     }
 });
 

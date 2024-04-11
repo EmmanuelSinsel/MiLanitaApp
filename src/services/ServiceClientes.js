@@ -3,14 +3,16 @@ import API from "./API";
 class ServiceClientes{
     api = new API()
 
-    get_lista_clientes = async (id_grupo, filtro) => {
-        url = ""
-        if(filtro == ""){
-            url = this.api.URL+"clientes/lista_clientes?grupo="+String(id_grupo)
+    get_lista_clientes = async (p, p_size, id_grupo, filtro) => {
+        url = this.api.URL+"clientes/lista_clientes?grupo="+String(id_grupo)
+        if(filtro != ""){
+            url += "&filtro="+filtro
         }
-        else{
-            url = this.api.URL+"clientes/lista_clientes?filtro="+filtro+"&grupo="+id_grupo
-
+        if(p != null){
+            url += "&p="+p
+        }
+        if(p_size != null){
+            url += "&p_size="+p_size
         }
         try {
             const response = await fetch(url);

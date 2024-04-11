@@ -3,7 +3,7 @@ import React from 'react';
 import Login from './src/forms/Login';
 import MainScreen from './src/forms/MainScreen';
 import FormPrestamos from './src/forms/FormPrestamos';
-import NuevoCliente from './src/forms/NuevoCliente';
+import FormClientes from './src/forms/FormClientes';
 import Abonos from './src/forms/Abonos';
 import AbonoDetalle from './src/forms/AbonoDetalle';
 import Camara from './src/forms/Camera';
@@ -36,8 +36,8 @@ export default function App() {
           component={FormPrestamos}
           options={{headerShown: false}}/>
         <Stack.Screen
-          name="NuevoCliente"
-          component={NuevoCliente}
+          name="FormClientes"
+          component={FormClientes}
           options={{headerShown: false}}/>
         <Stack.Screen
           name="Abonos"

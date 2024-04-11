@@ -1,18 +1,22 @@
 import { StatusBar } from 'expo-status-bar';
 import { Text, View, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { styles } from '../../Style';
-import React, {useState} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import ImageIndex from '../ImageIndex';
 import { Dropdown } from 'react-native-element-dropdown';
+import ServiceClientes from '../services/ServiceClientes';
+import ServicePrestamos from '../services/ServicePrestamos';
 
 const ConsultaClientes = ({navigation}) => {
-    function backMainScreen() {
-        navigation.goBack()
-    }
-    
+    let service = new ServiceClientes()
+    let servicePrestamos = new ServicePrestamos()
     const [ruta,                setRuta] = useState('');
     const [grupo,               setGrupo] = useState('');
-    const [filtro,      setFiltro] = useState('');
+    const [lista_rutas, setListaRutas] = useState([]);
+    const [lista_grupos, setListaGrupos] = useState([]);
+    const [page,                setPage] = useState(1);
+    const [filtro_text,           setFiltro] = useState('');
+    const [filteredTableData, setFilteredTableData] = useState(null)
     const data = [
         { label: 'Item 1', value: '1' },
         { label: 'Item 2', value: '2' },
@@ -23,30 +27,84 @@ const ConsultaClientes = ({navigation}) => {
         { label: 'Item 7', value: '7' },
         { label: 'Item 8', value: '8' },
     ];
-    const [tableData, setTableData] = useState([['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel']]);
+    const [tableData, setTableData] = useState([])
+    const [max_pages, setMaxPages] = useState([]);
+    let clientes_data = []
+    useEffect(() => {
+        get_rutas()
+    }, [ get_rutas]);
+
+    const filterTable = (value) =>{
+        setPage(1)
+        if(value.length > 2){
+            const filtro_upper = value.toUpperCase()
+            setFiltro(value)
+            console.log(filtro_upper)
+            get_clientes(1, 100, grupo, filtro_upper)
+        }
+    }
+    function backMainScreen() {
+        navigation.goBack()
+    }
+
+    const is_close_to_bottom = ({layoutMeasurement, contentOffset, contentSize}) => {
+        const paddingToBottom = 5;
+        return layoutMeasurement.height + contentOffset.y >=
+        contentSize.height - paddingToBottom;
+    };
+
+    const next_chunk = () => {
+        let pg = page + 1
+        if(pg < max_pages){
+            add_clientes(pg, 100, grupo, filtro_text)
+        }
+    }
+
+    const add_clientes = useCallback(async (p, p_size, id_grupo, filtro) => {
+        const data = await service.get_lista_clientes(p, p_size, id_grupo, filtro)
+        let temp_clientes = []
+        const clientes = data.clientes
+        for(let i = 0; i < clientes.length ; i++){
+            temp_clientes.push([clientes[i].id_cliente,clientes[i].nom_cliente])
+        }
+        setTableData(tableData => [...tableData, ...temp_clientes])
+        setMaxPages(data.paginas)
+        setPage(p)
+    }, [])
+
+    const get_clientes = useCallback(async (p, p_size, id_grupo, filtro) => {
+        setPage(0)
+        const data = await service.get_lista_clientes(p, p_size, id_grupo, filtro)
+        let temp_clientes = []
+        const clientes = data.clientes
+        for(let i = 0; i < clientes.length ; i++){
+            temp_clientes.push([clientes[i].id_cliente,clientes[i].nom_cliente])
+        }
+        setMaxPages(data.paginas)
+        setTableData(temp_clientes)
+        clientes_data = temp_clientes
+    }, [])
+
+    const get_rutas = useCallback(async () => {
+        const data = await servicePrestamos.get_rutas()
+        let temp_rutas = []
+        for(let i = 0; i < data.length ; i++){
+            temp_rutas.push({"label":data[i].ruta,"value":data[i].id_ruta})
+        }
+        setListaRutas(temp_rutas)
+    }, [])
+    const get_grupos = useCallback(async (id_ruta) => {
+        const data = await servicePrestamos.get_grupos(id=id_ruta)
+        let temp_grupos = []
+        for(let i = 0; i < data.length ; i++){
+            temp_grupos.push({"label":data[i].nom_grupo,"value":Number(data[i].id_grupo)})
+        }
+        setListaGrupos(temp_grupos)
+    }, [])
+
+
     return (
-        <ScrollView style={styles.background}>
+        <View style={styles.background}>
             <StatusBar backgroundColor='#70be44'/>
             <View style={styles.mainTopBar}>
                 <View style={styles.spacer30}></View>
@@ -67,68 +125,92 @@ const ConsultaClientes = ({navigation}) => {
                     <View style={styles.textBoxBorder}>
                                 <Text style={styles.textBoxLabel}>Ruta</Text>
                                 <Dropdown style={styles.comboBox}
-                                data={data} search
+                                data={lista_rutas} search
                                 labelField="label" valueField="value"
                                 searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
                                 placeholderStyle={styles.comboBoxPlaceholder}
                                 selectedTextStyle={styles.comboBoxSelected}
                                 value={ruta}
-                                onChange={item => {setRuta(item.value);}}/>
+                                onChange={item => {setRuta(item.value);get_grupos(item.value);}}/>
                     </View>
                 </View>
                 <View style={styles.textBoxContainerHalf}>
                     <View style={styles.textBoxBorder}>
                                 <Text style={styles.textBoxLabel}>Grupo</Text>
                                 <Dropdown style={styles.comboBox}
-                                data={data} search
+                                data={lista_grupos} search
                                 labelField="label" valueField="value"
                                 searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
                                 placeholderStyle={styles.comboBoxPlaceholder}
                                 selectedTextStyle={styles.comboBoxSelected}
                                 value={grupo}
-                                onChange={item => {setGrupo(item.value);}}/>
+                                onChange={item => {setGrupo(item.value); get_clientes(page, 100, item.value, "")}}/>
                     </View>
                 </View>
             </View>
             <View style={styles.spacer20}></View>
             <View style={styles.textBoxContainerFull}>
-                <View style={styles.textBoxBorder}>
+                <View style={[styles.textBoxBorder, {}]}>
                             <Text style={styles.textBoxLabel}>Buscador</Text>
                             <TextInput style={styles.textBox}
-                            onChangeText={value => setFiltro(value)}
-                            defaultValue={filtro}/>
+                            onChangeText={value => {filterTable(value)}}
+                            defaultValue={filtro_text}/>
                 </View>
             </View>
             <View style={styles.spacer20}></View>
-            <DataTable tableData={tableData}></DataTable>
-            <View style={styles.spacer30}></View>
-        </ScrollView>
+            <ScrollView style={{height:"76%"}} onScroll={({nativeEvent}) => {
+                if (is_close_to_bottom(nativeEvent)) {
+                    next_chunk();
+                }
+            }}>
+                {
+                    filteredTableData === null ?
+                    <DataTable tableData={tableData} navigation={navigation}></DataTable>:
+                    <DataTable tableData={filteredTableData} navigation={navigation}></DataTable>
+                }
+                <View style={styles.spacer10}></View>
+                {
+                    tableData.length >= page * 100 ? 
+                    <View style={[styles.textBoxContainerFull,{ height:50 }]}>
+                        <Image style={[styles.loadingImage,{height:50, marginLeft:5}]}
+                            source={ImageIndex.loading}>
+                        </Image>
+                    </View>
+                    :
+                    <View></View>
+                }
+            </ScrollView>
+        </View>
     )
 }
-function DataTable({tableData}) {
-    const [ruta,                setRuta] = useState('');
-    const data1 = [
-        { label: 'Normal', value: '1' },
-        { label: 'Recuperado', value: '2' },
-    ];
+function DataTable({tableData, navigation}) {
+    const editPrestamo = (id_prestamo) => {
+        navigation.navigate("FormPrestamos",{ label:"Prestamo #"+String(id_prestamo), button:"Actualizar Prestamo", id: id_prestamo });
+    }
     return (
         <View>
+            <View style={[styles.tableRowOdd,{height:50, flexDirection:"row",alignItems:"center"}]}>
+                <Text style={[styles.cell,{fontWeight:"bold", width:50}]}>ID. C</Text>
+                <View>
+                    <Text style={[styles.cell,{fontWeight:"bold", width:320}]}>Cliente</Text>
+                </View>
+            </View>
             {
                 tableData.map((data,i) => (
                     i % 2 === 0 ?
-                    <View key={i} style={[styles.tableRowEven,{height:50, flexDirection:"row",alignItems:"center"}]}>
-                        <Text style={styles.cell}>{data[0]}</Text>
+                    <TouchableOpacity onPress={() => editPrestamo(data[0])} key={i} style={[styles.tableRowEven,{height:50, flexDirection:"row",alignItems:"center"}]}>
+                        <Text style={[styles.cell,{ width:50}]}>{data[0]}</Text>
                         <View>
-                            <Text style={styles.cell}>{data[2]}</Text>
+                            <Text style={[styles.cell,{ width:320}]}>{data[1]}</Text>
                         </View>
-                    </View>
+                    </TouchableOpacity>
                     :
-                    <View key={i} style={[styles.tableRowOdd,{height:50, flexDirection:"row",alignItems:"center"}]}> 
-                        <Text style={styles.cell}>{data[0]}</Text>
+                    <TouchableOpacity onPress={() => editPrestamo(data[0])} key={i} style={[styles.tableRowOdd,{height:50, flexDirection:"row",alignItems:"center"}]}> 
+                        <Text style={[styles.cell,{ width:50}]}>{data[0]}</Text>
                         <View>
-                            <Text style={styles.cell}>{data[2]}</Text>
+                            <Text style={[styles.cell,{ width:320}]}>{data[1]}</Text>
                         </View>
-                    </View>
+                    </TouchableOpacity>
 
                 ))
             }

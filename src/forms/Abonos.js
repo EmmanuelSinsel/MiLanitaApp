@@ -9,6 +9,26 @@ import ServicePrestamos from '../services/ServicePrestamos';
 import CurrencyInput from 'react-native-currency-input';
 
 const Abonos = ({navigation}) => {
+    //TABLA
+    const [tipo_abono, setTipoAbono] = useState([]);
+    const [lista_abonos, setAbono] = useState(null);
+    const update_type = (key, type) => {
+        let new_list = tipo_abono
+        new_list[key]=type.value
+        setTipoAbono(new_list)
+        console.log(new_list)
+    }
+    const update_abono = (id, value) => {
+        if(value == null){
+            value = 0
+        }
+        const newInputs = lista_abonos.map(input =>
+            input.id === id ? { ...input, value: value } : input
+        );
+        setAbono(newInputs);
+        console.log(newInputs)
+    }
+    //FORMULARIO
     let serviceAbonos = new ServiceAbonos()
     let servicePrestamos = new ServicePrestamos()
     const [filtro,      setFiltro] = useState('');
@@ -23,9 +43,6 @@ const Abonos = ({navigation}) => {
     
     function backMainScreen() {
         navigation.goBack()
-    }
-    const showData = (index)=> {
-        navigation.navigate("AbonoDetalle",{ id: index });
     }
     const get_rutas = useCallback(async () => {
         const data = await servicePrestamos.get_rutas()
@@ -50,7 +67,31 @@ const Abonos = ({navigation}) => {
             temp_abonos.push([data[i].id_prestamo,data[i].nom_cliente,data[i].num_abono,data[i].abono])
         }
         setTableData(temp_abonos)
+        let list = []
+        let lista_abonos = []
+        for(let i = 0; i < temp_abonos.length ; i++){
+            list.push('1')
+            lista_abonos.push({ id: i, value: temp_abonos[i][3] })
+        }
+        setTipoAbono(list)
+        setAbono(lista_abonos)
     }, [])
+    const guardar_lista_abonos = async (new_tipo_abono, new_lista_abonos, new_table_data) => {
+        let data = []
+        for(let i = 0 ; i < new_table_data.length ; i++){
+            data.push({
+                "id_prestamo":new_table_data[i][0],
+                "no_abono":new_table_data[i][2]+1,
+                "abono":new_lista_abonos[i].value,
+                "tipo_abono":new_tipo_abono[i]
+            })
+        }
+        data = {"abonos":data}   
+        console.log(data)
+        
+        const res = await serviceAbonos.guardar_abonos(data)
+        console.log(res)
+    }
 
     return (
         <ScrollView style={styles.background}>
@@ -59,12 +100,17 @@ const Abonos = ({navigation}) => {
                 <View style={styles.spacer30}></View>
                 <View style={styles.spacer20}></View>
                 <View style={styles.topBarContainer}>
-                    <TouchableOpacity style={styles.topBarButton} onPress={backMainScreen}>
-                            <Image style={styles.invertedImageTopBar}
-                                source={ImageIndex.back}>
-                            </Image>
+                    <View style={{flexDirection:'row', width:"66.6%"}}>
+                        <TouchableOpacity style={styles.topBarButton} onPress={backMainScreen}>
+                                <Image style={styles.invertedImageTopBar}
+                                    source={ImageIndex.back}>
+                                </Image>
+                        </TouchableOpacity>
+                        <Text style={styles.mainHeadersInverted}>Abonos</Text>
+                    </View>
+                    <TouchableOpacity style={styles.topBarSaveButton} onPress={() => guardar_lista_abonos(tipo_abono, lista_abonos, tableData) }>
+                        <Text style={{fontSize:22, color:"white", fontWeight:"bold"}}>Guardar</Text>
                     </TouchableOpacity>
-                    <Text style={styles.mainHeadersInverted}>Abonos</Text>
                 </View>
                 <View style={styles.spacer20}></View>
             </View>
@@ -106,56 +152,27 @@ const Abonos = ({navigation}) => {
                             defaultValue={filtro}/>
                 </View>
             </View>
-            <View style={styles.spacer20}></View>
+            <View style={styles.spacer10}></View>
+            <View style={styles.horizontalLine}></View>
             {
-                tableData !== null &&
-                <DataTable tableData={tableData}></DataTable>
+                lista_abonos !== null &&
+                <DataTable tableData={tableData} update_abono={update_abono} update_type={update_type} lista_abonos={lista_abonos} lista_tipos={tipo_abono}></DataTable>
             }
-
             <View style={styles.spacer30}></View>
         </ScrollView>
     )
 }
 
-function DataTable({tableData}) {
-    const [tipo_abono, setTipoAbono] = useState([]);
-    const [lista_abonos, setAbono] = useState([]);
+function DataTable({tableData, update_abono, update_type, lista_abonos, lista_tipos }) {
     const data1 = [
         { label: 'Normal', value: '1' },
         { label: 'Recuperado', value: '2' },
         { label: 'Parcial', value: '3' },
         { label: 'Adelantado', value: '4' },
     ];
-
-    const generate = () => {
-        let list = []
-        let lista_abonos = []
-        for(let i = 0; i < tableData.length ; i++){
-            list.push('1')
-            lista_abonos.push({ id: i, value: tableData[i][3] })
-        }
-        setTipoAbono(list)
-        setAbono(lista_abonos)
-        return true;
-    }
-    const update_type = (key, type) => {
-        let new_list = tipo_abono
-        new_list[key]=type.value
-        setTipoAbono(new_list)
-        console.log(new_list)
-    }
-    const update_abono = (id, value) => {
-        const newInputs = lista_abonos.map(input =>
-            input.id === id ? { ...input, value: value } : input
-        );
-        setAbono(newInputs);
-        console.log(newInputs)
-    }
     return (
         <View>
-            {
-                generate() === true &&
-                <View>
+            <View>
                 {
                     tableData.map((data,i) => (
                         i % 2 === 0 ?
@@ -173,7 +190,7 @@ function DataTable({tableData}) {
                                             prefix="$"
                                             placeholder='$0'
                                             onChangeValue={(value) => update_abono(i, value)}
-                                            value={String(data[3])}/>
+                                            value={String(lista_abonos[i].value)}/>
                                     <Text style={styles.cell}>Tipo:</Text>
                                     <Dropdown style={[styles.cellCombo, {width:140}]}
                                     data={data1} search
@@ -181,7 +198,7 @@ function DataTable({tableData}) {
                                     searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
                                     placeholderStyle={styles.comboBoxPlaceholder}
                                     selectedTextStyle={styles.cellComboBoxSelected}
-                                    value={String(data[3])}
+                                    value={lista_tipos[i]}
                                     onChange={item => {update_type(i, item)}}/>
                                 </View>
                             </View>
@@ -200,8 +217,8 @@ function DataTable({tableData}) {
                                             maxValue={9999}
                                             prefix="$"
                                             placeholder='$0'
-                                            //onChangeValue={(value) => setImportePrestamo(value) && calcular_prestamo(importe=importe_prestamo, plazo=plazo_prestamo)}
-                                            value={String(data[3])}/>
+                                            onChangeValue={(value) => update_abono(i, value)}
+                                            value={String(lista_abonos[i].value)}/>
                                     <Text style={styles.cell}>Tipo:</Text>
                                     <Dropdown style={[styles.cellCombo, {width:140}]}
                                     data={data1} search
@@ -209,7 +226,7 @@ function DataTable({tableData}) {
                                     searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
                                     placeholderStyle={styles.comboBoxPlaceholder}
                                     selectedTextStyle={styles.cellComboBoxSelected}
-                                    value={String(data[3])}
+                                    value={lista_tipos[i]}
                                     onChange={item => {update_type(i, item)}}/>
                                 </View>
                             </View>
@@ -217,8 +234,7 @@ function DataTable({tableData}) {
 
                     ))
                 }
-                </View> && console.log(lista_abonos)
-            }
+            </View>
         </View>
             
     )

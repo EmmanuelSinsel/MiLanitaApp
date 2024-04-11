@@ -26,6 +26,7 @@ const ImageIndex = {
     next: require('../assets/icons/icon-next.png'),
     loading: require('../assets/icons/icon-loading.gif'),
     gallery: require('../assets/icons/icon-gallery.png'),
+    save: require('../assets/icons/icon-save.png'),
 };
 
 export default ImageIndex

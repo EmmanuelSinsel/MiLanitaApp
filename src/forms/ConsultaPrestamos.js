@@ -81,11 +81,7 @@ const ConsultaPrestamos = ({navigation}) => {
     }, [])
 
     return (
-        <View style={styles.background} onScroll={({nativeEvent}) => {
-                if (is_close_to_bottom(nativeEvent)) {
-                    next_chunk();
-                }
-            }}>
+        <View style={styles.background}>
             <StatusBar backgroundColor='#70be44'/>
             <View style={styles.mainTopBar}>
                 <View style={styles.spacer30}></View>
@@ -110,7 +106,11 @@ const ConsultaPrestamos = ({navigation}) => {
                 </View>
             </View>
             <View style={styles.spacer20}></View>
-            <ScrollView>
+            <ScrollView style={{height:"76%"}} onScroll={({nativeEvent}) => {
+                if (is_close_to_bottom(nativeEvent)) {
+                    next_chunk();
+                }
+            }}>
                 {
                     filteredTableData === null ?
                     <DataTable tableData={tableData} navigation={navigation}></DataTable>:
@@ -127,25 +127,19 @@ const ConsultaPrestamos = ({navigation}) => {
                     :
                     <View></View>
                 }
-                <View style={styles.spacer10}></View>
+
             </ScrollView>
-            
         </View>
     )
 }
 function DataTable({tableData, navigation}) {
-    const [ruta,                setRuta] = useState('');
-    const data1 = [
-        { label: 'Normal', value: '1' },
-        { label: 'Recuperado', value: '2' },
-    ];
     const editPrestamo = (id_prestamo) => {
         navigation.navigate("FormPrestamos",{ label:"Prestamo #"+String(id_prestamo), button:"Actualizar Prestamo", id: id_prestamo });
     }
     return (
         <View>
             <View style={[styles.tableRowOdd,{height:50, flexDirection:"row",alignItems:"center"}]}>
-                <Text style={[styles.cell,{fontWeight:"bold", width:50}]}>ID</Text>
+                <Text style={[styles.cell,{fontWeight:"bold", width:50}]}>ID. P</Text>
                 <View>
                     <Text style={[styles.cell,{fontWeight:"bold", width:320}]}>Cliente</Text>
                 </View>

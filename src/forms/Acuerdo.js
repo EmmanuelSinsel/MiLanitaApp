@@ -130,7 +130,7 @@ const Acuerdo = ({navigation}) => {
                 </View>
             </View>
             <View style={styles.spacer20}></View>
-            <View style={styles.textBoxContainerFull}>
+            <View style={[styles.textBoxContainerFull,{height:70}]}>
                 <View style={styles.textBoxBorderMoney}>
                             <Text style={styles.textBoxLabel}>Saldo Pendiente</Text>
                             <CurrencyInput style={styles.textBoxMoney}
@@ -163,7 +163,7 @@ const Acuerdo = ({navigation}) => {
                 </View>
             </View>
             <View style={styles.spacer20}></View>
-            <View style={styles.textBoxContainerFull}>
+            <View style={[styles.textBoxContainerFull, {height:100}]}>
                 <View style={[styles.textBoxBorder,{height:100, flexDirection:"row"}]}>
                             <Text style={styles.textBoxLabel}>Motivo</Text>
                             <TextInput style={[styles.textBox, {alignSelf:"flex-start", verticalAlign:"top", paddingTop:10}]}
