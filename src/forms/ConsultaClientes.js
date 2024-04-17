@@ -17,6 +17,7 @@ const ConsultaClientes = ({navigation}) => {
     const [page,                setPage] = useState(1);
     const [filtro_text,           setFiltro] = useState('');
     const [filteredTableData, setFilteredTableData] = useState(null)
+    const [loading ,setLoading] = useState(0)
     const data = [
         { label: 'Item 1', value: '1' },
         { label: 'Item 2', value: '2' },
@@ -29,19 +30,16 @@ const ConsultaClientes = ({navigation}) => {
     ];
     const [tableData, setTableData] = useState([])
     const [max_pages, setMaxPages] = useState([]);
-    let clientes_data = []
     useEffect(() => {
         get_rutas()
     }, [ get_rutas]);
 
     const filterTable = (value) =>{
         setPage(1)
-        if(value.length > 2){
-            const filtro_upper = value.toUpperCase()
-            setFiltro(value)
-            console.log(filtro_upper)
-            get_clientes(1, 100, grupo, filtro_upper)
-        }
+        const filtro_upper = value.toUpperCase()
+        setFiltro(value)
+        get_clientes(1, 100, grupo, filtro_upper)
+        
     }
     function backMainScreen() {
         navigation.goBack()
@@ -55,13 +53,14 @@ const ConsultaClientes = ({navigation}) => {
 
     const next_chunk = () => {
         let pg = page + 1
-        if(pg < max_pages){
+        if(pg <= max_pages){
             add_clientes(pg, 100, grupo, filtro_text)
         }
     }
 
     const add_clientes = useCallback(async (p, p_size, id_grupo, filtro) => {
-        const data = await service.get_lista_clientes(p, p_size, id_grupo, filtro)
+        const res = await service.get_lista_clientes(p, p_size, id_grupo, filtro)
+        const data = res.data
         let temp_clientes = []
         const clientes = data.clientes
         for(let i = 0; i < clientes.length ; i++){
@@ -69,12 +68,14 @@ const ConsultaClientes = ({navigation}) => {
         }
         setTableData(tableData => [...tableData, ...temp_clientes])
         setMaxPages(data.paginas)
+
         setPage(p)
     }, [])
 
     const get_clientes = useCallback(async (p, p_size, id_grupo, filtro) => {
-        setPage(0)
-        const data = await service.get_lista_clientes(p, p_size, id_grupo, filtro)
+        setPage(1)
+        const res = await service.get_lista_clientes(p, p_size, id_grupo, filtro)
+        const data = res.data
         let temp_clientes = []
         const clientes = data.clientes
         for(let i = 0; i < clientes.length ; i++){
@@ -86,7 +87,8 @@ const ConsultaClientes = ({navigation}) => {
     }, [])
 
     const get_rutas = useCallback(async () => {
-        const data = await servicePrestamos.get_rutas()
+        const res = await servicePrestamos.get_rutas()
+        const data = res.data
         let temp_rutas = []
         for(let i = 0; i < data.length ; i++){
             temp_rutas.push({"label":data[i].ruta,"value":data[i].id_ruta})
@@ -94,7 +96,8 @@ const ConsultaClientes = ({navigation}) => {
         setListaRutas(temp_rutas)
     }, [])
     const get_grupos = useCallback(async (id_ruta) => {
-        const data = await servicePrestamos.get_grupos(id=id_ruta)
+        const res = await servicePrestamos.get_grupos(id=id_ruta)
+        const data = res.data
         let temp_grupos = []
         for(let i = 0; i < data.length ; i++){
             temp_grupos.push({"label":data[i].nom_grupo,"value":Number(data[i].id_grupo)})
@@ -150,12 +153,17 @@ const ConsultaClientes = ({navigation}) => {
             </View>
             <View style={styles.spacer20}></View>
             <View style={styles.textBoxContainerFull}>
+
                 <View style={[styles.textBoxBorder, {}]}>
                             <Text style={styles.textBoxLabel}>Buscador</Text>
                             <TextInput style={styles.textBox}
                             onChangeText={value => {filterTable(value)}}
                             defaultValue={filtro_text}/>
                 </View>
+                {
+                    grupo === '' &&
+                    <Locker></Locker>
+                }
             </View>
             <View style={styles.spacer20}></View>
             <ScrollView style={{height:"76%"}} onScroll={({nativeEvent}) => {
@@ -184,8 +192,8 @@ const ConsultaClientes = ({navigation}) => {
     )
 }
 function DataTable({tableData, navigation}) {
-    const editPrestamo = (id_prestamo) => {
-        navigation.navigate("FormPrestamos",{ label:"Prestamo #"+String(id_prestamo), button:"Actualizar Prestamo", id: id_prestamo });
+    const editPrestamo = (id_cliente) => {
+        navigation.navigate("FormClientes",{ label:"Cliente #"+String(id_cliente), button:"Actualizar Cliente", id: id_cliente });
     }
     return (
         <View>
@@ -214,6 +222,22 @@ function DataTable({tableData, navigation}) {
 
                 ))
             }
+        </View>
+    )
+}
+
+function Locker(){
+    return(
+        <View style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            top: 0,
+            left: 0,
+            backgroundColor: 'gray',
+            opacity:0.1,
+            borderRadius:15
+        }}>
         </View>
     )
 }

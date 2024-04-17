@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, TextInput, Pressable, ToastAndroid, TouchableOpacity, ScrollView, Image, } from 'react-native';
+import { Text, View, TextInput, Pressable, ToastAndroid, TouchableOpacity, ScrollView, Image, BackHandler} from 'react-native';
 import { styles } from '../../Style';
 import React, { useEffect, useState, useCallback } from 'react';
 import ImageIndex from '../ImageIndex';
@@ -19,6 +19,7 @@ const FormPrestamos = ({navigation}) => {
     let service = new ServicePrestamos()
     let serviceClientes= new ServiceClientes()
     const headerHeight = useHeaderHeight();
+    const [cancel, setCancel] = useState('')
     const [editable, setEditable] = useState(true)
     const [coords, setCoords] = useState(null)
     const [visible,             setVisible] = useState(true)
@@ -60,23 +61,59 @@ const FormPrestamos = ({navigation}) => {
         { label: 'Finalizado', value: '2' },
         { label: 'Demorado', value: '3' },
     ];
+    const cantidades_prestamo = [
+        { label: "$3000", value: 3000 },
+        { label: "$3500", value: 3500 },
+        { label: "$4000", value: 4000 },
+        { label: "$4500", value: 4500 },
+        { label: "$5000", value: 5000 }
+    ]
+    const cantidades_prestamo_8 = [
+        { label: "$10000", value: 10000 },
+        { label: "$15000", value: 15000 },
+        { label: "$20000", value: 20000 },
+        { label: "$25000", value: 25000 },
+        { label: "$30000", value: 30000 },
+        { label: "$40000", value: 40000 },
+        { label: "$50000", value: 50000 },
+    ]
+    const plazos = [
+        { label: "12", value: 12 },
+        { label: "14", value: 14 },
+        { label: "16", value: 16 },
+    ]
     const [top_label, setTopLabel] = useState('')
     const [button_label, setButtonLabel] = useState('')
     const route = useRoute()
     useEffect(() => {
+        const backAction = () => {
+            if(route.params?.label){
+                return false;
+            }else{
+                setCancel(1)
+                return true;
+            }
+        }
+        const backHandlerPrestamos = BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction,
+        );
         if(route.params?.label){
             setEditable(false)
             setTopLabel(route.params?.label)
             setButtonLabel(route.params?.button)
             setLoading(1)
             get_detalle_prestamo(route.params?.id)
-
         }else{
             setEditable(true)
             setTopLabel("Nuevo Prestamo")
             setButtonLabel("Registrar Prestamo")
             get_rutas()
-            get_siguiente_id()
+            if(route.params?.id_prestamo_return){
+                setIdPrestamo(route.params?.id_prestamo_return)
+            }else{
+                get_siguiente_id()
+            }
         }
         if (route.params?.lat && route.params?.lon) {
             setCoords({
@@ -98,13 +135,12 @@ const FormPrestamos = ({navigation}) => {
                     setFotoGarantia(base64)
                 }
             })();
-            
         }
-    }, [get_detalle_prestamo, route.params?.lat, route.params?.lon, route.params?.type, route.params?.photo, setEditable, editable]);
-
+        return () =>
+        BackHandler.removeEventListener("hardwareBackPress", backAction);
+    }, [get_detalle_prestamo, route.params?.lat, route.params?.lon, route.params?.type, route.params?.photo, setEditable, editable]);;
     handleFocus = () => this.setState({isFocused: true})
     handleBlur = () => this.setState({isFocused: false})
-
     const registrarPrestamo = useCallback(async (new_id_prestamo,
         new_id_cliente,
         new_importe,
@@ -163,7 +199,11 @@ const FormPrestamos = ({navigation}) => {
         navigation.navigate("NuevoCliente",{ type: 1 });
     }
     function backMainScreen() {
-        navigation.goBack()
+        if(editable == true){
+            setCancel(1)
+        }else{
+            navigation.goBack()
+        }
     }
     function getGps(){
         if(coords!= '0'){
@@ -177,14 +217,14 @@ const FormPrestamos = ({navigation}) => {
             (async () => {
                 let location = await Location.getCurrentPositionAsync({});
                 if(coords!= '0'){
-                    navigation.navigate("Mapa",{ lat: location.coords.latitude, lon: location.coords.longitude, editable: editable});
+                    navigation.navigate("Mapa",{ lat: location.coords.latitude, lon: location.coords.longitude, editable: editable, id_prestamo: id_prestamo});
                 }
             })();
         }
     }
     function getINE(){
         if(editable == true){
-            navigation.navigate("Camara",{ photo_type: 1 });
+            navigation.navigate("Camara",{ photo_type: 1, id_prestamo: id_prestamo, });
         }else{
             if(foto_ine == '1'){
                 navigation.navigate("Preview",{ id_prestamo: id_prestamo, image_type:'ine'});
@@ -193,7 +233,7 @@ const FormPrestamos = ({navigation}) => {
     }
     function getDomicilio(){
         if(editable == true){
-            navigation.navigate("Camara",{ photo_type: 2 });
+            navigation.navigate("Camara",{ photo_type: 2 , id_prestamo: id_prestamo,});
         }else{
             if(foto_dom == '1'){
                 navigation.navigate("Preview",{ id_prestamo: id_prestamo, image_type:'dom'});
@@ -202,7 +242,7 @@ const FormPrestamos = ({navigation}) => {
     }
     function getGarantia(){
         if(editable == true){
-            navigation.navigate("Camara",{ photo_type: 3 });
+            navigation.navigate("Camara",{ photo_type: 3, id_prestamo: id_prestamo, });
         }else{
             if(foto_garantia == '1'){
                 navigation.navigate("Preview",{ id_prestamo: id_prestamo, image_type:'garantia'});
@@ -237,7 +277,8 @@ const FormPrestamos = ({navigation}) => {
     }
     const calcular_prestamo = useCallback(async (importe, plazo, flag) => {
         if(importe != null && plazo != null && flag == true){
-            const data = await service.calcular_prestamo(importe=importe, plazo=plazo)
+            const res = await service.calcular_prestamo(importe=importe, plazo=plazo)
+            const data = res.data
             setInteresPrestamo(data.intereses)
             setSeguroPrestamo(data.seguro)
             setAbonoPrestamo(data.abono)
@@ -248,10 +289,15 @@ const FormPrestamos = ({navigation}) => {
     }, [])
 
     const get_clientes = useCallback(async (id_grupo, filtro) => {
-        const data = await serviceClientes.get_lista_clientes(id_grupo=id_grupo, filtro=filtro)
+        const res = await serviceClientes.get_lista_clientes(1, 100, id_grupo=id_grupo, filtro=filtro)
+        const data = res.data
+        const clientes = data.clientes
         let temp_clientes = []
-        for(let i = 0; i < data.length ; i++){
-            temp_clientes.push({"id": data[i].id_cliente,"title": data[i].nom_cliente, "tel":data[i].tel_cliente, "dom": data[i].dom_cliente})
+        for(let i = 0; i < clientes.length ; i++){
+            temp_clientes.push({"id": clientes[i].id_cliente,
+                                "title": clientes[i].nom_cliente, 
+                                "tel":clientes[i].tel_cliente, 
+                                "dom": clientes[i].dom_cliente})
         }
         setListaClientes(temp_clientes)
     }, [])
@@ -267,7 +313,8 @@ const FormPrestamos = ({navigation}) => {
     }
 
     const get_avales = useCallback(async (filtro) => {
-        const data = await serviceClientes.get_lista_avales(filtro=filtro)
+        const res = await serviceClientes.get_lista_avales(filtro=filtro)
+        const data = res.data
         let temp_avales = []
         for(let i = 0; i < data.length ; i++){
             temp_avales.push({"id": data[i].id_aval,"title": data[i].nom_aval, "tel":data[i].tel_aval, "dom": data[i].dom_aval})
@@ -337,16 +384,22 @@ const FormPrestamos = ({navigation}) => {
     }
 
     const check_aval = useCallback(async (id) => {
-        const data = await service.check_aval(id=id)
-        return data.availability
+        const res = await service.check_aval(id=id)
+        return res.status
     }, [])
 
     const get_siguiente_id = useCallback(async () => {
         const data = await service.get_siguiente_id()
         setIdPrestamo(String(data.next_id))
     }, [])
+
+    const eliminar_preregistro = useCallback(async (id_prestamo) => {
+        const res = await service.eliminar_preregistro(id_prestamo)
+    }, [])
+
     const get_rutas = useCallback(async () => {
-        const data = await service.get_rutas()
+        const res = await service.get_rutas()
+        const data = res.data
         let temp_rutas = []
         for(let i = 0; i < data.length ; i++){
             temp_rutas.push({"label":data[i].ruta,"value":data[i].id_ruta})
@@ -354,15 +407,20 @@ const FormPrestamos = ({navigation}) => {
         setListaRutas(temp_rutas)
     }, [])
     const get_grupos = useCallback(async (id_ruta) => {
-        const data = await service.get_grupos(id=id_ruta)
+        const res = await service.get_grupos(id=id_ruta)
+        const data = res.data
         let temp_grupos = []
         for(let i = 0; i < data.length ; i++){
             temp_grupos.push({"label":data[i].nom_grupo,"value":Number(data[i].id_grupo)})
         }
         setListaGrupos(temp_grupos)
+        if(id_ruta == 8){
+            setPlazoPrestamo(14)
+        }
     }, [])
     const get_detalle_prestamo = useCallback(async (id) => {
-        const data = await service.get_detalle_prestamo(id=id)
+        const res = await service.get_detalle_prestamo(id=id)
+        const data = res.data
         setLoading(0)
         setIdPrestamo(String(data.id_prestamo))
         setNombreCliente(String(data.cliente.nombre))
@@ -413,497 +471,484 @@ const FormPrestamos = ({navigation}) => {
         <AutocompleteDropdownContextProvider headerOffset={headerHeight} >
         <View style={styles.background}>
             <StatusBar backgroundColor='#70be44'/>
-            <View style={styles.mainTopBar}>
-                <View style={styles.spacer30}></View>
-                <View style={styles.spacer20}></View>
-                <View style={styles.topBarContainer}>
-                    <TouchableOpacity style={styles.topBarButton} onPress={backMainScreen}>
-                            <Image style={styles.invertedImageTopBar}
-                                source={ImageIndex.back}>
-                            </Image>
-                    </TouchableOpacity>
-                    <Text style={styles.mainHeadersInverted}>{top_label}</Text>
-                </View>
-                <View style={styles.spacer20}></View>
-            </View>
             {
-                loading === 1 &&
-                <View style={styles.loadingScreen}>
-                    <Image style={[styles.loadingImage,{height:500, width:200, marginTop:-150}]}
-                        source={ImageIndex.loading}>
-                    </Image>
+                cancel === 1 &&
+                <View style={{position:"absolute", height:"100%", width:"100%", zIndex:20}}>
+                    <View style={styles.alertBackground}></View>
+                    <View style={styles.alert}>
+                        <View style={styles.spacer30}></View>
+                        <Text style={{fontSize:22, alignSelf:"center", textAlign:"center"}}>Estas seguro que deseas cancelar el registro?</Text>
+                        <View style={styles.spacer20}></View>
+                        <View style={{flexDirection:"row"}}>
+                            <View style={{width:"50%"}}>
+                                <TouchableOpacity 
+                                style={{alignSelf:"center", width:'70%', backgroundColor:"green", height:50, justifyContent:"center", borderRadius:15}}
+                                onPress={() => {eliminar_preregistro(id_prestamo);                
+                                    navigation.goBack()}}>
+                                    <Text style={{fontSize:22, alignSelf:"center", color:"white"}}>Si</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View style={{width:"50%"}}>
+                                <TouchableOpacity 
+                                style={{alignSelf:"center", width:'70%', backgroundColor:"red", height:50, justifyContent:"center", borderRadius:15}}
+                                onPress={() => setCancel(0)}>
+                                    <Text style={{fontSize:22, alignSelf:"center", color:"white"}}>No</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
                 </View>
             }
-            <ScrollView>
-                {
-                    lista_abonos !== null ?
-                    <View>
-                        <View style={styles.spacer20}></View>
-                        <View style={styles.mainHeaderContainer}>
-                            <Text style={styles.mainHeaders}>Historial de Abonos</Text>
-                        </View>
-                        <View style={styles.horizontalLine}></View>
-                        <DataTable tableData={lista_abonos}></DataTable>
-                        <View style={styles.spacer30}></View>
-                        <View style={styles.mainHeaderContainer}>
-                            <Text style={styles.mainHeaders}>{top_label}</Text>
-                        </View>
-                        <View style={styles.horizontalLine}></View>
-                        <View style={styles.spacer20}></View>
+            <View>
+                <View style={styles.mainTopBar}>
+                    <View style={styles.spacer30}></View>
+                    <View style={styles.spacer20}></View>
+                    <View style={styles.topBarContainer}>
+                        <TouchableOpacity style={styles.topBarButton} onPress={backMainScreen}>
+                                <Image style={styles.invertedImageTopBar}
+                                    source={ImageIndex.back}>
+                                </Image>
+                        </TouchableOpacity>
+                        <Text style={styles.mainHeadersInverted}>{top_label}</Text>
                     </View>
-                    :
-                    <View>
-                        <View style={styles.spacer30}></View>
+                    <View style={styles.spacer20}></View>
+                </View>
+                {
+                    loading === 1 &&
+                    <View style={styles.loadingScreen}>
+                        <Image style={[styles.loadingImage,{height:500, width:200, marginTop:-150}]}
+                            source={ImageIndex.loading}>
+                        </Image>
                     </View>
                 }
-                <View style={styles.formRow}>
-                    <View style={styles.textBoxContainerHalf}>
-                        <View style={styles.textBoxBorder}>
-                                    <Text style={styles.textBoxLabel}>ID Prestamo</Text>
-                                    <TextInput style={styles.textBox}
-                                    keyboardType='numeric'
-                                    placeholder='1234'
-                                    onChangeText={id_prestamo => setIdPrestamo(id_prestamo)}
-                                    value={id_prestamo}/>
-                        </View>
-                        {<Locker></Locker>}
-                    </View>
-                </View>
-                <View style={styles.spacer20}></View>
-                <View style={styles.formRow}>
-                    <View style={styles.textBoxContainerHalf}>
-                        <View style={styles.textBoxBorder}>
-                                    <Text style={styles.textBoxLabel}>Ruta</Text>
-                                    {
-                                        ruta_text === '' ?
-                                        <Dropdown style={styles.comboBox}
-                                        data={lista_rutas} search
-                                        labelField="label" valueField="value"
-                                        searchPlaceholder="Ruta.." placeholder='Ej. ML-1'
-                                        placeholderStyle={styles.comboBoxPlaceholder}
-                                        selectedTextStyle={styles.comboBoxSelected}
-                                        value={ruta}
-                                        onChange={item => {setRuta(item.value);get_grupos(item.value);}}/>
-                                        :
-                                        <TextInput style={styles.textBox}
-                                        selection={{start:0, end:0}}
-                                        defaultValue={ruta_text}/>
-                                    }
-                                    {editable == false && <Locker></Locker>}
-                        </View>
-                    </View>
-                    <View style={styles.textBoxContainerHalf}>
-                        <View style={styles.textBoxBorder}>
-                                    <Text style={styles.textBoxLabel}>Grupo</Text>
-                                    {
-                                        grupo_text === '' ?
-                                        <Dropdown style={styles.comboBox}
-                                        data={lista_grupos} search
-                                        labelField="label" valueField="value"
-                                        searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
-                                        placeholderStyle={styles.comboBoxPlaceholder}
-                                        selectedTextStyle={styles.comboBoxSelected}
-                                        value={grupo}
-                                        onChange={item => {setGrupo(item.value); console.log(item)}}/>
-                                        :
-                                        <TextInput style={styles.textBox}
-                                        selection={{start:0, end:0}}
-                                        defaultValue={grupo_text}/>
-                                    }
-                                    {editable == false && <Locker></Locker>}
-                        </View>
-                    </View>
-                </View>
-                <View style={styles.spacer10}></View>
-                <View>
+                <ScrollView>
                     {
-                        unlockCliente() === true ? <View></View> : <View style={styles.lockUI}></View>
-                    }
-                    <View style={styles.spacer10}></View>
-                    <View style={styles.mainHeaderContainer}>
-                        <Text style={styles.mainHeaders}>Datos del Cliente</Text>
-                        {
-                            editable === true &&
-                            <TouchableOpacity style={styles.mainHeaderButton} onPress={newCliente}>
-                                <Image style={styles.invertedBubbleImage}
-                                    source={ImageIndex.add}>
-                                </Image>
-                            </TouchableOpacity>
-                        }
-
-                    </View>
-                    <View style={styles.horizontalLine}></View>
-                    <View style={styles.spacer10}></View>
-                    <View style={styles.textBoxContainerFull}>
-                        <View style={styles.textBoxBorder}>
-                        <Text style={styles.textBoxLabel}>Nombre del Cliente</Text>
-                            {
-                                editable === true ?
-                                <AutocompleteDropdown
-                                style={{zIndex:100}}
-                                containerStyle={[styles.textBox]}
-                                inputContainerStyle={{backgroundColor:"white", marginTop:2, marginLeft:-10, borderRadius:20, width:"105%"}}
-                                clearOnFocus={false}
-                                closeOnBlur={true}
-                                onChangeText={value => get_clientes(id_grupo=grupo, filtro=value)}
-                                onClear={clear_cliente}
-                                debounce={600}
-
-                                emptyResultText={"Sin resultado"}
-                                textInputProps={{
-                                    placeholder: 'Nombre Apellido Apellido',
-                                    placeholderTextColor:"#a9a9a9",
-                                    style:{fontSize:18, marginLeft:-3},
-                                }}
-                                closeOnSubmit={false}
-                                onSelectItem={item => {
-                                    item && setNombreCliente(item); select_datos_cliente(item)}}
-                                dataSet={lista_clientes}
-                                />
-                                :
-                                <TextInput style={styles.textBox}
-                                selection={{start:0, end:0}}
-                                defaultValue={nombre_cliente}/>
-                            }
-                        </View> 
-                        {editable == false && <Locker></Locker>}
-                    </View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.textBoxContainerFull}>
-                        <View style={styles.textBoxBorder} >
-                                    <Text style={styles.textBoxLabel}>Domicilio</Text>
-                                    <TextInput style={styles.textBox}
-                                    placeholder='Calle, Numero, Colonia'
-                                    onChangeText={value => setDomCliente(value)}
-                                    defaultValue={dom_cliente}/>
-                        </View>
-                        {editable == false && <Locker></Locker>}
-                    </View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.textBoxContainerFull}>
-                        <View style={styles.textBoxBorder}>
-                                    <Text style={styles.textBoxLabel}>Telefono</Text>
-                                    <TextInput style={styles.textBox}
-                                    keyboardType='numeric'
-                                    placeholder='Ej. 6681234567'
-                                    maxLength={10}
-                                    onChangeText={value => setTelCliente(value)}
-                                    defaultValue={tel_cliente}/>
-                        </View>
-                        {editable == false && <Locker></Locker>}
-                    </View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.mainHeaderContainer}>
-                        <Text style={styles.mainHeaders}>Datos del Aval</Text>
-                        {
-                            editable === true &&
-                            <TouchableOpacity style={styles.mainHeaderButton} onPress={newAval}>
-                                <Image style={styles.invertedBubbleImage}
-                                    source={ImageIndex.add}>
-                                </Image>
-                            </TouchableOpacity>
-                        }
-
-                    </View>
-                    <View style={styles.horizontalLine}></View>
-                    <View style={styles.spacer10}></View>
-                    <View style={styles.textBoxContainerFull}>
-                        <View style={styles.textBoxBorder}>
-                        <Text style={styles.textBoxLabel}>Nombre del Aval</Text>
-                            {
-                                editable === true ?
-                                <AutocompleteDropdown
-                                key={reload_aval}
-                                style={{zIndex:100}}
-                                containerStyle={[styles.textBox]}
-                                inputContainerStyle={{backgroundColor:"white", marginTop:2, marginLeft:-10, borderRadius:20, width:"105%"}}
-                                textInputProps={{
-                                    placeholder: 'Nombre Apellido Apellido',
-                                    placeholderTextColor:"#a9a9a9",
-                                    style:{fontSize:18, marginLeft:-3},
-                                }}
-                                clearOnFocus={false}
-                                closeOnBlur={true}
-                                onChangeText={value => get_avales(filtro=value)}
-                                onClear={clear_aval}
-                                value={nombre_aval}
-                                debounce={600}
-                                emptyResultText={"Sin resultado"}
-                                closeOnSubmit={false}
-                                onSelectItem={item => {
-                                    item && setNombreAval(item.title); select_datos_aval(item)}}
-                                dataSet={lista_avales}
-                                />
-                                :
-                                <TextInput style={styles.textBox}
-                                selection={{start:0, end:0}}
-                                defaultValue={nombre_aval}/>
-                            }
-
-                        </View>
-                        {editable == false && <Locker></Locker>}
-                    </View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.textBoxContainerFull}>
-                        <View style={styles.textBoxBorder}>
-                                    <Text style={styles.textBoxLabel}>Domicilio</Text>
-                                    <TextInput style={styles.textBox}
-                                    placeholder='Calle, Numero, Colonia'
-                                    onChangeText={value => setDomAval(value)}
-                                    defaultValue={dom_aval}/>
-                        </View>
-                        {editable == false && <Locker></Locker>}
-                    </View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.textBoxContainerFull}>
-                        <View style={styles.textBoxBorder}>
-                                    <Text style={styles.textBoxLabel}>Telefono</Text>
-                                    <TextInput style={styles.textBox}
-                                    keyboardType='numeric'
-                                    placeholder='Ej. 6681234567'
-                                    maxLength={10}
-                                    onChangeText={value => setTelAval(value)}
-                                    defaultValue={tel_aval}/>
-                        </View>
-                        {editable == false && <Locker></Locker>}
-                    </View>
-                    <View style={styles.spacer20}></View>
-                </View>
-                <View>
-                    {
-                        unlockPrestamo() === true ? <View></View> : <View style={styles.lockUI}></View>
-                    }
-                    <Text style={styles.mainHeaders}>Datos del Prestamo</Text>
-                    <View style={styles.horizontalLine}></View>
-                    <View style={styles.spacer10}></View>
-                    <View style={styles.formRow}>
-                        <View style={styles.textBoxContainerTwoThird}>
-                            <View style={styles.textBoxBorder}>
-                                        <Text style={styles.textBoxLabel}>Importe</Text>
-                                        <CurrencyInput style={styles.textBox}
-                                        delimiter=","
-                                        precision={0}
-                                        minValue={0}
-                                        maxValue={99999}
-                                        prefix="$"
-                                        placeholder='$0'
-                                        onChangeValue={(value) => setImportePrestamo(value) && calcular_prestamo(importe=importe_prestamo, plazo=plazo_prestamo)}
-                                        value={importe_prestamo}/>
+                        lista_abonos !== null ?
+                        <View>
+                            <View style={styles.spacer20}></View>
+                            <View style={styles.mainHeaderContainer}>
+                                <Text style={styles.mainHeaders}>Historial de Abonos</Text>
                             </View>
-                            {editable == false && <Locker></Locker>}
+                            <View style={styles.horizontalLine}></View>
+                            <DataTable tableData={lista_abonos}></DataTable>
+                            <View style={styles.spacer30}></View>
+                            <View style={styles.mainHeaderContainer}>
+                                <Text style={styles.mainHeaders}>{top_label}</Text>
+                            </View>
+                            <View style={styles.horizontalLine}></View>
+                            <View style={styles.spacer20}></View>
                         </View>
-                        <View style={styles.textBoxContainerOneThird}>
+                        :
+                        <View>
+                            <View style={styles.spacer30}></View>
+                        </View>
+                    }
+                    <View style={styles.formRow}>
+                        <View style={styles.textBoxContainerHalf}>
                             <View style={styles.textBoxBorder}>
-                                        <Text style={styles.textBoxLabel}>Plazo</Text>
+                                        <Text style={styles.textBoxLabel}>ID Prestamo</Text>
                                         <TextInput style={styles.textBox}
-                                        placeholder='Ej. 12'
                                         keyboardType='numeric'
-                                        onChangeText={value => update_plazo(plazo=value)}
-                                        value={plazo_prestamo}/>
+                                        placeholder='1234'
+                                        onChangeText={id_prestamo => setIdPrestamo(id_prestamo)}
+                                        value={id_prestamo}/>
                             </View>
-                            {editable == false && <Locker></Locker>}
+                            {<Locker></Locker>}
                         </View>
                     </View>
                     <View style={styles.spacer20}></View>
                     <View style={styles.formRow}>
                         <View style={styles.textBoxContainerHalf}>
                             <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Pagaré</Text>
-                                <TextInput style={styles.textBox}
-                                keyboardType='numeric'
-                                placeholder='Ej. 1234'
-                                onChangeText={value => setPagarePrestamo(value)}
-                                defaultValue={pagare_prestamo}/>
+                                        <Text style={styles.textBoxLabel}>Ruta</Text>
+                                        {
+                                            ruta_text === '' ?
+                                            <Dropdown style={styles.comboBox}
+                                            data={lista_rutas} search
+                                            labelField="label" valueField="value"
+                                            searchPlaceholder="Ruta.." placeholder='Ej. ML-1'
+                                            placeholderStyle={styles.comboBoxPlaceholder}
+                                            selectedTextStyle={styles.comboBoxSelected}
+                                            value={ruta}
+                                            onChange={item => {setRuta(item.value);get_grupos(item.value);}}/>
+                                            :
+                                            <TextInput style={styles.textBox}
+                                            selection={{start:0, end:0}}
+                                            defaultValue={ruta_text}/>
+                                        }
+                                        {editable == false && <Locker></Locker>}
                             </View>
-                            {editable == false && <Locker></Locker>}
                         </View>
                         <View style={styles.textBoxContainerHalf}>
                             <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Fecha</Text>
-                                <TouchableOpacity style={styles.textBox}
-                                    onPress={showDatePicker}>
-                                        <View style={{ display: !visible ? 'flex' : 'none', paddingTop:8 }}>
-                                            <Text style={styles.date_label}>{fecha_prestamo}</Text>
-                                        </View>
-                                        <View style={{ display: visible ? 'flex' : 'none' , paddingTop:11  }}>
-                                            <Text style={styles.comboBoxPlaceholder}>DD/MM/YYYY</Text>
-                                        </View>
+                                        <Text style={styles.textBoxLabel}>Grupo</Text>
+                                        {
+                                            grupo_text === '' ?
+                                            <Dropdown style={styles.comboBox}
+                                            data={lista_grupos} search
+                                            labelField="label" valueField="value"
+                                            searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
+                                            placeholderStyle={styles.comboBoxPlaceholder}
+                                            selectedTextStyle={styles.comboBoxSelected}
+                                            value={grupo}
+                                            onChange={item => {setGrupo(item.value); console.log(item)}}/>
+                                            :
+                                            <TextInput style={styles.textBox}
+                                            selection={{start:0, end:0}}
+                                            defaultValue={grupo_text}/>
+                                        }
+                                        {editable == false && <Locker></Locker>}
+                            </View>
+                        </View>
+                    </View>
+                    <View style={styles.spacer10}></View>
+                    <View>
+                        {
+                            unlockCliente() === true ? <View></View> : <View style={styles.lockUI}></View>
+                        }
+                        <View style={styles.spacer10}></View>
+                        <View style={styles.mainHeaderContainer}>
+                            <Text style={styles.mainHeaders}>Datos del Cliente</Text>
+                            {
+                                editable === true &&
+                                <TouchableOpacity style={styles.mainHeaderButton} onPress={newCliente}>
+                                    <Image style={styles.invertedBubbleImage}
+                                        source={ImageIndex.add}>
+                                    </Image>
                                 </TouchableOpacity>
-                                <DateTimePickerModal
-                                    isVisible={isDatePickerVisible}
-                                    mode="date"
-                                    onConfirm={handleConfirm}
-                                    onCancel={hideDatePicker}
-                                />
-                            </View>
-                            {editable == false && <Locker></Locker>}
+                            }
+
                         </View>
-                    </View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.formRow}>
-                        <View style={styles.textBoxContainerHalf}>
+                        <View style={styles.horizontalLine}></View>
+                        <View style={styles.spacer10}></View>
+                        <View style={styles.textBoxContainerFull}>
                             <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Estatus</Text>
+                            <Text style={styles.textBoxLabel}>Nombre del Cliente</Text>
                                 {
-                                    estatus_prestamo_text === '' ? 
-                                    <Dropdown style={styles.comboBox}
-                                    data={estatus_prestamo_list}
-                                    labelField="label" valueField="value"
-                                    placeholder='Ej. Pendiente'
-                                    value={estatus_prestamo}
-                                    placeholderStyle={styles.comboBoxPlaceholder}
-                                    selectedTextStyle={styles.comboBoxSelected}
-                                    onChange={item => {setEstatusPrestamo(item.label);}}/>
+                                    editable === true ?
+                                    <AutocompleteDropdown
+                                    style={{zIndex:100}}
+                                    containerStyle={[styles.textBox]}
+                                    inputContainerStyle={{backgroundColor:"white", marginTop:2, marginLeft:-10, borderRadius:20, width:"105%"}}
+                                    clearOnFocus={false}
+                                    closeOnBlur={true}
+                                    onChangeText={value => get_clientes(id_grupo=grupo, filtro=value)}
+                                    onClear={clear_cliente}
+                                    debounce={600}
+
+                                    emptyResultText={"Sin resultado"}
+                                    textInputProps={{
+                                        placeholder: 'Nombre Apellido Apellido',
+                                        placeholderTextColor:"#a9a9a9",
+                                        style:{fontSize:18, marginLeft:-3},
+                                    }}
+                                    closeOnSubmit={false}
+                                    onSelectItem={item => {
+                                        item && setNombreCliente(item); select_datos_cliente(item)}}
+                                    dataSet={lista_clientes}
+                                    />
                                     :
                                     <TextInput style={styles.textBox}
-                                    defaultValue={estatus_prestamo_text}/>
+                                    selection={{start:0, end:0}}
+                                    defaultValue={nombre_cliente}/>
                                 }
+                            </View> 
+                            {editable == false && <Locker></Locker>}
+                        </View>
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.textBoxContainerFull}>
+                            <View style={styles.textBoxBorder} >
+                                        <Text style={styles.textBoxLabel}>Domicilio</Text>
+                                        <TextInput style={styles.textBox}
+                                        placeholder='Calle, Numero, Colonia'
+                                        onChangeText={value => setDomCliente(value)}
+                                        defaultValue={dom_cliente}/>
                             </View>
                             {editable == false && <Locker></Locker>}
                         </View>
-                        <View style={styles.textBoxContainerHalf}>
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.textBoxContainerFull}>
                             <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Ubicacion</Text>
-                                <TouchableOpacity style={styles.textBox} onPress={getGps}>
-                                    {coords === null ?
-                                        <View style={styles.textBoxRow}>
-                                            <Image style={[styles.BubbleImage,{tintColor:"#F2CC62", zIndex:10}]}
-                                                source={ImageIndex.gps}>
-                                            </Image>
-                                            <Text style={styles.textBoxPlaceholder}>Capturar</Text>
+                                        <Text style={styles.textBoxLabel}>Telefono</Text>
+                                        <TextInput style={styles.textBox}
+                                        keyboardType='numeric'
+                                        placeholder='Ej. 6681234567'
+                                        maxLength={10}
+                                        onChangeText={value => setTelCliente(value)}
+                                        defaultValue={tel_cliente}/>
+                            </View>
+                            {editable == false && <Locker></Locker>}
+                        </View>
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.mainHeaderContainer}>
+                            <Text style={styles.mainHeaders}>Datos del Aval</Text>
+                            {
+                                editable === true &&
+                                <TouchableOpacity style={styles.mainHeaderButton} onPress={newAval}>
+                                    <Image style={styles.invertedBubbleImage}
+                                        source={ImageIndex.add}>
+                                    </Image>
+                                </TouchableOpacity>
+                            }
+
+                        </View>
+                        <View style={styles.horizontalLine}></View>
+                        <View style={styles.spacer10}></View>
+                        <View style={styles.textBoxContainerFull}>
+                            <View style={styles.textBoxBorder}>
+                            <Text style={styles.textBoxLabel}>Nombre del Aval</Text>
+                                {
+                                    editable === true ?
+                                    <AutocompleteDropdown
+                                    key={reload_aval}
+                                    style={{zIndex:100}}
+                                    containerStyle={[styles.textBox]}
+                                    inputContainerStyle={{backgroundColor:"white", marginTop:2, marginLeft:-10, borderRadius:20, width:"105%"}}
+                                    textInputProps={{
+                                        placeholder: 'Nombre Apellido Apellido',
+                                        placeholderTextColor:"#a9a9a9",
+                                        style:{fontSize:18, marginLeft:-3},
+                                    }}
+                                    clearOnFocus={false}
+                                    closeOnBlur={true}
+                                    onChangeText={value => get_avales(filtro=value)}
+                                    onClear={clear_aval}
+                                    value={nombre_aval}
+                                    debounce={600}
+                                    emptyResultText={"Sin resultado"}
+                                    closeOnSubmit={false}
+                                    onSelectItem={item => {
+                                        item && setNombreAval(item.title); select_datos_aval(item)}}
+                                    dataSet={lista_avales}
+                                    />
+                                    :
+                                    <TextInput style={styles.textBox}
+                                    selection={{start:0, end:0}}
+                                    defaultValue={nombre_aval}/>
+                                }
+
+                            </View>
+                            {editable == false && <Locker></Locker>}
+                        </View>
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.textBoxContainerFull}>
+                            <View style={styles.textBoxBorder}>
+                                        <Text style={styles.textBoxLabel}>Domicilio</Text>
+                                        <TextInput style={styles.textBox}
+                                        placeholder='Calle, Numero, Colonia'
+                                        onChangeText={value => setDomAval(value)}
+                                        defaultValue={dom_aval}/>
+                            </View>
+                            {editable == false && <Locker></Locker>}
+                        </View>
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.textBoxContainerFull}>
+                            <View style={styles.textBoxBorder}>
+                                        <Text style={styles.textBoxLabel}>Telefono</Text>
+                                        <TextInput style={styles.textBox}
+                                        keyboardType='numeric'
+                                        placeholder='Ej. 6681234567'
+                                        maxLength={10}
+                                        onChangeText={value => setTelAval(value)}
+                                        defaultValue={tel_aval}/>
+                            </View>
+                            {editable == false && <Locker></Locker>}
+                        </View>
+                        <View style={styles.spacer20}></View>
+                    </View>
+                    <View>
+                        {
+                            unlockPrestamo() === true ? <View></View> : <View style={styles.lockUI}></View>
+                        }
+                        <Text style={styles.mainHeaders}>Datos del Prestamo</Text>
+                        <View style={styles.horizontalLine}></View>
+                        <View style={styles.spacer10}></View>
+                        <View style={styles.formRow}>
+                            <View style={styles.textBoxContainerTwoThird}>
+                                {
+                                    editable === true ?
+                                    <View>
+                                    {
+                                        ruta === 8 ?
+                                        <View style={styles.textBoxBorder}>
+                                            <Text style={styles.textBoxLabel}>Importe</Text>
+                                            <Dropdown style={styles.comboBox}
+                                            data={cantidades_prestamo_8}
+                                            labelField="label" valueField="value"
+                                            placeholder='Importe'
+                                            placeholderStyle={styles.comboBoxPlaceholder}
+                                            selectedTextStyle={styles.comboBoxSelected}
+                                            value={importe_prestamo}
+                                            onChange={(value) => setImportePrestamo(value.value) && calcular_prestamo(importe=importe_prestamo, plazo=plazo_prestamo)}/>
                                         </View>
-                                        :<View></View>
-                                    }
-                                    {coords !== null && editable === true  ?
-                                        <View style={styles.textBoxRow}>
-                                            <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
-                                                source={ImageIndex.gps}>
-                                            </Image>
-                                            <Text style={styles.textBoxSuccessful}>Capturado</Text>
+                                        :
+                                        <View style={styles.textBoxBorder}>
+                                            <Text style={styles.textBoxLabel}>Importe</Text>
+                                            <Dropdown style={styles.comboBox}
+                                            data={cantidades_prestamo}
+                                            labelField="label" valueField="value"
+                                            placeholder='Importe'
+                                            placeholderStyle={styles.comboBoxPlaceholder}
+                                            selectedTextStyle={styles.comboBoxSelected}
+                                            value={importe_prestamo}
+                                            onChange={(value) => setImportePrestamo(value.value) && calcular_prestamo(importe=importe_prestamo, plazo=plazo_prestamo)}/>
                                         </View>
-                                        :<View></View>
                                     }
-                                    {coords !== null && editable === false && coords !== '0' ?
-                                        <View style={styles.textBoxRow}>
-                                            <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
-                                                source={ImageIndex.gps}>
-                                            </Image>
-                                            <Text style={styles.textBoxSuccessful}>Ver</Text>
-                                        </View>
-                                        :<View></View>
-                                    }
-                                    {coords === '0' && editable == false ?
-                                        <View style={styles.textBoxRow}>
-                                        <Image style={[styles.BubbleImage,{tintColor:"red"}]}
-                                            source={ImageIndex.gps}>
-                                        </Image>
-                                        <Text style={styles.textBoxError}>No disponible</Text>
                                     </View>
-                                    :<View></View>
-                                    }
-                                </TouchableOpacity>
+                                    :
+                                    <View style={styles.textBoxBorder}>
+                                        <Text style={styles.textBoxLabel}>Pagaré</Text>
+                                        <CurrencyInput style={styles.textBox}
+                                            delimiter=","
+                                            precision={0}
+                                            minValue={0}
+                                            maxValue={9999}
+                                            prefix="$"
+                                            value={importe_prestamo}/>
+                                    </View>
+                                }
+                                
+                                
+                                {editable == false && <Locker></Locker>}
                             </View>
-                            {/* {editable == false && <Locker></Locker>} */}
+                            <View style={styles.textBoxContainerOneThird}>
+                                <View style={styles.textBoxBorder}>
+                                <Text style={styles.textBoxLabel}>Plazo</Text>
+                                {
+                                    editable === true ?
+                                    <View>
+                                    {
+                                        ruta === 8 ?
+                                        <Text style={styles.comboBox}>{plazo_prestamo}</Text>
+                                        :
+                                        <Dropdown style={styles.comboBox}
+                                        data={plazos}
+                                        labelField="label" valueField="value"
+                                        placeholder='Plazo'
+                                        placeholderStyle={styles.comboBoxPlaceholder}
+                                        selectedTextStyle={styles.comboBoxSelected}
+                                        value={plazo_prestamo}
+                                        onChange={value => update_plazo(plazo=value.value)}/>
+                                    }
+                                    </View>
+                                    :
+                                    <TextInput style={styles.textBox}
+                                    defaultValue={plazo_prestamo}/>
+                                }
+
+                                </View>
+                                {editable == false && <Locker></Locker>}
+                            </View>
                         </View>
-                    </View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.formRow}>
-                        <View style={styles.textBoxContainerHalf}>
-                            <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Domicilio </Text>
-                                <TouchableOpacity style={styles.textBox} onPress={getDomicilio}>
-                                    {foto_dom === null ?
-                                        <View style={styles.textBoxRow}>
-                                            <Image style={[styles.BubbleImage,{tintColor:"#F2CC62"}]}
-                                                source={ImageIndex.cam}>
-                                            </Image>
-                                            <Text style={styles.textBoxPlaceholder}>Capturar</Text>
-                                        </View>
-                                        :<View></View>
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.formRow}>
+                            <View style={styles.textBoxContainerHalf}>
+                                <View style={styles.textBoxBorder}>
+                                    <Text style={styles.textBoxLabel}>Pagaré</Text>
+                                    <TextInput style={styles.textBox}
+                                    keyboardType='numeric'
+                                    placeholder='Ej. 1234'
+                                    onChangeText={value => setPagarePrestamo(value)}
+                                    defaultValue={pagare_prestamo}/>
+                                </View>
+                                {editable == false && <Locker></Locker>}
+                            </View>
+                            <View style={styles.textBoxContainerHalf}>
+                                <View style={styles.textBoxBorder}>
+                                    <Text style={styles.textBoxLabel}>Fecha</Text>
+                                    <TouchableOpacity style={styles.textBox}
+                                        onPress={showDatePicker}>
+                                            <View style={{ display: !visible ? 'flex' : 'none', paddingTop:8 }}>
+                                                <Text style={styles.date_label}>{fecha_prestamo}</Text>
+                                            </View>
+                                            <View style={{ display: visible ? 'flex' : 'none' , paddingTop:11  }}>
+                                                <Text style={styles.comboBoxPlaceholder}>DD/MM/YYYY</Text>
+                                            </View>
+                                    </TouchableOpacity>
+                                    <DateTimePickerModal
+                                        isVisible={isDatePickerVisible}
+                                        mode="date"
+                                        onConfirm={handleConfirm}
+                                        onCancel={hideDatePicker}
+                                    />
+                                </View>
+                                {editable == false && <Locker></Locker>}
+                            </View>
+                        </View>
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.formRow}>
+                            <View style={styles.textBoxContainerHalf}>
+                                <View style={styles.textBoxBorder}>
+                                    <Text style={styles.textBoxLabel}>Estatus</Text>
+                                    {
+                                        estatus_prestamo_text === '' ? 
+                                        <Dropdown style={styles.comboBox}
+                                        data={estatus_prestamo_list}
+                                        labelField="label" valueField="value"
+                                        placeholder='Ej. Pendiente'
+                                        value={estatus_prestamo}
+                                        placeholderStyle={styles.comboBoxPlaceholder}
+                                        selectedTextStyle={styles.comboBoxSelected}
+                                        onChange={item => {setEstatusPrestamo(item.label);}}/>
+                                        :
+                                        <TextInput style={styles.textBox}
+                                        defaultValue={estatus_prestamo_text}/>
                                     }
-                                    {foto_dom !== null && foto_dom !== '1' && foto_dom !== '0' ?
-                                        <View style={styles.textBoxRow}>
-                                            <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
-                                                source={ImageIndex.cam}>
-                                            </Image>
-                                            <Text style={styles.textBoxSuccessful}>Capturado</Text>
-                                        </View>
-                                        :<View></View>
-                                    }
-                                    {foto_dom === '1' ?
-                                        <View style={styles.textBoxRow}>
-                                            <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
-                                                source={ImageIndex.cam}>
-                                            </Image>
-                                            <Text style={styles.textBoxSuccessful}>Ver</Text>
-                                        </View>
-                                        :<View></View>
-                                    }
-                                    {foto_dom === '0' ?
-                                        <View style={styles.textBoxRow}>
+                                </View>
+                                {editable == false && <Locker></Locker>}
+                            </View>
+                            <View style={styles.textBoxContainerHalf}>
+                                <View style={styles.textBoxBorder}>
+                                    <Text style={styles.textBoxLabel}>Ubicacion</Text>
+                                    <TouchableOpacity style={styles.textBox} onPress={getGps}>
+                                        {coords === null ?
+                                            <View style={styles.textBoxRow}>
+                                                <Image style={[styles.BubbleImage,{tintColor:"#F2CC62", zIndex:10}]}
+                                                    source={ImageIndex.gps}>
+                                                </Image>
+                                                <Text style={styles.textBoxPlaceholder}>Capturar</Text>
+                                            </View>
+                                            :<View></View>
+                                        }
+                                        {coords !== null && editable === true  ?
+                                            <View style={styles.textBoxRow}>
+                                                <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
+                                                    source={ImageIndex.gps}>
+                                                </Image>
+                                                <Text style={styles.textBoxSuccessful}>Capturado</Text>
+                                            </View>
+                                            :<View></View>
+                                        }
+                                        {coords !== null && editable === false && coords !== '0' ?
+                                            <View style={styles.textBoxRow}>
+                                                <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
+                                                    source={ImageIndex.gps}>
+                                                </Image>
+                                                <Text style={styles.textBoxSuccessful}>Ver</Text>
+                                            </View>
+                                            :<View></View>
+                                        }
+                                        {coords === '0' && editable == false ?
+                                            <View style={styles.textBoxRow}>
                                             <Image style={[styles.BubbleImage,{tintColor:"red"}]}
-                                                source={ImageIndex.cam}>
+                                                source={ImageIndex.gps}>
                                             </Image>
                                             <Text style={styles.textBoxError}>No disponible</Text>
                                         </View>
                                         :<View></View>
-                                    }
-                                </TouchableOpacity>
+                                        }
+                                    </TouchableOpacity>
+                                </View>
                                 {/* {editable == false && <Locker></Locker>} */}
                             </View>
                         </View>
-                        <View style={styles.textBoxContainerHalf}>
-                            <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>INE</Text>
-                                <TouchableOpacity style={styles.textBox} onPress={getINE}>
-                                    {foto_ine === null ?
-                                        <View style={styles.textBoxRow}>
-                                            <Image style={[styles.BubbleImage,{tintColor:"#F2CC62"}]}
-                                                source={ImageIndex.cam}>
-                                            </Image>
-                                            <Text style={styles.textBoxPlaceholder}>Capturar</Text>
-                                        </View>
-                                        :<View></View>
-                                    }
-                                    {foto_ine !== null && foto_ine !== '1' && foto_ine !== '0' ?
-                                        <View style={styles.textBoxRow}>
-                                            <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
-                                                source={ImageIndex.cam}>
-                                            </Image>
-                                            <Text style={styles.textBoxSuccessful}>Capturado</Text>
-                                        </View>
-                                        :<View></View>
-                                    }
-                                    {foto_ine === '1' ?
-                                        <View style={styles.textBoxRow}>
-                                            <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
-                                                source={ImageIndex.cam}>
-                                            </Image>
-                                            <Text style={styles.textBoxSuccessful}>Ver</Text>
-                                        </View>
-                                        :<View></View>
-                                    }
-                                    {foto_ine === '0' ?
-                                        <View style={styles.textBoxRow}>
-                                            <Image style={[styles.BubbleImage,{tintColor:"red"}]}
-                                                source={ImageIndex.cam}>
-                                            </Image>
-                                            <Text style={styles.textBoxError}>No disponible</Text>
-                                        </View>
-                                        :<View></View>
-                                    }
-                                </TouchableOpacity>
-                                {/* {editable == false && <Locker></Locker>} */}
-                            </View>
-                        </View>
-                    </View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.formRow}>
-                    <View style={styles.textBoxContainerHalf}>
-                            <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Garantia </Text>
-                                    <TouchableOpacity style={styles.textBox} onPress={getGarantia}>
-                                        {foto_garantia === null ?
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.formRow}>
+                            <View style={styles.textBoxContainerHalf}>
+                                <View style={styles.textBoxBorder}>
+                                    <Text style={styles.textBoxLabel}>Domicilio </Text>
+                                    <TouchableOpacity style={styles.textBox} onPress={() => getDomicilio()}>
+                                        {foto_dom === null ?
                                             <View style={styles.textBoxRow}>
                                                 <Image style={[styles.BubbleImage,{tintColor:"#F2CC62"}]}
                                                     source={ImageIndex.cam}>
@@ -912,7 +957,7 @@ const FormPrestamos = ({navigation}) => {
                                             </View>
                                             :<View></View>
                                         }
-                                        {foto_garantia !== null && foto_garantia !== '1' && foto_garantia !== '0' ?
+                                        {foto_dom !== null && foto_dom !== '1' && foto_dom !== '0' ?
                                             <View style={styles.textBoxRow}>
                                                 <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
                                                     source={ImageIndex.cam}>
@@ -921,16 +966,16 @@ const FormPrestamos = ({navigation}) => {
                                             </View>
                                             :<View></View>
                                         }
-                                        {foto_garantia === '1' ?
+                                        {foto_dom === '1' ?
                                             <View style={styles.textBoxRow}>
                                                 <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
                                                     source={ImageIndex.cam}>
                                                 </Image>
                                                 <Text style={styles.textBoxSuccessful}>Ver</Text>
                                             </View>
-                                        :<View></View>
-                                    }
-                                        {foto_garantia === '0' ?
+                                            :<View></View>
+                                        }
+                                        {foto_dom === '0' ?
                                             <View style={styles.textBoxRow}>
                                                 <Image style={[styles.BubbleImage,{tintColor:"red"}]}
                                                     source={ImageIndex.cam}>
@@ -940,133 +985,222 @@ const FormPrestamos = ({navigation}) => {
                                             :<View></View>
                                         }
                                     </TouchableOpacity>
-                                {/* {editable == false && <Locker></Locker>} */}
+                                    {/* {editable == false && <Locker></Locker>} */}
+                                </View>
+                            </View>
+                            <View style={styles.textBoxContainerHalf}>
+                                <View style={styles.textBoxBorder}>
+                                    <Text style={styles.textBoxLabel}>INE</Text>
+                                    <TouchableOpacity style={styles.textBox} onPress={getINE}>
+                                        {foto_ine === null ?
+                                            <View style={styles.textBoxRow}>
+                                                <Image style={[styles.BubbleImage,{tintColor:"#F2CC62"}]}
+                                                    source={ImageIndex.cam}>
+                                                </Image>
+                                                <Text style={styles.textBoxPlaceholder}>Capturar</Text>
+                                            </View>
+                                            :<View></View>
+                                        }
+                                        {foto_ine !== null && foto_ine !== '1' && foto_ine !== '0' ?
+                                            <View style={styles.textBoxRow}>
+                                                <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
+                                                    source={ImageIndex.cam}>
+                                                </Image>
+                                                <Text style={styles.textBoxSuccessful}>Capturado</Text>
+                                            </View>
+                                            :<View></View>
+                                        }
+                                        {foto_ine === '1' ?
+                                            <View style={styles.textBoxRow}>
+                                                <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
+                                                    source={ImageIndex.cam}>
+                                                </Image>
+                                                <Text style={styles.textBoxSuccessful}>Ver</Text>
+                                            </View>
+                                            :<View></View>
+                                        }
+                                        {foto_ine === '0' ?
+                                            <View style={styles.textBoxRow}>
+                                                <Image style={[styles.BubbleImage,{tintColor:"red"}]}
+                                                    source={ImageIndex.cam}>
+                                                </Image>
+                                                <Text style={styles.textBoxError}>No disponible</Text>
+                                            </View>
+                                            :<View></View>
+                                        }
+                                    </TouchableOpacity>
+                                    {/* {editable == false && <Locker></Locker>} */}
+                                </View>
                             </View>
                         </View>
-                    </View>
-                    <View style={styles.spacer10}></View>
-                </View>
-                <View>
-                    {
-                        unlockPreview() === true ? <View>
-                            {calcular_prestamo(importe=importe_prestamo, plazo=plazo_prestamo, flag=editable) === true ?
-                            <View></View> : <View></View>}
-                        </View> : <View style={styles.lockUI}></View>
-                    }
-                    <View style={styles.spacer10}></View>
-                    <Text style={styles.mainHeaders}>Resumen del Prestamo</Text>
-                    <View style={styles.horizontalLine}></View>
-                    <View style={styles.spacer10}></View>
-                    <View style={styles.formRow}>
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.formRow}>
                         <View style={styles.textBoxContainerHalf}>
-                            <View style={styles.textBoxBorder}>
-                                        <Text style={styles.textBoxLabel}>Intereses</Text>
-                                        <CurrencyInput style={styles.textBox}
-                                        delimiter=","
-                                        precision={0}
-                                        minValue={0}
-                                        maxValue={9999}
-                                        prefix="$"
-                                        placeholder='$0'
-                                        onChangeValue={(value) => setInteresPrestamo(value)}
-                                        value={intereses_prestamo}/>
+                                <View style={styles.textBoxBorder}>
+                                    <Text style={styles.textBoxLabel}>Garantia </Text>
+                                        <TouchableOpacity style={styles.textBox} onPress={getGarantia}>
+                                            {foto_garantia === null ?
+                                                <View style={styles.textBoxRow}>
+                                                    <Image style={[styles.BubbleImage,{tintColor:"#F2CC62"}]}
+                                                        source={ImageIndex.cam}>
+                                                    </Image>
+                                                    <Text style={styles.textBoxPlaceholder}>Capturar</Text>
+                                                </View>
+                                                :<View></View>
+                                            }
+                                            {foto_garantia !== null && foto_garantia !== '1' && foto_garantia !== '0' ?
+                                                <View style={styles.textBoxRow}>
+                                                    <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
+                                                        source={ImageIndex.cam}>
+                                                    </Image>
+                                                    <Text style={styles.textBoxSuccessful}>Capturado</Text>
+                                                </View>
+                                                :<View></View>
+                                            }
+                                            {foto_garantia === '1' ?
+                                                <View style={styles.textBoxRow}>
+                                                    <Image style={[styles.BubbleImage,{tintColor:"#70be44"}]}
+                                                        source={ImageIndex.cam}>
+                                                    </Image>
+                                                    <Text style={styles.textBoxSuccessful}>Ver</Text>
+                                                </View>
+                                            :<View></View>
+                                        }
+                                            {foto_garantia === '0' ?
+                                                <View style={styles.textBoxRow}>
+                                                    <Image style={[styles.BubbleImage,{tintColor:"red"}]}
+                                                        source={ImageIndex.cam}>
+                                                    </Image>
+                                                    <Text style={styles.textBoxError}>No disponible</Text>
+                                                </View>
+                                                :<View></View>
+                                            }
+                                        </TouchableOpacity>
+                                    {/* {editable == false && <Locker></Locker>} */}
+                                </View>
                             </View>
-                            <Locker></Locker>
                         </View>
-                        <View style={styles.textBoxContainerHalf}>
-                            <View style={styles.textBoxBorder}>
-                                        <Text style={styles.textBoxLabel}>Seguro</Text>
-                                        <CurrencyInput style={styles.textBox}
-                                        delimiter=","
-                                        precision={0}
-                                        minValue={0}
-                                        maxValue={9999}
-                                        prefix="$"
-                                        placeholder='$0'
-                                        onChangeValue={(value) => setSeguroPrestamo(value)}
-                                        value={seguro_prestamo}/>
-                                        
-                            </View>
-                            <Locker></Locker>
-                        </View>
-                    </View>            
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.formRow}>
-                        <View style={styles.textBoxContainerHalf}>
-                            <View style={styles.textBoxBorder}>
-                                        <Text style={styles.textBoxLabel}>Abono</Text>
-                                        <CurrencyInput style={styles.textBox}
-                                        delimiter=","
-                                        precision={0}
-                                        minValue={0}
-                                        maxValue={9999}
-                                        prefix="$"
-                                        placeholder='$0'
-                                        onChangeValue={(value) => setAbonoPrestamo(value)}
-                                        value={abono_prestamo}/>
-                            </View>
-                            <Locker></Locker>
-                        </View>
+                        <View style={styles.spacer10}></View>
                     </View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.textBoxContainerFull}>
-                        <View style={styles.textBoxBorderMoney}>
-                                    <Text style={styles.textBoxLabel}>Total</Text>
-                                    <CurrencyInput style={styles.textBoxMoney}
-                                    delimiter=","
-                                    precision={0}
-                                    minValue={0}
-                                    maxValue={99999}
-                                    prefix="$"
-                                    placeholder='$0'
-                                    onChangeValue={(value) => setTotalPrestamo(value)}
-                                    value={total_prestamo}/>
-                        </View>
-                        <Locker></Locker>
-                    </View>
-                    {
-                        editable === false &&
-                        <View style={styles.spacer30}></View>
-                    }
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.formRow}>
+                    <View>
                         {
-                            editable === false ? <View></View> 
-                            :
-                            <TouchableOpacity onPress={() => registrarPrestamo(
-                                new_id_prestamo=id_prestamo,
-                                new_id_cliente=id_cliente,
-                                new_importe=importe_prestamo,
-                                new_plazo=plazo_prestamo,
-                                new_abono=abono_prestamo,
-                                new_seguro=seguro_prestamo,
-                                new_num_semana=0,
-                                new_fecha=fecha_prestamo,
-                                new_estatus=estatus_prestamo,
-                                new_intereses=intereses_prestamo,
-                                new_total_pagar=total_prestamo,
-                                new_saldo_pendiente=total_prestamo,
-                                new_pagare=pagare_prestamo,
-                                new_id_aval=id_aval,
-                                new_id_ruta=ruta,
-                                new_foto_ine=foto_ine,
-                                new_foto_dom=foto_dom,
-                                new_foto_garantia=foto_garantia,
-                                new_coords_lat=coords.latitude,
-                                new_coords_lon=coords.longitude
-                            )}
-                                style={styles.mainButtonFloating}>
-                                <Text style={styles.mainButtonText}>{button_label}</Text>
-                            </TouchableOpacity>
+                            unlockPreview() === true ? <View>
+                                {calcular_prestamo(importe=importe_prestamo, plazo=plazo_prestamo, flag=editable) === true ?
+                                <View></View> : <View></View>}
+                            </View> : <View style={styles.lockUI}></View>
                         }
+                        <View style={styles.spacer10}></View>
+                        <Text style={styles.mainHeaders}>Resumen del Prestamo</Text>
+                        <View style={styles.horizontalLine}></View>
+                        <View style={styles.spacer10}></View>
+                        <View style={styles.formRow}>
+                            <View style={styles.textBoxContainerHalf}>
+                                <View style={styles.textBoxBorder}>
+                                            <Text style={styles.textBoxLabel}>Intereses</Text>
+                                            <CurrencyInput style={styles.textBox}
+                                            delimiter=","
+                                            precision={0}
+                                            minValue={0}
+                                            maxValue={9999}
+                                            prefix="$"
+                                            placeholder='$0'
+                                            onChangeValue={(value) => setInteresPrestamo(value)}
+                                            value={intereses_prestamo}/>
+                                </View>
+                                <Locker></Locker>
+                            </View>
+                            <View style={styles.textBoxContainerHalf}>
+                                <View style={styles.textBoxBorder}>
+                                            <Text style={styles.textBoxLabel}>Seguro</Text>
+                                            <CurrencyInput style={styles.textBox}
+                                            delimiter=","
+                                            precision={0}
+                                            minValue={0}
+                                            maxValue={9999}
+                                            prefix="$"
+                                            placeholder='$0'
+                                            onChangeValue={(value) => setSeguroPrestamo(value)}
+                                            value={seguro_prestamo}/>
+                                            
+                                </View>
+                                <Locker></Locker>
+                            </View>
+                        </View>            
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.formRow}>
+                            <View style={styles.textBoxContainerHalf}>
+                                <View style={styles.textBoxBorder}>
+                                            <Text style={styles.textBoxLabel}>Abono</Text>
+                                            <CurrencyInput style={styles.textBox}
+                                            delimiter=","
+                                            precision={0}
+                                            minValue={0}
+                                            maxValue={9999}
+                                            prefix="$"
+                                            placeholder='$0'
+                                            onChangeValue={(value) => setAbonoPrestamo(value)}
+                                            value={abono_prestamo}/>
+                                </View>
+                                <Locker></Locker>
+                            </View>
+                        </View>
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.textBoxContainerFull}>
+                            <View style={styles.textBoxBorderMoney}>
+                                        <Text style={styles.textBoxLabel}>Total</Text>
+                                        <CurrencyInput style={styles.textBoxMoney}
+                                        delimiter=","
+                                        precision={0}
+                                        minValue={0}
+                                        maxValue={99999}
+                                        prefix="$"
+                                        placeholder='$0'
+                                        onChangeValue={(value) => setTotalPrestamo(value)}
+                                        value={total_prestamo}/>
+                            </View>
+                            <Locker></Locker>
+                        </View>
+                        {
+                            editable === false &&
+                            <View style={styles.spacer30}></View>
+                        }
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.formRow}>
+                            {
+                                editable === false ? <View></View> 
+                                :
+                                <TouchableOpacity onPress={() => registrarPrestamo(
+                                    new_id_prestamo=id_prestamo,
+                                    new_id_cliente=id_cliente,
+                                    new_importe=importe_prestamo,
+                                    new_plazo=plazo_prestamo,
+                                    new_abono=abono_prestamo,
+                                    new_seguro=seguro_prestamo,
+                                    new_num_semana=0,
+                                    new_fecha=fecha_prestamo,
+                                    new_estatus=estatus_prestamo,
+                                    new_intereses=intereses_prestamo,
+                                    new_total_pagar=total_prestamo,
+                                    new_saldo_pendiente=total_prestamo,
+                                    new_pagare=pagare_prestamo,
+                                    new_id_aval=id_aval,
+                                    new_id_ruta=ruta,
+                                    new_foto_ine=foto_ine,
+                                    new_foto_dom=foto_dom,
+                                    new_foto_garantia=foto_garantia,
+                                    new_coords_lat=coords.latitude,
+                                    new_coords_lon=coords.longitude
+                                )}
+                                    style={styles.mainButtonFloating}>
+                                    <Text style={styles.mainButtonText}>{button_label}</Text>
+                                </TouchableOpacity>
+                            }
+                        </View>
+                        <View style={{height:200}}></View>
                     </View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.spacer20}></View>
-                    <View style={styles.spacer20}></View>
-                </View>
-            </ScrollView>
+                </ScrollView>
+            </View>
         </View>
         </AutocompleteDropdownContextProvider>
     )
@@ -1105,7 +1239,7 @@ function DataTable({tableData}) {
                     {
                         tableData.map((data,i) => (
                         i % 2 === 0 ?
-                        <TouchableOpacity key={i} style={[styles.tableRowEven,{height:50, flexDirection:"row",alignItems:"center"}]}>
+                        <View key={i} style={[styles.tableRowEven,{height:50, flexDirection:"row",alignItems:"center"}]}>
                             <Text style={[styles.cell,{ width:50}]}>{data[0]}</Text>
                             <View>
                                 <Text style={[styles.cell,{ width:100}]}>${data[1]}</Text>
@@ -1113,9 +1247,9 @@ function DataTable({tableData}) {
                             <View>
                                 <Text style={[styles.cell,{ width:100}]}>{data[2]}</Text>
                             </View>
-                        </TouchableOpacity>
+                        </View>
                         :
-                        <TouchableOpacity  key={i} style={[styles.tableRowOdd,{height:50, flexDirection:"row",alignItems:"center"}]}> 
+                        <View  key={i} style={[styles.tableRowOdd,{height:50, flexDirection:"row",alignItems:"center"}]}> 
                             <Text style={[styles.cell,{ width:50}]}>{data[0]}</Text>
                             <View>
                                 <Text style={[styles.cell,{ width:100}]}>${data[1]}</Text>
@@ -1123,18 +1257,18 @@ function DataTable({tableData}) {
                             <View>
                                 <Text style={[styles.cell,{ width:100}]}>{data[2]}</Text>
                             </View>
-                        </TouchableOpacity>
+                        </View>
 
                         ))
                     }
                 </View>
                 :
                 <View>
-                    <TouchableOpacity style={[styles.tableRowEven,{height:50, flexDirection:"row",alignItems:"center"}]}> 
+                    <View style={[styles.tableRowEven,{height:50, flexDirection:"row",alignItems:"center"}]}> 
                         <View>
                             <Text style={[styles.cell,{ width:300}]}>Aun no hay abonos</Text>
                         </View>
-                    </TouchableOpacity>
+                    </View>
                 </View>
             }
         </View>

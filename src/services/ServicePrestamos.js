@@ -115,6 +115,23 @@ class ServicePrestamos{
         console.error(error);
         }
     }
+
+    eliminar_preregistro = async (id_prestamo) => {
+        url = this.api.URL+"prestamos/eliminar_preregistro?id_prestamo="+id_prestamo
+        try {
+            const response = await fetch(url
+                ,{  
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                }});
+            const json = await response.json();
+            return json;
+        } catch (error) {
+        console.error(error);
+        }
+    };
 }
 
 export default ServicePrestamos

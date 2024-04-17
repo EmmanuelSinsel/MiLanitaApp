@@ -41,6 +41,63 @@ class ServiceClientes{
         console.error(error);
         }
     };
+
+    get_detalle_cliente = async (id) => {
+        url = this.api.URL+"clientes/detalle_cliente?id_cliente="+String(id)
+        try {
+            const response = await fetch(url);
+            const json = await response.json();
+            return json;
+        } catch (error) {
+        console.error(error);
+        }
+    };
+
+    get_siguiente_id = async () => {
+        url = this.api.URL+"clientes/siguiente_id"
+        try {
+            const response = await fetch(url);
+            const json = await response.json();
+            return json;
+        } catch (error) {
+        console.error(error);
+        }
+    };
+
+    registrar_cliente = async (nuevo_cliente) => {
+        url = this.api.URL+"clientes/registrar_cliente"
+        try {
+            const response = await fetch(url
+                ,{  
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(nuevo_cliente)});
+            const json = await response.json();
+            return json;
+        } catch (error) {
+        console.error(error);
+        }
+    }
+
+    eliminar_preregistro = async (id_cliente) => {
+        url = this.api.URL+"clientes/eliminar_preregistro?id_cliente="+id_cliente
+        try {
+            const response = await fetch(url
+                ,{  
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                }});
+            const json = await response.json();
+            return json;
+        } catch (error) {
+        console.error(error);
+        }
+    };
 }
 
 export default ServiceClientes

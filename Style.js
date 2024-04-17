@@ -25,6 +25,7 @@ const styles = StyleSheet.create({
         marginLeft:"50%",
         height:"100%",
         width:"50%",
+        zIndex:-2,
         backgroundColor: white,
     },
     container: {
@@ -39,11 +40,11 @@ const styles = StyleSheet.create({
         backgroundColor: main_green,
         borderBottomRightRadius:25,
         justifyContent:"center",
-        zIndex:10
+        zIndex:-2
     },
     bottomRectangle: {
         height:"40%",
-        backgroundColor: white,
+        backgroundColor:white,
         borderTopLeftRadius:25,
         alignItems:"center",
         justifyContent:""
@@ -574,6 +575,25 @@ const styles = StyleSheet.create({
         height:40,
         backgroundColor:"#378804",
         borderRadius:15,
+    },
+    alertBackground:{
+        position:"absolute",
+        height:"100%",
+        width:"100%",
+        backgroundColor:"gray",
+        opacity:0.2,
+        zIndex:21,
+        justifyContent:"center"
+    },
+    alert:{
+        position:"absolute",
+        alignSelf:"center",
+        width:"80%",
+        height:200,
+        backgroundColor:"white",
+        opacity:10,
+        zIndex:22,
+        marginTop:300
     }
 });
 

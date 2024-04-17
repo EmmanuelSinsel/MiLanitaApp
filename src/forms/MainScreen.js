@@ -1,10 +1,34 @@
 import { StatusBar } from 'expo-status-bar';
 import { Text, View, TouchableOpacity, ScrollView, Image, ToastAndroid } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { styles } from '../../Style';
-import React from 'react';
+import { React, useEffect, useState } from 'react';
 import ImageIndex from '../ImageIndex';
 
 const MainScreen = ({navigation}) => {
+    const [admin, setAdmin] = useState(false)
+    useEffect(() => {
+        const get_values = async() => {
+            try {
+                const id_empleado = await AsyncStorage.getItem('id_empleado');
+                const nombre_empleado = await AsyncStorage.getItem('nombre_empleado');
+                const id_rol = await AsyncStorage.getItem('id_rol');
+                const nombre_rol = await AsyncStorage.getItem('nombre_rol');
+                if(nombre_rol == "ADMINISTRADOR"){
+                    setAdmin(true)
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        get_values()
+    },[])
+
+    //ADMINISTRADOR
+    function trackEmpleadosFunc() {
+        ToastAndroid.show("AUN NO DISPONIBLE",ToastAndroid.SHORT)
+        //navigation.navigate("TrackEmpleados");
+    }
     //ALTAS
     function nuevoPrestamoFunc() {
         navigation.navigate("FormPrestamos");
@@ -48,6 +72,20 @@ const MainScreen = ({navigation}) => {
                 </View>
             </View>
             <View style={styles.spacer10}></View>
+            {
+                admin === true &&
+                <View>
+                    <Text style={styles.mainHeaders}>Administrador</Text>
+                    <View style={styles.horizontalLine}></View>
+                    <View style={styles.mainRow}>
+                        <MainRoundButton func={trackEmpleadosFunc} title={"Rastreo de empleados"} image={ImageIndex.track}></MainRoundButton>
+                        <MainRoundButtonSpacer></MainRoundButtonSpacer>
+                        <MainRoundButtonSpacer></MainRoundButtonSpacer>
+                    </View>
+                </View>
+            }
+
+
             <Text style={styles.mainHeaders}>Caja</Text>
             <View style={styles.horizontalLine}></View>
             <View style={styles.mainRow}>

@@ -36,7 +36,8 @@ const Preview = ({navigation}) => {
     }
 
     const get_photo = useCallback(async (id_prestamo, image_type) => {
-        const data = await service.get_imagen(id_prestamo=id_prestamo, image_type=image_type)
+        const res = await service.get_imagen(id_prestamo=id_prestamo, image_type=image_type)
+        const data = res.data
         setLoading(0)
         setImage('data:image/png;base64,'+data.image)
     }, [])

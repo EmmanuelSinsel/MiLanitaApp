@@ -8,35 +8,29 @@ import ServicePrestamos from '../services/ServicePrestamos';
 
 const ConsultaPrestamos = ({navigation}) => {
     service = new ServicePrestamos()
-    let prestamos = []
     const [ruta,                setRuta] = useState('');
     const [grupo,               setGrupo] = useState('');
     const [page,           setPage] = useState(1);
     const [filtro_text,           setFiltro] = useState('');
     const [filteredTableData, setFilteredTableData] = useState(null)
-    const data = [
-        { label: 'Item 1', value: '1' },
-        { label: 'Item 2', value: '2' },
-        { label: 'Item 3', value: '3' },
-        { label: 'Item 4', value: '4' },
-        { label: 'Item 5', value: '5' },
-        { label: 'Item 6', value: '6' },
-        { label: 'Item 7', value: '7' },
-        { label: 'Item 8', value: '8' },
-    ];
+    const [loading, setLoading] = useState(0)
     const [tableData, setTableData] = useState([])
     const [max_pages, setMaxPages] = useState([]);
     let prestamos_data = []
     useEffect(() => {
+        setLoading(1)
         get_prestamos(p=page, p_size=100, filtro="")
     }, [get_prestamos]);
 
     const filterTable = (value) =>{
         setPage(1)
+        setLoading(1)
         if(value.length >= 2){
             const filtro_upper = value.toUpperCase()
             setFiltro(value)
             get_prestamos(p=1, p_size=100, filtro=filtro_upper)
+        }else{
+            setLoading(0)
         }
     }
     function backMainScreen() {
@@ -57,7 +51,8 @@ const ConsultaPrestamos = ({navigation}) => {
     }
 
     const add_prestamos = useCallback(async (p, p_size, filtro) => {
-        const data = await service.get_prestamos(p=p, p_size=p_size, filtro=filtro)
+        const res = await service.get_prestamos(p=p, p_size=p_size, filtro=filtro)
+        const data = res.data
         let temp_prestamos = []
         const prestamos = data.prestamos
         for(let i = 0; i < prestamos.length ; i++){
@@ -69,7 +64,8 @@ const ConsultaPrestamos = ({navigation}) => {
     }, [])
 
     const get_prestamos = useCallback(async (p, p_size, filtro) => {
-        const data = await service.get_prestamos(p=p, p_size=p_size, filtro=filtro)
+        const res = await service.get_prestamos(p=p, p_size=p_size, filtro=filtro)
+        const data = res.data
         let temp_prestamos = []
         const prestamos = data.prestamos
         for(let i = 0; i < prestamos.length ; i++){
@@ -78,6 +74,7 @@ const ConsultaPrestamos = ({navigation}) => {
         setMaxPages(data.paginas)
         setTableData(temp_prestamos)
         prestamos_data = temp_prestamos
+        setLoading(0)
     }, [])
 
     return (
@@ -102,31 +99,42 @@ const ConsultaPrestamos = ({navigation}) => {
                             <Text style={styles.textBoxLabel}>Buscador</Text>
                             <TextInput style={styles.textBox}
                             onChangeText={value => {filterTable(value)}}
+                            
                             defaultValue={filtro_text}/>
                 </View>
             </View>
             <View style={styles.spacer20}></View>
-            <ScrollView style={{height:"76%"}} onScroll={({nativeEvent}) => {
-                if (is_close_to_bottom(nativeEvent)) {
-                    next_chunk();
-                }
-            }}>
                 {
-                    filteredTableData === null ?
-                    <DataTable tableData={tableData} navigation={navigation}></DataTable>:
-                    <DataTable tableData={filteredTableData} navigation={navigation}></DataTable>
-                }
-                <View style={styles.spacer10}></View>
-                {
-                    tableData.length >= page * 100 ? 
-                    <View style={[styles.textBoxContainerFull,{ height:50 }]}>
-                        <Image style={[styles.loadingImage,{height:50, marginLeft:5}]}
+                    loading === 1 &&
+                    <View style={styles.loadingScreen}>
+                        <Image style={[styles.loadingImage,{height:500, width:200, marginTop:-150}]}
                             source={ImageIndex.loading}>
                         </Image>
                     </View>
-                    :
-                    <View></View>
                 }
+            <ScrollView style={{height:"76%"}} onScroll={({nativeEvent}) => {
+                if (is_close_to_bottom(nativeEvent)) {
+                    next_chunk();
+                }}}>
+                <View>
+                    {
+                        filteredTableData === null ?
+                        <DataTable tableData={tableData} navigation={navigation}></DataTable>:
+                        <DataTable tableData={filteredTableData} navigation={navigation}></DataTable>
+                    }
+                    <View style={styles.spacer10}></View>
+                    {
+                        tableData.length >= page * 100 ? 
+                        <View style={[styles.textBoxContainerFull,{ height:50 }]}>
+                            <Image style={[styles.loadingImage,{height:50, marginLeft:5}]}
+                                source={ImageIndex.loading}>
+                            </Image>
+                        </View>
+                        :
+                        <View></View>
+                    }
+                </View>
+                
 
             </ScrollView>
         </View>

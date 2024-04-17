@@ -3,21 +3,37 @@ import { StyleSheet, Text, View, TextInput, Button, Pressable, ToastAndroid, Tou
 import { styles } from '../../Style';
 import React, {useState, useEffect} from 'react';
 import ImageIndex from '../ImageIndex';
-import { AutoFocus, Camera, CameraType, FlashMode } from 'expo-camera';
+import { AutoFocus, Camera, CameraType, FlashMode} from 'expo-camera';
 import { useRoute } from "@react-navigation/native"
 import * as MediaLibrary from "expo-media-library";
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 const Camara = ({navigation}) => {
-
+    const [permission, requestPermission] = Camera.useCameraPermissions();
+    const route = useRoute()
     const [preview, setPreview] = useState(0);
     const [flash_type, setFlashType] = useState(FlashMode.off);
     const [type, setType] = useState(CameraType.back);
     const [camera, setCamera] = useState(null);
     const [image, setImage] = useState(null);
+    const [photo_label, setPhotoLabel] = useState('')
+    const [photo_type, setPhotoType] = useState(null)
+    const [id_prestamo, setIdPrestamo] = useState(0)
     useEffect(() => {
+        setIdPrestamo(route.params?.id_prestamo)
+        setPhotoType(route.params?.photo_type)
+        if(route.params?.photo_type == 1){
+            setPhotoLabel("INE")
+        }
+        if(route.params?.photo_type == 2){
+            setPhotoLabel("Domicilio")
+        }
+        if(route.params?.photo_type == 3){
+            setPhotoLabel("Garantia")
+        }
         const backAction = () => {
             if(preview == 1){
                 setPreview(0)
@@ -26,7 +42,6 @@ const Camara = ({navigation}) => {
             }else{
                 return false
             }
-
         };
         const backHandler = BackHandler.addEventListener(
             'hardwareBackPress',
@@ -34,27 +49,10 @@ const Camara = ({navigation}) => {
         );
         return () => backHandler.remove();
     },[preview,image])
+
     function backMainScreen() {
         navigation.goBack()
     }
-    const route = useRoute()
-    let photo_type
-    if(route.params?.photo_type){
-        photo_type = route.params?.photo_type
-    }
-    let photo_label = "INE"
-    function init(){
-        if(photo_type == 1){
-            photo_label = "INE"
-        }
-        if(photo_type == 2){
-            photo_label = "Domicilio"
-        }
-        if(photo_type == 3){
-            photo_label = "Garantia"
-        }
-    }
-    init()
 
     function switchFlash(){
         if(flash_type == FlashMode.off){
@@ -84,7 +82,7 @@ const Camara = ({navigation}) => {
     function accept_photo(){
         navigation.navigate({
             name: 'FormPrestamos',
-            params: { type: photo_type, photo: image },
+            params: { type: photo_type, photo: image, id_prestamo_return: id_prestamo },
             merge: true,
         });
     }

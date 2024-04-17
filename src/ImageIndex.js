@@ -27,6 +27,9 @@ const ImageIndex = {
     loading: require('../assets/icons/icon-loading.gif'),
     gallery: require('../assets/icons/icon-gallery.png'),
     save: require('../assets/icons/icon-save.png'),
+    track: require('../assets/icons/icon-track.png'),
+    showPassword: require('../assets/icons/icon-show-password.png'),
+    hidePassword: require('../assets/icons/icon-hide-password.png'),
 };
 
 export default ImageIndex
