@@ -10,7 +10,7 @@ class ServiceAuth{
             const json = await response.json();
             return json;
         } catch (error) {
-        console.error(error);
+            return String(error);
         }
     };
 

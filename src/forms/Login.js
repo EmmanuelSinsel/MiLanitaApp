@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, TextInput, Animated, ToastAndroid, TouchableOpacity, Image, Dimensions, Keyboard} from 'react-native';
+import { Text, View, TextInput, Animated, ToastAndroid, TouchableOpacity, Image, Alert} from 'react-native';
 import { useKeyboard } from '@react-native-community/hooks'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { styles } from '../../Style';
@@ -19,6 +19,7 @@ const Login = ({navigation}) => {
 
     const login = useCallback(async (usuario, password) => {
         const res = await serviceAuth.login(usuario, password)
+        Alert.alert("Login",res)
         const auth = res.auth
         if(res.status == 1){
             try {
