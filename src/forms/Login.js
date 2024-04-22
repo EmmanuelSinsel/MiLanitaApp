@@ -14,12 +14,13 @@ const Login = ({navigation}) => {
     const [password, setPassword] = useState('');
     const [keyboardStatus, setKeyboardStatus] = useState('');
     const inputRef = React.useRef();
+    const [show_password, setShowPassword] = useState(false);
     useEffect(() => {
     },[])
 
     const login = useCallback(async (usuario, password) => {
         const res = await serviceAuth.login(usuario, password)
-        Alert.alert("Login",res)
+        //Alert.alert("Login",res)
         const auth = res.auth
         if(res.status == 1){
             try {
@@ -68,6 +69,10 @@ const Login = ({navigation}) => {
             { translateY: this.state.animation }
         ]
     }
+    const showPassword = (state) => {
+        setShowPassword(state)
+        console.log(state)
+    }
 
     return (
         <View style={{height:"100%"}}>
@@ -92,18 +97,35 @@ const Login = ({navigation}) => {
                         <View style={styles.spacer30}></View>
                         <View style={styles.textBoxBorder}>
                             <Text style={styles.textBoxLabel}>Contraseña</Text>
-                            <View style={[styles.textBoxRow,{width:"100%"}]}>
-                                <TextInput
-                                    style={styles.textBox}
-                                    secureTextEntry={true}
-                                    onChangeText={password => setPassword(password)}
-                                    defaultValue={password}
-                                />
-                                <TouchableOpacity>
-                                <Image style={[styles.BubbleImage,{tintColor:"black", zIndex:10, marginLeft:-50}]}
-                                    source={ImageIndex.showPassword}>
-                                </Image>
-                                </TouchableOpacity>
+                            <View style={{width:"100%", height: 20, }}>
+                                {
+                                    show_password === true ?
+                                    <View style={[styles.textBoxRow, {width:"100%"}]}>
+                                        <TextInput
+                                        style={styles.textBox}
+                                        onChangeText={password => setPassword(password)}
+                                        defaultValue={password}/>
+                                        <TouchableOpacity onPress={() => setShowPassword(false)}>
+                                            <Image style={[styles.BubbleImage,{ zIndex:10, marginLeft:-50}]}
+                                                source={ImageIndex.hidePassword}>
+                                            </Image>
+                                        </TouchableOpacity>
+                                    </View>
+                                    :
+                                    <View style={[styles.textBoxRow, {width:"100%"}]}>
+                                        <TextInput
+                                        style={styles.textBox}
+                                        secureTextEntry={true}
+                                        onChangeText={password => setPassword(password)}
+                                        defaultValue={password}/>
+                                        <TouchableOpacity onPress={() => setShowPassword(true)}>
+                                            <Image style={[styles.BubbleImage,{tintColor:"black", zIndex:10, marginLeft:-50}]}
+                                                source={ImageIndex.showPassword}>
+                                            </Image>
+                                        </TouchableOpacity>
+                                    </View>
+                                }
+
 
                             </View>
                         </View>
