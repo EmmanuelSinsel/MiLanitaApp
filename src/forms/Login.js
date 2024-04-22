@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, TextInput, Animated, ToastAndroid, TouchableOpacity, Image, Alert} from 'react-native';
+import { Text, View, TextInput, Animated, ToastAndroid, TouchableOpacity, Image, Platform} from 'react-native';
 import { useKeyboard } from '@react-native-community/hooks'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { styles } from '../../Style';
@@ -15,7 +15,15 @@ const Login = ({navigation}) => {
     const [keyboardStatus, setKeyboardStatus] = useState('');
     const inputRef = React.useRef();
     const [show_password, setShowPassword] = useState(false);
+    const [spacer, setSpacer] = useState(0)
     useEffect(() => {
+        console.log(String(Platform.OS))
+        if(Platform.OS == "ios"){
+            setSpacer(400)
+        }
+        if(Platform.OS == "android"){
+            setSpacer(100)
+        }
     },[])
 
     const login = useCallback(async (usuario, password) => {
@@ -125,8 +133,6 @@ const Login = ({navigation}) => {
                                         </TouchableOpacity>
                                     </View>
                                 }
-
-
                             </View>
                         </View>
                         <View style={styles.spacer30}></View>
@@ -139,9 +145,8 @@ const Login = ({navigation}) => {
             </View>
             {
                 keyboard.keyboardShown === true &&
-                <View style={{backgroundColor:"white", height:200, zIndex:-10}}></View>
+                <View style={{backgroundColor:"white", height:spacer, zIndex:-10}}></View>
             }
-
         </View>
 
     );
