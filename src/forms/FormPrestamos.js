@@ -342,7 +342,7 @@ const FormPrestamos = ({navigation}) => {
                 setNombreAval('')
                 setReloadAval(!reload_aval)
                 if(Platform.OS == "android"){
-                    Android.show('El Aval seleccionado ya es Aval en 3 prestamos activos', ToastAndroid.SHORT);
+                    ToastAndroid.show('El Aval seleccionado ya es Aval en 3 prestamos activos', ToastAndroid.SHORT);
                 }
             }
         }
