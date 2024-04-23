@@ -129,7 +129,7 @@ class ServicePrestamos{
             const json = await response.json();
             return json;
         } catch (error) {
-        console.error(error);
+            console.error(error);
         }
     };
 

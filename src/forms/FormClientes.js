@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, Button, Pressable, ToastAndroid, TouchableOpacity, ScrollView, Image, BackHandler } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, Pressable, ToastAndroid, TouchableOpacity, ScrollView, Image, BackHandler, Platform } from 'react-native';
 import { styles } from '../../Style';
 import React, {useState, useEffect, useCallback} from 'react';
 import ImageIndex from '../ImageIndex';
@@ -125,7 +125,6 @@ const FormClientes = ({navigation}) => {
         if(data.tipo_cliente == 1){
             setTipoClienteEdit("Normal")
         }
-
     }, [])
 
     const registerCliente = async (
@@ -151,7 +150,7 @@ const FormClientes = ({navigation}) => {
         console.log(nuevo_cliente)
         const data = await serviceClientes.registrar_cliente(nuevo_cliente)
         if(Platform.OS == "android"){
-        ToastAndroid.show('Cliente Registrado', ToastAndroid.SHORT);
+            ToastAndroid.show('Cliente Registrado', ToastAndroid.SHORT);
         }
         navigation.goBack()
     }

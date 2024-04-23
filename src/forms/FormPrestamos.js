@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, TextInput, Pressable, ToastAndroid, TouchableOpacity, ScrollView, Image, BackHandler} from 'react-native';
+import { Text, View, TextInput, Pressable, ToastAndroid, TouchableOpacity, ScrollView, Image, BackHandler, Platform} from 'react-native';
 import { styles } from '../../Style';
 import React, { useEffect, useState, useCallback } from 'react';
 import ImageIndex from '../ImageIndex';
@@ -190,7 +190,7 @@ const FormPrestamos = ({navigation}) => {
         }
         const data = await service.registrar_prestamo(nuevo_prestamo=nuevo_prestamo)
         if(Platform.OS == "android"){
-        ToastAndroid.show('Prestamo Registrado', ToastAndroid.SHORT);}
+            ToastAndroid.show('Prestamo Registrado', ToastAndroid.SHORT);}
         navigation.goBack()
     },[])
     function newCliente(){
@@ -342,7 +342,7 @@ const FormPrestamos = ({navigation}) => {
                 setNombreAval('')
                 setReloadAval(!reload_aval)
                 if(Platform.OS == "android"){
-                ToastAndroid.show('El Aval seleccionado ya es Aval en 3 prestamos activos', ToastAndroid.SHORT);
+                    Android.show('El Aval seleccionado ya es Aval en 3 prestamos activos', ToastAndroid.SHORT);
                 }
             }
         }
