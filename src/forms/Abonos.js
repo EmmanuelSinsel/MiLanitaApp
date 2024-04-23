@@ -12,11 +12,11 @@ const Abonos = ({navigation}) => {
     //TABLA
     const [tipo_abono, setTipoAbono] = useState([]);
     const [lista_abonos, setAbono] = useState(null);
+
     const update_type = (key, type) => {
         let new_list = tipo_abono
         new_list[key]=type.value
         setTipoAbono(new_list)
-        console.log(new_list)
     }
     const update_abono = (id, value) => {
         if(value == null){
@@ -26,7 +26,6 @@ const Abonos = ({navigation}) => {
             input.id === id ? { ...input, value: value } : input
         );
         setAbono(newInputs);
-        console.log(newInputs)
     }
     //FORMULARIO
     let serviceAbonos = new ServiceAbonos()
@@ -234,12 +233,46 @@ const Abonos = ({navigation}) => {
 }
 
 function DataTable({tableData, update_abono, update_type, lista_abonos, lista_tipos, filtro }) {
+    const [combo_color, setComboColor] = useState([]);
     const data1 = [
         { label: 'Normal', value: '2' },
         { label: 'Recuperado', value: '5' },
         { label: 'Parcial', value: '4' },
         { label: 'Adelantado', value: '6' },
     ];
+
+    useEffect(() => {
+        let colores = []
+        for(let i = 0; i < lista_abonos.length ; i++){
+            colores.push('transparent')
+        }
+        setComboColor(colores)
+    },[])
+
+    const change_color = (key, type) => {
+        let color = ''
+        if(type.value == "2"){
+            color = 'transparent'
+        }else if(type.value == '4'){
+            color = 'pink'
+        }else if(type.value == '5'){
+            color = 'green'
+        }else if(type.value == '6'){
+            color = 'orange'
+        }
+        console.log(key)
+        console.log(type)
+        console.log(color)
+        const nextColors = combo_color.map((c, i) => {
+            if (i === key) {
+                return color;
+            } else {
+                return combo_color[i];
+            }
+        });
+        setComboColor(nextColors);
+    }
+    
     const visible = (nombre) => {
         if(String(nombre).includes(String(filtro).toUpperCase())){
             return true;
@@ -261,7 +294,7 @@ function DataTable({tableData, update_abono, update_type, lista_abonos, lista_ti
                                         <Text style={styles.cell}>{data[1]}</Text>
                                         <View style={[styles.cellHorizontal,{marginTop:-20}]}>
                                             <Text style={[styles.cell,{marginLeft:-40, marginTop:17}]}>Abono #{String(data[2]+1)}:</Text>
-                                            <CurrencyInput style={[styles.cellInput,{width:70}]}
+                                            <CurrencyInput style={[styles.cellInput,{width:70,  backgroundColor:combo_color[i]}]}
                                                     delimiter=","
                                                     precision={0}
                                                     minValue={0}
@@ -272,13 +305,12 @@ function DataTable({tableData, update_abono, update_type, lista_abonos, lista_ti
                                                     value={String(lista_abonos[i].value)}/>
                                             <Text style={[styles.cell, {marginTop:17}]}>Tipo:</Text>
                                             <Dropdown style={[styles.cellCombo, {width:140}]}
-                                            data={data1} search
+                                            data={data1} 
                                             labelField="label" valueField="value"
-                                            searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
                                             placeholderStyle={styles.comboBoxPlaceholder}
                                             selectedTextStyle={[styles.cellComboBoxSelected,{marginTop:5}]}
                                             value={lista_tipos[i]}
-                                            onChange={item => {update_type(i, item)}}/>
+                                            onChange={item => {update_type(i, item); change_color(i,item)}}/>
                                         </View>
                                     </View>
                                 </View>
@@ -294,7 +326,7 @@ function DataTable({tableData, update_abono, update_type, lista_abonos, lista_ti
                                         <Text style={styles.cell}>{data[1]}</Text>
                                         <View style={[styles.cellHorizontal,{marginTop:-20}]}>
                                             <Text style={[styles.cell,{marginLeft:-40, marginTop:17}]}>Abono #{String(data[2]+1)}:</Text>
-                                            <CurrencyInput style={[styles.cellInput,{width:70}]}
+                                            <CurrencyInput style={[styles.cellInput,{width:70,backgroundColor:combo_color[i]}]}
                                                     delimiter=","
                                                     precision={0}
                                                     minValue={0}
@@ -305,13 +337,12 @@ function DataTable({tableData, update_abono, update_type, lista_abonos, lista_ti
                                                     value={String(lista_abonos[i].value)}/>
                                             <Text style={[styles.cell, {marginTop:17}]}>Tipo:</Text>
                                             <Dropdown style={[styles.cellCombo, {width:140}]}
-                                            data={data1} search
+                                            data={data1}
                                             labelField="label" valueField="value"
-                                            searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
                                             placeholderStyle={styles.comboBoxPlaceholder}
                                             selectedTextStyle={[styles.cellComboBoxSelected,{marginTop:5}]}
                                             value={lista_tipos[i]}
-                                            onChange={item => {update_type(i, item)}}/>
+                                            onChange={item => {update_type(i, item); change_color(i,item)}}/>
                                         </View>
                                     </View>
                                 </View>

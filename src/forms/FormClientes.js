@@ -150,7 +150,9 @@ const FormClientes = ({navigation}) => {
         }
         console.log(nuevo_cliente)
         const data = await serviceClientes.registrar_cliente(nuevo_cliente)
+        if(Platform.OS == "android"){
         ToastAndroid.show('Cliente Registrado', ToastAndroid.SHORT);
+        }
         navigation.goBack()
     }
 

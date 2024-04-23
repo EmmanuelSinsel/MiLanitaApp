@@ -132,6 +132,18 @@ class ServicePrestamos{
         console.error(error);
         }
     };
+
+    get_last_aval = async (id_cliente) => {
+        url = this.api.URL+"prestamos/get_last_aval?id_cliente="+id_cliente
+        try {
+            const response = await fetch(url);
+            const json = await response.json();
+            return json;
+        } catch (error) {
+        console.error(error);
+        }
+    }
+
 }
 
 export default ServicePrestamos

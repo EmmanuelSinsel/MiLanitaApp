@@ -189,7 +189,8 @@ const FormPrestamos = ({navigation}) => {
             'coords_lon':new_coords_lon
         }
         const data = await service.registrar_prestamo(nuevo_prestamo=nuevo_prestamo)
-        ToastAndroid.show('Prestamo Registrado', ToastAndroid.SHORT);
+        if(Platform.OS == "android"){
+        ToastAndroid.show('Prestamo Registrado', ToastAndroid.SHORT);}
         navigation.goBack()
     },[])
     function newCliente(){
@@ -340,9 +341,16 @@ const FormPrestamos = ({navigation}) => {
             }else{
                 setNombreAval('')
                 setReloadAval(!reload_aval)
+                if(Platform.OS == "android"){
                 ToastAndroid.show('El Aval seleccionado ya es Aval en 3 prestamos activos', ToastAndroid.SHORT);
+                }
             }
         }
+    }
+
+    const get_last_aval = async(id_cliente) => {
+        const res = await serviceClientes.get_last_aval(id_cliente)
+        console.log(data)
     }
 
     const unlockCliente = () => {

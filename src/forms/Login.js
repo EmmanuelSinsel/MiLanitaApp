@@ -51,10 +51,14 @@ const Login = ({navigation}) => {
             } catch (error) {
                 console.log(error)
             }
-            ToastAndroid.show('Sesion iniciada', ToastAndroid.SHORT);
+            if(Platform.OS == "android"){
+                ToastAndroid.show('Sesion iniciada', ToastAndroid.SHORT);
+            }
+
             navigation.navigate("MainScreen");
         }else{
-            ToastAndroid.show(res.detail, ToastAndroid.SHORT);
+            if(Platform.OS == "android"){
+            ToastAndroid.show(res.detail, ToastAndroid.SHORT);}
         }
         setUser('')
         setPassword('')
