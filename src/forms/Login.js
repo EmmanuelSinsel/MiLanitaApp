@@ -117,7 +117,7 @@ const Login = ({navigation}) => {
                                         style={styles.textBox}
                                         onChangeText={password => setPassword(password)}
                                         defaultValue={password}/>
-                                        <TouchableOpacity onPress={() => setShowPassword(false)}>
+                                        <TouchableOpacity onPress={() => setShowPassword(!show_password)}>
                                             <Image style={[styles.BubbleImage,{ zIndex:10, marginLeft:-50}]}
                                                 source={ImageIndex.hidePassword}>
                                             </Image>
@@ -130,7 +130,7 @@ const Login = ({navigation}) => {
                                         secureTextEntry={true}
                                         onChangeText={password => setPassword(password)}
                                         defaultValue={password}/>
-                                        <TouchableOpacity onPress={() => setShowPassword(true)}>
+                                        <TouchableOpacity onPress={() => setShowPassword(!show_password)}>
                                             <Image style={[styles.BubbleImage,{tintColor:"black", zIndex:10, marginLeft:-50}]}
                                                 source={ImageIndex.showPassword}>
                                             </Image>

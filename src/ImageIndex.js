@@ -30,6 +30,7 @@ const ImageIndex = {
     track: require('../assets/icons/icon-track.png'),
     showPassword: require('../assets/icons/icon-show-password.png'),
     hidePassword: require('../assets/icons/icon-hide-password.png'),
+    clear: require('../assets/icons/icon-clear.png'),
 };
 
 export default ImageIndex
