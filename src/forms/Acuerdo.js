@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, TextInput, Pressable, ToastAndroid, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { Text, View, TextInput, Pressable, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { styles } from '../../Style';
 import React, {useState} from 'react';
 import ImageIndex from '../ImageIndex';
@@ -61,7 +61,6 @@ const Acuerdo = ({navigation}) => {
         navigation.goBack()
     }
     function registerAcuerdo(){
-        ToastAndroid.show(intervalo_acuerdo, ToastAndroid.SHORT);
     }
     return (
         <ScrollView style={styles.background}>

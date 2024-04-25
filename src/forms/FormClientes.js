@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, Button, Pressable, ToastAndroid, TouchableOpacity, ScrollView, Image, BackHandler, Platform } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, Pressable, TouchableOpacity, ScrollView, Image, BackHandler, Platform } from 'react-native';
 import { styles } from '../../Style';
 import React, {useState, useEffect, useCallback} from 'react';
 import ImageIndex from '../ImageIndex';
@@ -7,6 +7,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { useRoute } from "@react-navigation/native"
 import ServicePrestamos from '../services/ServicePrestamos';
 import ServiceClientes from '../services/ServiceClientes';
+import Toast from 'react-native-root-toast';
 
 const FormClientes = ({navigation}) => {
     let service = new ServicePrestamos()
@@ -149,9 +150,9 @@ const FormClientes = ({navigation}) => {
         }
         console.log(nuevo_cliente)
         const data = await serviceClientes.registrar_cliente(nuevo_cliente)
-        if(Platform.OS == "android"){
-            ToastAndroid.show('Cliente Registrado', ToastAndroid.SHORT);
-        }
+        let toast = Toast.show('Cliente Registrado', {
+            duration: Toast.durations.SHORT,
+        });
         navigation.goBack()
     }
 

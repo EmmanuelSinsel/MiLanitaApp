@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, Button, Pressable, ToastAndroid, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, Pressable, TouchableOpacity, ScrollView, Image, Alert, Platform, Linking } from 'react-native';
 import { styles } from '../../Style';
 import React, {useState, useEffect} from 'react';
 import ImageIndex from '../ImageIndex';
@@ -52,7 +52,6 @@ const Mapa = ({navigation}) => {
     }, [])
 
     const setFinalRegion = (lat, lon) => {
-        ToastAndroid.show(lat + " " + lon, ToastAndroid.SHORT);
         navigation.navigate({
             name: 'FormPrestamos',
             params: { lat: lat, lon: lon, id_prestamo_return: id_prestamo },
@@ -61,7 +60,16 @@ const Mapa = ({navigation}) => {
     }
 
     const openMaps = (lat, lon) => {
-
+        console.log(route.params?.label)
+        const scheme = Platform.select({ ios: 'maps://0,0?q=', android: 'geo:0,0?q=' });
+        const latLng = `${lat},${lon}`;
+        const label = route.params?.label;
+        const url = Platform.select({
+            ios: `${scheme}${label}@${latLng}`,
+            android: `${scheme}${latLng}(${label})`
+        });
+        
+        Linking.openURL(url);
     }
 
     const getAddress = async(lat, lon) =>{

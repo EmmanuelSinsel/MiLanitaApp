@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, Button, Pressable, ToastAndroid, TouchableOpacity, ScrollView,useWindowDimensions, Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, Pressable, TouchableOpacity, ScrollView,useWindowDimensions, Image, Alert } from 'react-native';
 import { styles } from '../../Style';
 import React, {useState, useEffect, useCallback} from 'react';
 import ImageIndex from '../ImageIndex';

@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, TextInput, TouchableOpacity, ScrollView, Image, ToastAndroid, Alert } from 'react-native';
+import { Text, View, TextInput, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
 import { styles } from '../../Style';
 import React, {useState, useEffect, useCallback} from 'react';
 import ImageIndex from '../ImageIndex';
@@ -31,6 +31,11 @@ const ConsultaPrestamos = ({navigation}) => {
             get_prestamos(p=1, p_size=100, filtro=filtro_upper)
         }else{
             setLoading(0)
+        }
+        if(value.length == 0){
+            setLoading(1)
+            setFiltro(value)
+            get_prestamos(p=1, p_size=100, filtro="")
         }
     }
     function backMainScreen() {

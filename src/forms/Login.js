@@ -1,11 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, TextInput, Animated, ToastAndroid, TouchableOpacity, Image, Platform} from 'react-native';
+import { Text, View, TextInput, Animated, TouchableOpacity, Image, Platform} from 'react-native';
 import { useKeyboard } from '@react-native-community/hooks'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { styles } from '../../Style';
 import React, {useState, useCallback, useEffect, useRef} from 'react';
 import ImageIndex from '../ImageIndex';
 import ServiceAuth from '../services/ServiceAuth';
+import Toast from 'react-native-root-toast';
 
 const Login = ({navigation}) => {
     const keyboard = useKeyboard()
@@ -51,14 +52,15 @@ const Login = ({navigation}) => {
             } catch (error) {
                 console.log(error)
             }
-            if(Platform.OS == "android"){
-                ToastAndroid.show('Sesion iniciada', ToastAndroid.SHORT);
-            }
+            let toast = Toast.show('Sesion iniciada', {
+                duration: Toast.durations.SHORT,
+            });
 
             navigation.navigate("MainScreen");
         }else{
-            if(Platform.OS == "android"){
-            ToastAndroid.show(res.detail, ToastAndroid.SHORT);}
+            let toast = Toast.show(res.detail, {
+                duration: Toast.durations.SHORT,
+            });
         }
         setUser('')
         setPassword('')

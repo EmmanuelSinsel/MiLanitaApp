@@ -1,9 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, TouchableOpacity, ScrollView, Image, ToastAndroid } from 'react-native';
+import { Text, View, TouchableOpacity, ScrollView, Image, } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { styles } from '../../Style';
 import { React, useEffect, useState } from 'react';
 import ImageIndex from '../ImageIndex';
+import Toast from 'react-native-root-toast';
 
 const MainScreen = ({navigation}) => {
     const [admin, setAdmin] = useState(false)
@@ -26,7 +27,9 @@ const MainScreen = ({navigation}) => {
 
     //ADMINISTRADOR
     function trackEmpleadosFunc() {
-        ToastAndroid.show("AUN NO DISPONIBLE",ToastAndroid.SHORT)
+        let toast = Toast.show('AUN NO DISPONIBLE', {
+            duration: Toast.durations.SHORT,
+        });
         //navigation.navigate("TrackEmpleados");
     }
     //ALTAS
