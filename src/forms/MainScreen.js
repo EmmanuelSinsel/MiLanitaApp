@@ -52,9 +52,12 @@ const MainScreen = ({navigation}) => {
     function consultaAcuerdos(){
         navigation.navigate("ConsultaAcuerdos")
     }
-    //CAMBIOS
+    //ABONOS
     function abonosFunc() {
         navigation.navigate("Abonos");
+    }
+    function extraCobranzaFunc() {
+        navigation.navigate("ConsultaExtraCobranza");
     }
     //LOGOUT
     function logout() {
@@ -106,7 +109,7 @@ const MainScreen = ({navigation}) => {
             </View>
             <View style={styles.spacer10}></View>
             <View style={styles.mainRow}>
-                <MainRoundButton func={consultaPrestamos}  title={"Extra Cobranza"} image={ImageIndex.payExtra} bubbleImage={ImageIndex.list}></MainRoundButton>
+                <MainRoundButton func={extraCobranzaFunc}  title={"Extra Cobranza"} image={ImageIndex.payExtra} bubbleImage={ImageIndex.list}></MainRoundButton>
                 <MainRoundButtonSpacer></MainRoundButtonSpacer>
                 <MainRoundButtonSpacer></MainRoundButtonSpacer>
             </View>

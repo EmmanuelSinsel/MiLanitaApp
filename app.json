@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "AwesomeProject",
+    "name": "MiLanitaApp",
     "slug": "AwesomeProject",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/milanita-logo-color-icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -36,14 +36,6 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      [
-        "expo-font",
-        {
-          "fonts": [
-            "assets/fonts/Arvo-Regular.tff"
-          ]
-        }
-      ],
       [
         "expo-location",
         {

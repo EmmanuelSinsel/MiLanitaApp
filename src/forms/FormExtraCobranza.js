@@ -1,37 +1,32 @@
 import { StatusBar } from 'expo-status-bar';
 import {  Text, View, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { styles } from '../../Style';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import ImageIndex from '../ImageIndex';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useRoute } from "@react-navigation/native"
+import CurrencyInput from 'react-native-currency-input';
 
-
-const AbonoDetalle = ({navigation}) => {
+const FormExtraCobranza = ({navigation}) => {
     function backMainScreen() {
         navigation.goBack()
     }
-
-    const data = [
-        { label: 'Item 1', value: '1' },
-        { label: 'Item 2', value: '2' },
-        { label: 'Item 3', value: '3' },
-        { label: 'Item 4', value: '4' },
-        { label: 'Item 5', value: '5' },
-        { label: 'Item 6', value: '6' },
-        { label: 'Item 7', value: '7' },
-        { label: 'Item 8', value: '8' },
-    ];
-
     const route = useRoute()
-    
-    const id = route.params?.id
-
     const [id_cliente,          setIdCliente] = useState('');
     const [id_prestamo,         setIdPrestamo] = useState('');
     const [nombre_cliente,      setNombreCliente] = useState('');
     const [no_semana_prestamo,  setNoSemana] = useState('');
     const [saldo_pendiente,     setSaldoPendiente] = useState('');
+    useEffect(() => {
+        if(route.params?.id){
+            get_abono_extra(route.params?.id)
+        }
+
+    }, []);
+
+    const get_abono_extra = (id) => {
+        console.log(id)
+    }
 
     return(
         <ScrollView style={styles.background}>
@@ -119,11 +114,15 @@ const AbonoDetalle = ({navigation}) => {
                 <View style={styles.textBoxContainerHalf}>
                     <View style={styles.textBoxBorder}>
                                 <Text style={styles.textBoxLabel}>Saldo Pendiente</Text>
-                                <TextInput style={styles.textBox}
-                                keyboardType='numeric'
-                                placeholder='1234'
+                                <CurrencyInput style={styles.textBox}
+                                delimiter=","
+                                precision={0}
+                                minValue={0}
+                                maxValue={9999}
+                                prefix="$"
+                                placeholder='$0'
                                 onChangeText={saldo_pendiente => setSaldoPendiente(saldo_pendiente)}
-                                defaultValue={saldo_pendiente}/>
+                                value={saldo_pendiente}/>
                     </View>
                 </View>
             </View>
@@ -165,11 +164,15 @@ const AbonoDetalle = ({navigation}) => {
                 <View style={styles.textBoxContainerHalf}>
                     <View style={styles.textBoxBorder}>
                                 <Text style={styles.textBoxLabel}>Importe Atrasado</Text>
-                                <TextInput style={styles.textBox}
-                                keyboardType='numeric'
-                                placeholder='1234'
+                                <CurrencyInput style={styles.textBox}
+                                delimiter=","
+                                precision={0}
+                                minValue={0}
+                                maxValue={9999}
+                                prefix="$"
+                                placeholder='$0'
                                 onChangeText={saldo_pendiente => setSaldoPendiente(saldo_pendiente)}
-                                defaultValue={saldo_pendiente}/>
+                                value={saldo_pendiente}/>
                     </View>
                 </View>
             </View>
@@ -177,40 +180,21 @@ const AbonoDetalle = ({navigation}) => {
             <View style={styles.textBoxContainerFull}>
                 <View style={styles.textBoxBorderMoney}>
                             <Text style={styles.textBoxLabel}>Abono</Text>
-                            <TextInput style={styles.textBoxMoney}
-                            keyboardType='numeric'
-                            placeholder='1234'
+                            <CurrencyInput style={styles.textBoxMoney}
+                            delimiter=","
+                            precision={0}
+                            minValue={0}
+                            maxValue={9999}
+                            prefix="$"
+                            placeholder='$0'
                             onChangeText={no_semana_prestamo => setNoSemana(no_semana_prestamo)}
-                            defaultValue={no_semana_prestamo}/>
+                            value={no_semana_prestamo}/>
+                            
                 </View>
             </View>
-            <View style={styles.formRow}>
-                <View style={styles.textBoxContainerHalf}>
-                    <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Ruta</Text>
-                                <Dropdown style={styles.comboBox}
-                                data={data} search
-                                labelField="label" valueField="value"
-                                searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
-                                placeholderStyle={styles.comboBoxPlaceholder}
-                                selectedTextStyle={styles.comboBoxSelected}
-                                value={ruta}
-                                onChange={item => {setRuta(item.value);}}/>
-                    </View>
-                </View>
-                <View style={styles.textBoxContainerHalf}>
-                    <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Importe Atrasado</Text>
-                                <TextInput style={styles.textBox}
-                                keyboardType='numeric'
-                                placeholder='1234'
-                                onChangeText={saldo_pendiente => setSaldoPendiente(saldo_pendiente)}
-                                defaultValue={saldo_pendiente}/>
-                    </View>
-                </View>
-            </View>
+            <View style={styles.spacer30}></View>
         </ScrollView>
     )
 }
 
-export default AbonoDetalle;
+export default FormExtraCobranza;

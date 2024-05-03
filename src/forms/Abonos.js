@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, TextInput, TouchableOpacity, ScrollView, Image, Dimensions } from 'react-native';
+import { Text, View, TextInput, TouchableOpacity, ScrollView, Image, Dimensions, BackHandler } from 'react-native';
 import { styles } from '../../Style';
 import React, {useState, useCallback, useEffect,} from 'react';
 import ImageIndex from '../ImageIndex';
@@ -17,6 +17,7 @@ const Abonos = ({navigation}) => {
         let new_list = tipo_abono
         new_list[key]=type.value
         setTipoAbono(new_list)
+        //setSafeLock(1)
     }
     const update_abono = (id, value) => {
         if(value == null){
@@ -26,6 +27,7 @@ const Abonos = ({navigation}) => {
             input.id === id ? { ...input, value: value } : input
         );
         setAbono(newInputs);
+        //setSafeLock(1)
     }
     //FORMULARIO
     let serviceAbonos = new ServiceAbonos()
@@ -33,7 +35,8 @@ const Abonos = ({navigation}) => {
     const top_controls_height = 110 + 150 - 10
     const windowHeight = Dimensions.get('window').height;
     const [filtro,      setFiltro] = useState('');
-    const [tableData, setTableData] = useState(null);
+    const [table_data, setTableData] = useState(null);
+    const [table_data_filtered, setTableDataFiltered] = useState(null);
     const [ruta,                setRuta] = useState('');
     const [grupo,               setGrupo] = useState('');
     const [lista_rutas, setListaRutas] = useState([]);
@@ -41,12 +44,24 @@ const Abonos = ({navigation}) => {
     const [loading_form, setLoadingForm] = useState(1);
     const [loading, setLoading] = useState(0)
     const [loaded, setLoaded] = useState(0)
+    const [safe_lock, setSafeLock] = useState(0)
+    const [cancel, setCancel] = useState('')
     useEffect(() => {
+        const backAction = () => {
+                setCancel(1)
+                return true;
+        };
+        const backHandlerClientes = BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction,
+        );
         get_rutas()
+        return () =>
+        BackHandler.removeEventListener("hardwareBackPress", backAction);
     },[get_rutas])
     
     function backMainScreen() {
-        navigation.goBack()
+        setCancel(1)
     }
     const get_rutas = useCallback(async () => {
         const res = await servicePrestamos.get_rutas()
@@ -75,6 +90,7 @@ const Abonos = ({navigation}) => {
             temp_abonos.push([data[i].id_prestamo,data[i].nom_cliente,data[i].num_abono,data[i].abono, data[i].num_semana])
         }
         setTableData(temp_abonos)
+        setTableDataFiltered(temp_abonos)
         let list = []
         let lista_abonos = []
         for(let i = 0; i < temp_abonos.length ; i++){
@@ -117,8 +133,53 @@ const Abonos = ({navigation}) => {
         }
     }
 
+    const filtrar = (filtro) => {
+        let temp_list = []
+        for(let i = 0; i < table_data.length ; i++){
+            if(filtro != ''){
+                if(String(table_data[i][1]).includes(String(filtro).toUpperCase())){
+                    temp_list.push([table_data[i][0], table_data[i][1], table_data[i][2]])
+                }
+                if(String(table_data[i][0]).includes(String(filtro).toUpperCase())){
+                    temp_list.push([table_data[i][0], table_data[i][1], table_data[i][2]])
+                }
+            }
+            else{
+                temp_list.push([table_data[i][0], table_data[i][1], table_data[i][2]])
+            }
+        }
+        setTableDataFiltered(temp_list)
+    }
+
     return (
         <View style={[styles.background, {height:"100%"}]}>
+            {
+                cancel === 1 &&
+                <View style={{position:"absolute", height:"100%", width:"100%", zIndex:20}}>
+                    <View style={styles.alertBackground}></View>
+                    <View style={styles.alert}>
+                        <View style={styles.spacer30}></View>
+                        <Text style={{fontSize:22, alignSelf:"center", textAlign:"center"}}>Estas seguro que deseas cancelar el registro?</Text>
+                        <View style={styles.spacer20}></View>
+                        <View style={{flexDirection:"row"}}>
+                            <View style={{width:"50%"}}>
+                                <TouchableOpacity 
+                                style={{alignSelf:"center", width:'70%', backgroundColor:"green", height:50, justifyContent:"center", borderRadius:15}}
+                                onPress={() => {navigation.goBack()}}>
+                                    <Text style={{fontSize:22, alignSelf:"center", color:"white"}}>Si</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View style={{width:"50%"}}>
+                                <TouchableOpacity 
+                                style={{alignSelf:"center", width:'70%', backgroundColor:"red", height:50, justifyContent:"center", borderRadius:15}}
+                                onPress={() => setCancel(0)}>
+                                    <Text style={{fontSize:22, alignSelf:"center", color:"white"}}>No</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            }
             <StatusBar backgroundColor='#70be44'/>
             {
                 loading === 1 &&
@@ -162,8 +223,8 @@ const Abonos = ({navigation}) => {
                         </TouchableOpacity>
                         <Text style={styles.mainHeadersInverted}>Abonos</Text>
                     </View>
-                    <TouchableOpacity style={styles.topBarSaveButton} onPress={() => guardar_lista_abonos(tipo_abono, lista_abonos, tableData) }>
-                        <Text style={{fontSize:22, color:"white", fontWeight:"bold"}}>Guardar</Text>
+                    <TouchableOpacity style={styles.topBarSaveButton} onPress={() => guardar_lista_abonos(tipo_abono, lista_abonos, table_data) }>
+                        <Text style={{fontSize:22, color:"white", fontWeight:"bold"}}>Abonar</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.spacer20}></View>
@@ -175,7 +236,7 @@ const Abonos = ({navigation}) => {
                         <View style={styles.textBoxBorder}>
                                     <Text style={styles.textBoxLabel}>Ruta</Text>
                                     <Dropdown style={styles.comboBox}
-                                    data={lista_rutas} search
+                                    data={lista_rutas}
                                     labelField="label" valueField="value"
                                     searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
                                     placeholderStyle={styles.comboBoxPlaceholder}
@@ -188,7 +249,7 @@ const Abonos = ({navigation}) => {
                         <View style={styles.textBoxBorder}>
                                     <Text style={styles.textBoxLabel}>Grupo</Text>
                                     <Dropdown style={styles.comboBox}
-                                    data={lista_grupos} search
+                                    data={lista_grupos}
                                     labelField="label" valueField="value"
                                     searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
                                     placeholderStyle={styles.comboBoxPlaceholder}
@@ -203,7 +264,7 @@ const Abonos = ({navigation}) => {
                     <View style={styles.textBoxBorder}>
                                 <Text style={styles.textBoxLabel}>Buscador</Text>
                                 <TextInput style={styles.textBox}
-                                onChangeText={value => setFiltro(value)}
+                                onChangeText={value => filtrar(value)}
                                 defaultValue={filtro}/>
                     </View>
                 </View>
@@ -217,12 +278,13 @@ const Abonos = ({navigation}) => {
                     {
                         lista_abonos !== null &&
                         <DataTable 
-                            tableData={tableData} 
+                            table_data={table_data_filtered} 
                             update_abono={update_abono} 
                             update_type={update_type} 
                             lista_abonos={lista_abonos} 
                             lista_tipos={tipo_abono} 
-                            filtro={filtro}>
+                            filtro={filtro}
+                            update_lock={setSafeLock}>
                         </DataTable>
                     }
                     </ScrollView>
@@ -232,8 +294,10 @@ const Abonos = ({navigation}) => {
     )
 }
 
-function DataTable({tableData, update_abono, update_type, lista_abonos, lista_tipos, filtro }) {
+function DataTable({table_data, update_abono, update_type, lista_abonos, lista_tipos, filtro, update_lock }) {
     const [combo_color, setComboColor] = useState([]);
+    const [color_switch, setColorSwitch] = useState(0);
+    const [filtered_data, setFilteredData] = useState([])
     const data1 = [
         { label: 'Normal', value: '2' },
         { label: 'Recuperado', value: '5' },
@@ -260,9 +324,6 @@ function DataTable({tableData, update_abono, update_type, lista_abonos, lista_ti
         }else if(type.value == '6'){
             color = 'orange'
         }
-        console.log(key)
-        console.log(type)
-        console.log(color)
         const nextColors = combo_color.map((c, i) => {
             if (i === key) {
                 return color;
@@ -273,80 +334,68 @@ function DataTable({tableData, update_abono, update_type, lista_abonos, lista_ti
         setComboColor(nextColors);
     }
     
-    const visible = (nombre) => {
-        if(String(nombre).includes(String(filtro).toUpperCase())){
-            return true;
-        }
-        return false;
-    }
     return (
         <View>
             <View>
                 {
-                    tableData.map((data,i) => (
+                    table_data.map((data,i) => (
                         i % 2 === 0 ?
                         <View key={i} >
-                            {
-                                visible(data[1]) === true &&
-                                <View style={[styles.tableRowEven]}>
-                                    <Text style={[styles.cell, {marginLeft:20}]}>{data[0]}</Text>
-                                    <View>
-                                        <Text style={styles.cell}>{data[1]}</Text>
-                                        <View style={[styles.cellHorizontal,{marginTop:-20}]}>
-                                            <Text style={[styles.cell,{marginLeft:-40, marginTop:17}]}>Abono #{String(data[2]+1)}:</Text>
-                                            <CurrencyInput style={[styles.cellInput,{width:70,  backgroundColor:combo_color[i]}]}
-                                                    delimiter=","
-                                                    precision={0}
-                                                    minValue={0}
-                                                    maxValue={9999}
-                                                    prefix="$"
-                                                    placeholder='$0'
-                                                    onChangeValue={(value) => update_abono(i, value)}
-                                                    value={String(lista_abonos[i].value)}/>
-                                            <Text style={[styles.cell, {marginTop:17}]}>Tipo:</Text>
-                                            <Dropdown style={[styles.cellCombo, {width:140}]}
-                                            data={data1} 
-                                            labelField="label" valueField="value"
-                                            placeholderStyle={styles.comboBoxPlaceholder}
-                                            selectedTextStyle={[styles.cellComboBoxSelected,{marginTop:5}]}
-                                            value={lista_tipos[i]}
-                                            onChange={item => {update_type(i, item); change_color(i,item)}}/>
-                                        </View>
+                            <View style={[styles.tableRowEven]}>
+                                <Text style={[styles.cell, {marginLeft:20}]}>{data[0]}</Text>
+                                <View>
+                                    <Text style={styles.cell}>{data[1]}</Text>
+                                    <View style={[styles.cellHorizontal,{marginTop:-20}]}>
+                                        <Text style={[styles.cell,{marginLeft:-40, marginTop:17}]}>Abono #{String(data[2]+1)}:</Text>
+                                        <CurrencyInput style={[styles.cellInput,{width:70,  backgroundColor:combo_color[i]}]}
+                                                delimiter=","
+                                                precision={0}
+                                                minValue={0}
+                                                maxValue={9999}
+                                                prefix="$"
+                                                placeholder='$0'
+                                                onChangeValue={(value) => {update_abono(i, value); update_lock(1)}}
+                                                value={String(lista_abonos[i].value)}/>
+                                        <Text style={[styles.cell, {marginTop:17}]}>Tipo:</Text>
+                                        <Dropdown style={[styles.cellCombo, {width:140}]}
+                                        data={data1} 
+                                        labelField="label" valueField="value"
+                                        placeholderStyle={styles.comboBoxPlaceholder}
+                                        selectedTextStyle={[styles.cellComboBoxSelected,{marginTop:5}]}
+                                        value={lista_tipos[i]}
+                                        onChange={item => {update_type(i, item); change_color(i,item); update_lock(1)}}/>
                                     </View>
                                 </View>
-                            }
+                            </View>
                         </View>
                         :
                         <View key={i} >
-                            {
-                                visible(data[1]) === true &&
-                                <View style={[styles.tableRowOdd]}>
-                                    <Text style={[styles.cell, {marginLeft:20}]}>{data[0]}</Text>
-                                    <View>
-                                        <Text style={styles.cell}>{data[1]}</Text>
-                                        <View style={[styles.cellHorizontal,{marginTop:-20}]}>
-                                            <Text style={[styles.cell,{marginLeft:-40, marginTop:17}]}>Abono #{String(data[2]+1)}:</Text>
-                                            <CurrencyInput style={[styles.cellInput,{width:70,backgroundColor:combo_color[i]}]}
-                                                    delimiter=","
-                                                    precision={0}
-                                                    minValue={0}
-                                                    maxValue={9999}
-                                                    prefix="$"
-                                                    placeholder='$0'
-                                                    onChangeValue={(value) => update_abono(i, value)}
-                                                    value={String(lista_abonos[i].value)}/>
-                                            <Text style={[styles.cell, {marginTop:17}]}>Tipo:</Text>
-                                            <Dropdown style={[styles.cellCombo, {width:140}]}
-                                            data={data1}
-                                            labelField="label" valueField="value"
-                                            placeholderStyle={styles.comboBoxPlaceholder}
-                                            selectedTextStyle={[styles.cellComboBoxSelected,{marginTop:5}]}
-                                            value={lista_tipos[i]}
-                                            onChange={item => {update_type(i, item); change_color(i,item)}}/>
-                                        </View>
+                            <View style={[styles.tableRowOdd]}>
+                                <Text style={[styles.cell, {marginLeft:20}]}>{data[0]}</Text>
+                                <View>
+                                    <Text style={styles.cell}>{data[1]}</Text>
+                                    <View style={[styles.cellHorizontal,{marginTop:-20}]}>
+                                        <Text style={[styles.cell,{marginLeft:-40, marginTop:17}]}>Abono #{String(data[2]+1)}:</Text>
+                                        <CurrencyInput style={[styles.cellInput,{width:70,backgroundColor:combo_color[i]}]}
+                                                delimiter=","
+                                                precision={0}
+                                                minValue={0}
+                                                maxValue={9999}
+                                                prefix="$"
+                                                placeholder='$0'
+                                                onChangeValue={(value) => {update_abono(i, value); update_lock(1)}}
+                                                value={String(lista_abonos[i].value)}/>
+                                        <Text style={[styles.cell, {marginTop:17}]}>Tipo:</Text>
+                                        <Dropdown style={[styles.cellCombo, {width:140}]}
+                                        data={data1}
+                                        labelField="label" valueField="value"
+                                        placeholderStyle={styles.comboBoxPlaceholder}
+                                        selectedTextStyle={[styles.cellComboBoxSelected,{marginTop:5}]}
+                                        value={lista_tipos[i]}
+                                        onChange={item => {update_type(i, item); change_color(i,item); update_lock(1)}}/>
                                     </View>
                                 </View>
-                            }
+                            </View>
                         </View>
                     ))
                 }

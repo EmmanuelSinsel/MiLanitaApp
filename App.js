@@ -5,7 +5,7 @@ import MainScreen from './src/forms/MainScreen';
 import FormPrestamos from './src/forms/FormPrestamos';
 import FormClientes from './src/forms/FormClientes';
 import Abonos from './src/forms/Abonos';
-import AbonoDetalle from './src/forms/AbonoDetalle';
+import ConsultaExtraCobranza from './src/forms/ConsultaExtraCobranza';
 import Camara from './src/forms/Camera';
 import Mapa from './src/forms/Mapa';
 import Acuerdo from './src/forms/Acuerdo';
@@ -16,6 +16,8 @@ import Preview from './src/forms/Preview';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import { RootSiblingParent } from 'react-native-root-siblings';
+import FormExtraCobranza from './src/forms/FormExtraCobranza';
+import FormAvales from './src/forms/FormAvales';
 
 const Stack = createNativeStackNavigator();
 
@@ -41,12 +43,20 @@ export default function App() {
             component={FormClientes}
             options={{headerShown: false}}/>
           <Stack.Screen
+            name="FormAvales"
+            component={FormAvales}
+            options={{headerShown: false}}/>
+          <Stack.Screen
             name="Abonos"
             component={Abonos}
             options={{headerShown: false}}/>
           <Stack.Screen
-            name="AbonoDetalle"
-            component={AbonoDetalle}
+            name="ConsultaExtraCobranza"
+            component={ConsultaExtraCobranza}
+            options={{headerShown: false}}/>
+          <Stack.Screen
+            name="FormExtraCobranza"
+            component={FormExtraCobranza}
             options={{headerShown: false}}/>
           <Stack.Screen
             name="Camara"

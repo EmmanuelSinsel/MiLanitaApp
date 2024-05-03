@@ -58,8 +58,11 @@ const FormPrestamos = ({navigation}) => {
     const [lista_abonos, setListaAbonos] = useState(null);
     const [reload_aval, setReloadAval] = useState(true)
     const [clientes_height, setClientesHeight] = useState(0)
+    const [clientes_focus, setClientesFocus] = useState(false)
     const [avales_height, setAvalesHeight] = useState(0)
+    const [avales_focus, setAvalesFocus] = useState(false)
     const [loading, setLoading] = useState(0);
+    const test = "Hola"
     const estatus_prestamo_list = [
         { label: 'Pendiente', value: '1' },
         { label: 'Finalizado', value: '2' },
@@ -202,8 +205,14 @@ const FormPrestamos = ({navigation}) => {
         navigation.navigate("FormClientes",{ type: 0 });
     }
     function newAval(){
-        navigation.navigate("FormClientes",{ type: 1 });
+        console.log(id_cliente)
+        navigation.navigate("FormAvales",{ id_cliente: id_cliente, update_aval: select_datos_aval });
     }
+
+    const updateAval = (id_aval) => {
+        setIdAval(id_aval)
+    }
+
     function backMainScreen() {
         if(editable == true){
             setCancel(1)
@@ -379,6 +388,16 @@ const FormPrestamos = ({navigation}) => {
 
     const unlockCliente = () => {
         if(grupo != null && ruta != null){
+            return true
+        }else if(editable==false){
+            return true
+        }else{
+            return false
+        }
+    }
+
+    const unlockAval = () => {
+        if(nombre_cliente != ""){
             return true
         }else if(editable==false){
             return true
@@ -625,7 +644,7 @@ const FormPrestamos = ({navigation}) => {
                                             placeholderStyle={styles.comboBoxPlaceholder}
                                             selectedTextStyle={styles.comboBoxSelected}
                                             value={grupo}
-                                            onChange={item => {setGrupo(item.value); get_clientes(item.value, '')}}/>
+                                            onChange={item => {setGrupo(item.value); get_clientes(item.value, ''); get_avales(item.value, '')}}/>
                                             :
                                             <TextInput style={styles.textBox}
                                             selection={{start:0, end:0}}
@@ -659,8 +678,8 @@ const FormPrestamos = ({navigation}) => {
                         </View>
                         <View style={styles.horizontalLine}></View>
                         <View style={styles.spacer10}></View>
-                        <View style={styles.textBoxContainerFull}>
-                            {/* <View style={styles.textBoxBorder}>
+                        <View style={[styles.textBoxContainerFull]}>
+                            <View style={styles.textBoxBorder}>
                             <Text style={styles.textBoxLabel}>Nombre del Cliente</Text>
                                 {
                                     editable === true ?
@@ -673,7 +692,9 @@ const FormPrestamos = ({navigation}) => {
                                     onChangeText={value => get_clientes(id_grupo=grupo, filtro=value)}
                                     onClear={clear_cliente}
                                     debounce={600}
-
+                                    value={test}
+                                    defaultValue={test}
+                                    
                                     emptyResultText={"Sin resultado"}
                                     textInputProps={{
                                         placeholder: 'Nombre Apellido Apellido',
@@ -690,20 +711,24 @@ const FormPrestamos = ({navigation}) => {
                                     selection={{start:0, end:0}}
                                     defaultValue={nombre_cliente}/>
                                 }
-                            </View>  */}
-                            {
+                            </View> 
+                            {/* {
                                 editable === true ?
-                                <AutoComplete 
-                                id_grupo={grupo}
-                                lista_items={lista_clientes}
-                                default_value={nombre_cliente}
-                                combo_height={clientes_height}
-                                setText={setNombreCliente}
-                                searchText={get_clientes}
-                                clearText={clear_cliente}
-                                placeHolder={"Nombre Apellido Apellido"}
-                                title={"Nombre del Cliente"}
-                                selectItem={select_datos_cliente}></AutoComplete>
+                                <View>
+                                    <AutoComplete 
+                                    id_grupo={grupo}
+                                    lista_items={lista_clientes}
+                                    default_value={nombre_cliente}
+                                    combo_height={clientes_height}
+                                    focused={setClientesFocus}
+                                    setText={setNombreCliente}
+                                    searchText={get_clientes}
+                                    clearText={clear_cliente}
+                                    placeHolder={"Nombre Apellido Apellido"}
+                                    title={"Nombre del Cliente"}
+                                    selectItem={select_datos_cliente}
+                                    ></AutoComplete>
+                                </View>
                                 :
                                 <View>
                                     <Text style={[styles.textBoxLabel, {zIndex:5}]}>Nombre del Cliente</Text>
@@ -711,10 +736,18 @@ const FormPrestamos = ({navigation}) => {
                                     selection={{start:0, end:0}}
                                     defaultValue={nombre_cliente}/>
                                 </View>
-                            }
-
+                            } */}
                             {editable == false && <Locker></Locker>}
                         </View>
+                        {
+                            clientes_focus === true &&
+                            <View>
+                                {
+                                    Platform.OS === 'ios' &&
+                                    <View style={{height:300}}></View>
+                                }
+                            </View>
+                        }
                         <View style={styles.spacer20}></View>
                         <View style={styles.textBoxContainerFull}>
                             <View style={styles.textBoxBorder} >
@@ -739,7 +772,13 @@ const FormPrestamos = ({navigation}) => {
                             </View>
                             {editable == false && <Locker></Locker>}
                         </View>
-                        <View style={styles.spacer20}></View>
+                        <View style={styles.spacer10}></View>
+                    </View>
+                    <View>
+                        {
+                            unlockAval() === true ? <View></View> : <View style={styles.lockUI}></View>
+                        }
+                        <View style={styles.spacer10}></View>
                         <View style={styles.mainHeaderContainer}>
                             <Text style={styles.mainHeaders}>Datos del Aval</Text>
                             {
@@ -755,7 +794,7 @@ const FormPrestamos = ({navigation}) => {
                         <View style={styles.horizontalLine}></View>
                         <View style={styles.spacer10}></View>
                         <View style={styles.textBoxContainerFull}>
-                            {/* <View style={styles.textBoxBorder}>
+                            <View style={styles.textBoxBorder}>
                             <Text style={styles.textBoxLabel}>Nombre del Aval</Text>
                                 {
                                     editable === true ?
@@ -771,7 +810,7 @@ const FormPrestamos = ({navigation}) => {
                                     }}
                                     clearOnFocus={false}
                                     closeOnBlur={true}
-                                    onChangeText={value => get_avales(filtro=value)}
+                                    onChangeText={value => get_avales(1, filtro=value)}
                                     onClear={clear_aval}
                                     value={nombre_aval}
                                     debounce={600}
@@ -787,8 +826,8 @@ const FormPrestamos = ({navigation}) => {
                                     defaultValue={nombre_aval}/>
                                 }
 
-                            </View> */}
-                            {
+                            </View>
+                            {/* {
                                 editable === true ?
                                 <AutoComplete
                                 key={reload_aval}
@@ -796,6 +835,7 @@ const FormPrestamos = ({navigation}) => {
                                 lista_items={lista_avales}
                                 default_value={nombre_aval}
                                 combo_height={avales_height}
+                                focused={setAvalesFocus}
                                 setText={setNombreAval}
                                 searchText={get_avales}
                                 clearText={clear_aval}
@@ -809,7 +849,7 @@ const FormPrestamos = ({navigation}) => {
                                     selection={{start:0, end:0}}
                                     defaultValue={nombre_aval}/>
                                 </View>
-                            }
+                            } */}
 
                             {editable == false && <Locker></Locker>}
                         </View>
@@ -1290,7 +1330,7 @@ const FormPrestamos = ({navigation}) => {
     )
 }
 
-function AutoComplete({id_grupo, setText, searchText, clearText, selectItem, lista_items, default_value, combo_height, placeHolder, title}){
+function AutoComplete({id_grupo, setText, searchText, clearText, selectItem, lista_items, default_value, combo_height, placeHolder, title, focused}){
     const [show_combo, setShowCombo] = useState(0)
     const [text_value, setTextValue] = useState("")
 
@@ -1301,7 +1341,7 @@ function AutoComplete({id_grupo, setText, searchText, clearText, selectItem, lis
                 <TextInput style={[styles.textBox,{zIndex:4, width:"100%"}]}
                 placeholder={placeHolder}
                 onChangeText={value => {searchText(id_grupo=id_grupo, filtro=value); setTextValue(value); clearText()}}
-                onFocus={() => {setShowCombo(1)}}
+                onFocus={() => {setShowCombo(1); focused(true)}}
                 value={text_value}></TextInput>
                 {
                     text_value !== "" &&
@@ -1335,7 +1375,7 @@ function AutoComplete({id_grupo, setText, searchText, clearText, selectItem, lis
                                                 <Text style={{fontSize:18, width:1000, marginLeft:10, marginTop:10, marginBottom:10}}>{data.title}</Text>
                                                 {
                                                     i < lista_items.length-1 &&
-                                                    <View style={{width:"100%", borderWidth:0.5, backgroundColor:"#70be44", borderColor:"#70be44", zIndex:1}}></View>
+                                                    <View style={{width:"100%", borderWidth:0.5, backgroundColor:"#70be44", borderColor:"#70be44", zIndex:102}}></View>
                                                 }
                                             </TouchableOpacity>
                                         </View>
@@ -1349,7 +1389,7 @@ function AutoComplete({id_grupo, setText, searchText, clearText, selectItem, lis
             {
                 show_combo === 1 &&
                 <TouchableOpacity style={{height:"10000%", width:"10000%", zIndex:3, marginLeft:"-50%", marginTop:"-300%"}}
-                onPress={() => setShowCombo(0)}></TouchableOpacity>
+                onPress={() => {setShowCombo(0); focused(false)}}></TouchableOpacity>
             }
 
         </View>

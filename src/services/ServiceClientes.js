@@ -64,6 +64,17 @@ class ServiceClientes{
         }
     };
 
+    get_siguiente_id_aval = async (id_cliente) => {
+        url = this.api.URL+"clientes/siguiente_id_aval?id_cliente="+id_cliente
+        try {
+            const response = await fetch(url);
+            const json = await response.json();
+            return json;
+        } catch (error) {
+        console.error(error);
+        }
+    };
+
     registrar_cliente = async (nuevo_cliente) => {
         url = this.api.URL+"clientes/registrar_cliente"
         try {
@@ -82,8 +93,43 @@ class ServiceClientes{
         }
     }
 
+    registrar_aval = async (nuevo_aval) => {
+        url = this.api.URL+"clientes/registrar_aval"
+        try {
+            const response = await fetch(url
+                ,{  
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(nuevo_aval)});
+            const json = await response.json();
+            return json;
+        } catch (error) {
+        console.error(error);
+        }
+    }
+
     eliminar_preregistro = async (id_cliente) => {
         url = this.api.URL+"clientes/eliminar_preregistro?id_cliente="+id_cliente
+        try {
+            const response = await fetch(url
+                ,{  
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                }});
+            const json = await response.json();
+            return json;
+        } catch (error) {
+        console.error(error);
+        }
+    };
+
+    eliminar_preregistro_aval = async (id_aval) => {
+        url = this.api.URL+"clientes/eliminar_preregistro_aval?id_aval="+id_aval
         try {
             const response = await fetch(url
                 ,{  

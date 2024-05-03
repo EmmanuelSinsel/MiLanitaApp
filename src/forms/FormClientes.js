@@ -39,17 +39,14 @@ const FormClientes = ({navigation}) => {
     const [editable, setEditable] = useState(true)
     const [loading, setLoading] = useState(0);
     const [load_flag, setLoadFlag] = useState(0)
-    const client_type_list = [{label:"Normal",value:"1"}]
+    const client_type_list = [{label:"Normal",value:"1"},{label:"Coordinador",value:"2"}]
     const route = useRoute()
     let client_type = "Cliente"
     useEffect(() => {
-        console.log(route.params?.label)
         const backAction = () => {
-            console.log("Asd")
             if(route.params?.label){
                 return false;
             }else{
-                console.log("true")
                 setCancel(1)
                 return true;
             }
@@ -270,7 +267,7 @@ const FormClientes = ({navigation}) => {
                                     {
                                         ruta_edit === '' ?
                                         <Dropdown style={styles.comboBox}
-                                        data={lista_rutas} search
+                                        data={lista_rutas}
                                         labelField="label" valueField="value"
                                         searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
                                         placeholderStyle={styles.comboBoxPlaceholder}
@@ -290,7 +287,7 @@ const FormClientes = ({navigation}) => {
                                     {
                                         grupo_edit === '' ?
                                         <Dropdown style={styles.comboBox}
-                                        data={lista_grupos} search
+                                        data={lista_grupos}
                                         labelField="label" valueField="value"
                                         searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
                                         placeholderStyle={styles.comboBoxPlaceholder}

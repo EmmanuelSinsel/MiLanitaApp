@@ -62,7 +62,6 @@ const Login = ({navigation}) => {
                 duration: Toast.durations.SHORT,
             });
         }
-        setUser('')
         setPassword('')
     }, [])
 

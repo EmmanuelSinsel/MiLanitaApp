@@ -50,6 +50,23 @@ class ServicePrestamos{
         }
     };
 
+    get_prestamos_extra_cobranza = async (p, grupo, p_size, filtro) => {
+        url = ""
+        if(filtro == ""){
+            url = this.api.URL+"prestamos/lista_prestamos_extra_cobranza?p="+p+"&grupo="+grupo+"&p_size="+p_size
+        }
+        else{
+            url = this.api.URL+"prestamos/lista_prestamos_extra_cobranza?p="+p+"&grupo="+grupo+"&p_size="+p_size+"&filtro="+filtro
+        }
+        try {
+            const response = await fetch(url);
+            const json = await response.json();
+            return json;
+        } catch (error) {
+        console.error(error);
+        }
+    };
+
     get_detalle_prestamo = async (id) => {
         url = this.api.URL+"prestamos/detalle_prestamos?id_prestamo="+id
         try {
