@@ -19,24 +19,24 @@ const Preview = ({navigation}) => {
     const height = Math.round((width * 4) / 3);
     const route = useRoute()
     useEffect(() => {
-        if(type=route.params?.image_type == 'ine'){
+        if(type=route.params?.imageType == 'ine'){
             setImageLabel("INE")
         }
-        if(type=route.params?.image_type == 'dom'){
+        if(type=route.params?.imageType == 'dom'){
             setImageLabel("Domicilio")
         }
-        if(type=route.params?.image_type == 'garantia'){
+        if(type=route.params?.imageType == 'garantia'){
             setImageLabel("Garantia")
         }
-        get_photo(id_prestamo=route.params?.id_prestamo, type=route.params?.image_type)
+        get_photo(idPrestamo=route.params?.idPrestamo, type=route.params?.imageType)
     },[])
 
     function backMainScreen() {
         navigation.goBack()
     }
 
-    const get_photo = useCallback(async (id_prestamo, image_type) => {
-        const res = await service.get_imagen(id_prestamo=id_prestamo, image_type=image_type)
+    const get_photo = useCallback(async (idPrestamo, imageType) => {
+        const res = await service.get_imagen(idPrestamo=idPrestamo, imageType=imageType)
         const data = res.data
         setLoading(0)
         setImage('data:image/png;base64,'+data.image)

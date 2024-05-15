@@ -10,98 +10,103 @@ import CurrencyInput from 'react-native-currency-input';
 
 const Abonos = ({navigation}) => {
     //TABLA
-    const [tipo_abono, setTipoAbono] = useState([]);
-    const [lista_abonos, setAbono] = useState(null);
-
-    const update_type = (key, type) => {
-        let new_list = tipo_abono
+    const [tipoAbono, setTipoAbono] = useState([]);
+    const [listaAbonos, setAbono] = useState(null);
+    const updateType = (key, type) => {
+        let new_list = tipoAbono
         new_list[key]=type.value
         setTipoAbono(new_list)
         //setSafeLock(1)
     }
-    const update_abono = (id, value) => {
+    const updateAbono = (id, value) => {
         if(value == null){
             value = 0
         }
-        const newInputs = lista_abonos.map(input =>
+        const newInputs = listaAbonos.map(input =>
             input.id === id ? { ...input, value: value } : input
         );
         setAbono(newInputs);
         //setSafeLock(1)
     }
+
     //FORMULARIO
     let serviceAbonos = new ServiceAbonos()
     let servicePrestamos = new ServicePrestamos()
-    const top_controls_height = 110 + 150 - 10
+    const topControlsHeight = 110 + 150 - 10
     const windowHeight = Dimensions.get('window').height;
     const [filtro,      setFiltro] = useState('');
-    const [table_data, setTableData] = useState(null);
-    const [table_data_filtered, setTableDataFiltered] = useState(null);
+    const [tableData, setTableData] = useState(null);
+    const [tableDataFiltered, setTableDataFiltered] = useState(null);
     const [ruta,                setRuta] = useState('');
     const [grupo,               setGrupo] = useState('');
-    const [lista_rutas, setListaRutas] = useState([]);
-    const [lista_grupos, setListaGrupos] = useState([]);
-    const [loading_form, setLoadingForm] = useState(1);
+    const [listaRutas, setListaRutas] = useState([]);
+    const [listaGrupos, setListaGrupos] = useState([]);
+    const [loadingForm, setLoadingForm] = useState(1);
     const [loading, setLoading] = useState(0)
     const [loaded, setLoaded] = useState(0)
-    const [safe_lock, setSafeLock] = useState(0)
     const [cancel, setCancel] = useState('')
     useEffect(() => {
         const backAction = () => {
-                setCancel(1)
-                return true;
+            setCancel(1)
+            return true;
         };
         const backHandlerClientes = BackHandler.addEventListener(
             'hardwareBackPress',
             backAction,
         );
-        get_rutas()
+        getRutas()
         return () =>
         BackHandler.removeEventListener("hardwareBackPress", backAction);
-    },[get_rutas])
+    },[getRutas])
     
     function backMainScreen() {
         setCancel(1)
     }
-    const get_rutas = useCallback(async () => {
-        const res = await servicePrestamos.get_rutas()
+
+    const getRutas = useCallback(async () => {
+        const res = await servicePrestamos.getRutas()
         const data = res.data
-        let temp_rutas = []
+        let tempRutas = []
         for(let i = 0; i < data.length ; i++){
-            temp_rutas.push({"label":data[i].ruta,"value":data[i].id_ruta})
+            tempRutas.push({"label":data[i].ruta,"value":data[i].idRuta})
         }
-        setListaRutas(temp_rutas)
+        setListaRutas(tempRutas)
     }, [])
-    const get_grupos = useCallback(async (id_ruta) => {
-        const res = await servicePrestamos.get_grupos(id=id_ruta)
+
+    const getGrupos = useCallback(async (idRuta) => {
+        const res = await servicePrestamos.getGrupos(id=idRuta)
         const data = res.data
-        let temp_grupos = []
+        let tempGrupos = []
         for(let i = 0; i < data.length ; i++){
-            temp_grupos.push({"label":data[i].nom_grupo,"value":Number(data[i].id_grupo)})
+            tempGrupos.push({"label":data[i].nomGrupo,"value":Number(data[i].idGrupo)})
         }
-        setListaGrupos(temp_grupos)
+        setListaGrupos(tempGrupos)
     }, [])
-    const get_lista_abonos = useCallback(async (id_grupo) => {
+
+    const getListaAbonos = useCallback(async (idGrupo) => {
         setLoadingForm(1)
-        const res = await serviceAbonos.get_lista_abonos(id_grupo)
+        setLoading(1)
+        const res = await serviceAbonos.getListaAbonos(idGrupo)
         const data = res.data
-        let temp_abonos = []
+        let tempAbonos = []
         for(let i = 0; i < data.length ; i++){
-            temp_abonos.push([data[i].id_prestamo,data[i].nom_cliente,data[i].num_abono,data[i].abono, data[i].num_semana])
+            tempAbonos.push([data[i].idPrestamo,data[i].nomCliente,data[i].numAbono,data[i].abono, data[i].numSemana])
         }
-        setTableData(temp_abonos)
-        setTableDataFiltered(temp_abonos)
+        setTableData(tempAbonos)
+        setTableDataFiltered(tempAbonos)
         let list = []
-        let lista_abonos = []
-        for(let i = 0; i < temp_abonos.length ; i++){
+        let listaAbonos = []
+        for(let i = 0; i < tempAbonos.length ; i++){
             list.push('2')
-            lista_abonos.push({ "id": i, "value": temp_abonos[i][3] })
+            listaAbonos.push({ "id": i, "value": tempAbonos[i][3] })
         }
         setTipoAbono(list)
-        setAbono(lista_abonos)
+        setAbono(listaAbonos)
         setLoadingForm(0)
+        setLoading(0)
     }, [setAbono, setTipoAbono])
-    const guardar_lista_abonos = async (new_tipo_abono, new_lista_abonos, new_table_data) => {
+
+    const guardarListaAbonos = async (newTipoAbono, newListaAbonos, newTableData) => {
         setLoading(1)
         let data = []
         let fecha = ""
@@ -116,13 +121,13 @@ const Abonos = ({navigation}) => {
         }
         var year = date.getFullYear()
         fecha = month+"/"+day+"/"+year
-        for(let i = 0 ; i < new_table_data.length ; i++){
+        for(let i = 0 ; i < newTableData.length ; i++){
             data.push({
-                "id_prestamo":new_table_data[i][0],
-                "no_abono":new_table_data[i][2]+1,
-                "abono":new_lista_abonos[i].value,
-                "tipo_abono":new_tipo_abono[i],
-                "no_semana":Number(new_table_data[i][4])+1,
+                "id_prestamo":newTableData[i][0],
+                "no_abono":newTableData[i][2]+1,
+                "abono":newListaAbonos[i].value,
+                "tipo_abono":newTipoAbono[i],
+                "no_semana":Number(newTableData[i][4])+1,
                 "fecha":fecha
             })
         }
@@ -134,21 +139,21 @@ const Abonos = ({navigation}) => {
     }
 
     const filtrar = (filtro) => {
-        let temp_list = []
-        for(let i = 0; i < table_data.length ; i++){
+        let tempList = []
+        for(let i = 0; i < tableData.length ; i++){
             if(filtro != ''){
-                if(String(table_data[i][1]).includes(String(filtro).toUpperCase())){
-                    temp_list.push([table_data[i][0], table_data[i][1], table_data[i][2]])
+                if(String(tableData[i][1]).includes(String(filtro).toUpperCase())){
+                    tempList.push([tableData[i][0], tableData[i][1], tableData[i][2]])
                 }
-                if(String(table_data[i][0]).includes(String(filtro).toUpperCase())){
-                    temp_list.push([table_data[i][0], table_data[i][1], table_data[i][2]])
+                if(String(tableData[i][0]).includes(String(filtro).toUpperCase())){
+                    tempList.push([tableData[i][0], tableData[i][1], tableData[i][2]])
                 }
             }
             else{
-                temp_list.push([table_data[i][0], table_data[i][1], table_data[i][2]])
+                tempList.push([tableData[i][0], tableData[i][1], tableData[i][2]])
             }
         }
-        setTableDataFiltered(temp_list)
+        setTableDataFiltered(tempList)
     }
 
     return (
@@ -181,14 +186,6 @@ const Abonos = ({navigation}) => {
                 </View>
             }
             <StatusBar backgroundColor='#70be44'/>
-            {
-                loading === 1 &&
-                <View style={styles.loadingScreen}>
-                    <Image style={[styles.loadingImage,{height:500, width:200, marginTop:-150}]}
-                        source={ImageIndex.loading}>
-                    </Image>
-                </View>
-            }
             {
                 loaded === 1 &&
                 <View style={{position:"absolute", height:"100%", width:"100%", zIndex:20}}>
@@ -223,12 +220,20 @@ const Abonos = ({navigation}) => {
                         </TouchableOpacity>
                         <Text style={styles.mainHeadersInverted}>Abonos</Text>
                     </View>
-                    <TouchableOpacity style={styles.topBarSaveButton} onPress={() => guardar_lista_abonos(tipo_abono, lista_abonos, table_data) }>
+                    <TouchableOpacity style={styles.topBarSaveButton} onPress={() => guardarListaAbonos(tipoAbono, listaAbonos, tableData) }>
                         <Text style={{fontSize:22, color:"white", fontWeight:"bold"}}>Abonar</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.spacer20}></View>
             </View>
+            {
+                loading === 1 &&
+                <View style={styles.loadingScreen}>
+                    <Image style={[styles.loadingImage,{height:500, width:200, marginTop:-150}]}
+                        source={ImageIndex.loading}>
+                    </Image>
+                </View>
+            }
             <View style={styles.spacer30}></View>
             <View style={{height:150}}>
                 <View style={styles.formRow}>
@@ -236,26 +241,26 @@ const Abonos = ({navigation}) => {
                         <View style={styles.textBoxBorder}>
                                     <Text style={styles.textBoxLabel}>Ruta</Text>
                                     <Dropdown style={styles.comboBox}
-                                    data={lista_rutas}
+                                    data={listaRutas}
                                     labelField="label" valueField="value"
                                     searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
                                     placeholderStyle={styles.comboBoxPlaceholder}
                                     selectedTextStyle={styles.comboBoxSelected}
                                     value={ruta}
-                                    onChange={item => {setRuta(item.value);get_grupos(item.value);}}/>
+                                    onChange={item => {setRuta(item.value);getGrupos(item.value);}}/>
                         </View>
                     </View>
                     <View style={styles.textBoxContainerHalf}>
                         <View style={styles.textBoxBorder}>
                                     <Text style={styles.textBoxLabel}>Grupo</Text>
                                     <Dropdown style={styles.comboBox}
-                                    data={lista_grupos}
+                                    data={listaGrupos}
                                     labelField="label" valueField="value"
                                     searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
                                     placeholderStyle={styles.comboBoxPlaceholder}
                                     selectedTextStyle={styles.comboBoxSelected}
                                     value={grupo}
-                                    onChange={item => {setGrupo(item.value); get_lista_abonos(item.value)}}/>
+                                    onChange={item => {setGrupo(item.value); getListaAbonos(item.value)}}/>
                         </View>
                     </View>
                 </View>
@@ -273,18 +278,17 @@ const Abonos = ({navigation}) => {
             </View>
             
             {
-                loading_form === 0 &&
-                    <ScrollView style={{height:windowHeight-top_controls_height}}>
+                loadingForm === 0 &&
+                    <ScrollView style={{height:windowHeight-topControlsHeight}}>
                     {
-                        lista_abonos !== null &&
+                        listaAbonos !== null &&
                         <DataTable 
-                            table_data={table_data_filtered} 
-                            update_abono={update_abono} 
-                            update_type={update_type} 
-                            lista_abonos={lista_abonos} 
-                            lista_tipos={tipo_abono} 
-                            filtro={filtro}
-                            update_lock={setSafeLock}>
+                            tableData={tableDataFiltered} 
+                            updateAbono={updateAbono} 
+                            updateType={updateType} 
+                            listaAbonos={listaAbonos} 
+                            lista_tipos={tipoAbono} 
+                            filtro={filtro}>
                         </DataTable>
                     }
                     </ScrollView>
@@ -294,10 +298,8 @@ const Abonos = ({navigation}) => {
     )
 }
 
-function DataTable({table_data, update_abono, update_type, lista_abonos, lista_tipos, filtro, update_lock }) {
-    const [combo_color, setComboColor] = useState([]);
-    const [color_switch, setColorSwitch] = useState(0);
-    const [filtered_data, setFilteredData] = useState([])
+function DataTable({tableData, updateAbono, updateType, listaAbonos, lista_tipos, filtro }) {
+    const [comboColor, setComboColor] = useState([]);
     const data1 = [
         { label: 'Normal', value: '2' },
         { label: 'Recuperado', value: '5' },
@@ -307,13 +309,13 @@ function DataTable({table_data, update_abono, update_type, lista_abonos, lista_t
 
     useEffect(() => {
         let colores = []
-        for(let i = 0; i < lista_abonos.length ; i++){
+        for(let i = 0; i < listaAbonos.length ; i++){
             colores.push('transparent')
         }
         setComboColor(colores)
     },[])
 
-    const change_color = (key, type) => {
+    const changeColor = (key, type) => {
         let color = ''
         if(type.value == "2"){
             color = 'transparent'
@@ -324,11 +326,11 @@ function DataTable({table_data, update_abono, update_type, lista_abonos, lista_t
         }else if(type.value == '6'){
             color = 'orange'
         }
-        const nextColors = combo_color.map((c, i) => {
+        const nextColors = comboColor.map((c, i) => {
             if (i === key) {
                 return color;
             } else {
-                return combo_color[i];
+                return comboColor[i];
             }
         });
         setComboColor(nextColors);
@@ -338,7 +340,7 @@ function DataTable({table_data, update_abono, update_type, lista_abonos, lista_t
         <View>
             <View>
                 {
-                    table_data.map((data,i) => (
+                    tableData.map((data,i) => (
                         i % 2 === 0 ?
                         <View key={i} >
                             <View style={[styles.tableRowEven]}>
@@ -347,15 +349,15 @@ function DataTable({table_data, update_abono, update_type, lista_abonos, lista_t
                                     <Text style={styles.cell}>{data[1]}</Text>
                                     <View style={[styles.cellHorizontal,{marginTop:-20}]}>
                                         <Text style={[styles.cell,{marginLeft:-40, marginTop:17}]}>Abono #{String(data[2]+1)}:</Text>
-                                        <CurrencyInput style={[styles.cellInput,{width:70,  backgroundColor:combo_color[i]}]}
+                                        <CurrencyInput style={[styles.cellInput,{width:70,  backgroundColor:comboColor[i]}]}
                                                 delimiter=","
                                                 precision={0}
                                                 minValue={0}
                                                 maxValue={9999}
                                                 prefix="$"
                                                 placeholder='$0'
-                                                onChangeValue={(value) => {update_abono(i, value); update_lock(1)}}
-                                                value={String(lista_abonos[i].value)}/>
+                                                onChangeValue={(value) => {updateAbono(i, value);}}
+                                                value={String(listaAbonos[i].value)}/>
                                         <Text style={[styles.cell, {marginTop:17}]}>Tipo:</Text>
                                         <Dropdown style={[styles.cellCombo, {width:140}]}
                                         data={data1} 
@@ -363,7 +365,7 @@ function DataTable({table_data, update_abono, update_type, lista_abonos, lista_t
                                         placeholderStyle={styles.comboBoxPlaceholder}
                                         selectedTextStyle={[styles.cellComboBoxSelected,{marginTop:5}]}
                                         value={lista_tipos[i]}
-                                        onChange={item => {update_type(i, item); change_color(i,item); update_lock(1)}}/>
+                                        onChange={item => {updateType(i, item); changeColor(i,item);}}/>
                                     </View>
                                 </View>
                             </View>
@@ -376,15 +378,15 @@ function DataTable({table_data, update_abono, update_type, lista_abonos, lista_t
                                     <Text style={styles.cell}>{data[1]}</Text>
                                     <View style={[styles.cellHorizontal,{marginTop:-20}]}>
                                         <Text style={[styles.cell,{marginLeft:-40, marginTop:17}]}>Abono #{String(data[2]+1)}:</Text>
-                                        <CurrencyInput style={[styles.cellInput,{width:70,backgroundColor:combo_color[i]}]}
+                                        <CurrencyInput style={[styles.cellInput,{width:70,backgroundColor:comboColor[i]}]}
                                                 delimiter=","
                                                 precision={0}
                                                 minValue={0}
                                                 maxValue={9999}
                                                 prefix="$"
                                                 placeholder='$0'
-                                                onChangeValue={(value) => {update_abono(i, value); update_lock(1)}}
-                                                value={String(lista_abonos[i].value)}/>
+                                                onChangeValue={(value) => {updateAbono(i, value);}}
+                                                value={String(listaAbonos[i].value)}/>
                                         <Text style={[styles.cell, {marginTop:17}]}>Tipo:</Text>
                                         <Dropdown style={[styles.cellCombo, {width:140}]}
                                         data={data1}
@@ -392,7 +394,7 @@ function DataTable({table_data, update_abono, update_type, lista_abonos, lista_t
                                         placeholderStyle={styles.comboBoxPlaceholder}
                                         selectedTextStyle={[styles.cellComboBoxSelected,{marginTop:5}]}
                                         value={lista_tipos[i]}
-                                        onChange={item => {update_type(i, item); change_color(i,item); update_lock(1)}}/>
+                                        onChange={item => {updateType(i, item); changeColor(i,item);}}/>
                                     </View>
                                 </View>
                             </View>

@@ -15,7 +15,7 @@ const Login = ({navigation}) => {
     const [password, setPassword] = useState('');
     const [keyboardStatus, setKeyboardStatus] = useState('');
     const inputRef = React.useRef();
-    const [show_password, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [spacer, setSpacer] = useState(0)
     useEffect(() => {
         console.log(String(Platform.OS))
@@ -29,25 +29,39 @@ const Login = ({navigation}) => {
 
     const login = useCallback(async (usuario, password) => {
         const res = await serviceAuth.login(usuario, password)
-        //Alert.alert("Login",res)
+        console.log(res)
         const auth = res.auth
+        print(auth)
+        console.log(auth.idRuta)
         if(res.status == 1){
             try {
                 await AsyncStorage.setItem(
-                    'id_empleado',
-                    String(auth.id_empleado),
+                    'idEmpleado',
+                    String(auth.idEmpleado),
                 );
                 await AsyncStorage.setItem(
-                    'nombre_empleado',
+                    'nombreEmpleado',
                     auth.nombre,
                 );
+                if(auth.idRuta){
+                    await AsyncStorage.setItem(
+                        'idRuta',
+                        String(auth.idRuta),
+                    );
+                }else{
+                    await AsyncStorage.setItem(
+                        'idRuta',
+                        null,
+                    );
+                }
+
                 await AsyncStorage.setItem(
-                    'id_rol',
-                    String(auth.rol.id_rol),
+                    'idRol',
+                    String(auth.rol.idRol),
                 );
                 await AsyncStorage.setItem(
-                    'nombre_rol',
-                    auth.rol.nombre_rol,
+                    'nombreRol',
+                    auth.rol.nombreRol,
                 );
             } catch (error) {
                 console.log(error)
@@ -82,7 +96,7 @@ const Login = ({navigation}) => {
             { translateY: this.state.animation }
         ]
     }
-    const showPassword = (state) => {
+    const showPasswordFunction = (state) => {
         setShowPassword(state)
         console.log(state)
     }
@@ -112,13 +126,13 @@ const Login = ({navigation}) => {
                             <Text style={styles.textBoxLabel}>Contraseña</Text>
                             <View style={{width:"100%", height: 20, }}>
                                 {
-                                    show_password === true ?
+                                    showPassword === true ?
                                     <View style={[styles.textBoxRow, {width:"100%"}]}>
                                         <TextInput
                                         style={styles.textBox}
                                         onChangeText={password => setPassword(password)}
                                         defaultValue={password}/>
-                                        <TouchableOpacity onPress={() => setShowPassword(!show_password)}>
+                                        <TouchableOpacity onPress={() => setShowPassword(!showPasswordFunction)}>
                                             <Image style={[styles.BubbleImage,{ zIndex:10, marginLeft:-50}]}
                                                 source={ImageIndex.hidePassword}>
                                             </Image>
@@ -131,7 +145,7 @@ const Login = ({navigation}) => {
                                         secureTextEntry={true}
                                         onChangeText={password => setPassword(password)}
                                         defaultValue={password}/>
-                                        <TouchableOpacity onPress={() => setShowPassword(!show_password)}>
+                                        <TouchableOpacity onPress={() => setShowPassword(!showPasswordFunction)}>
                                             <Image style={[styles.BubbleImage,{tintColor:"black", zIndex:10, marginLeft:-50}]}
                                                 source={ImageIndex.showPassword}>
                                             </Image>

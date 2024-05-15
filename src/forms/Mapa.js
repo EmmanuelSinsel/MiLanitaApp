@@ -22,7 +22,7 @@ const Mapa = ({navigation}) => {
     const [longitude, setLon] = useState('')
     const [address, setAddress] = useState('')
     const [editable, setEditable] = useState('')
-    const [id_prestamo, setIdPrestamo] = useState('')
+    const [idPrestamo, setIdPrestamo] = useState('')
     const [region, setRegion] = useState({
         latitude: latitude,
         longitude: longitude,
@@ -47,14 +47,14 @@ const Mapa = ({navigation}) => {
     useEffect(() => {
         getActualRegion()
         console.log(editable)
-        setIdPrestamo(route.params?.id_prestamo)
+        setIdPrestamo(route.params?.idPrestamo)
         setEditable(route.params?.editable)
     }, [])
 
     const setFinalRegion = (lat, lon) => {
         navigation.navigate({
             name: 'FormPrestamos',
-            params: { lat: lat, lon: lon, id_prestamo_return: id_prestamo },
+            params: { lat: lat, lon: lon, idPrestamoReturn: idPrestamo },
             merge: true,
         });
     }

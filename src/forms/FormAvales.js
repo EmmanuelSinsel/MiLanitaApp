@@ -25,19 +25,19 @@ const FormAvales = ({navigation}) => {
             navigation.goBack()
         }
     }
-    const [top_label, setTopLabel] = useState('')
+    const [topLabel, setTopLabel] = useState('')
     const [cancel, setCancel] = useState('')
-    const [id_aval, setIdAval] = useState(0)
-    const [id_aval_edit, setIdAvalEdit] = useState('')
-    const [nombre_aval,      setNombreAval] = useState('');
-    const [dom_aval,         setDomAval] = useState('');
-    const [tel_aval,         setTelAval] = useState('');
+    const [idAval, setIdAval] = useState(0)
+    const [idAvalNoEditable, setIdAvalEdit] = useState('')
+    const [nombreAval,      setNombreAval] = useState('');
+    const [domicilioAval,         setDomAval] = useState('');
+    const [telefonoAval,         setTelAval] = useState('');
     const [editable, setEditable] = useState(true)
     const [loading, setLoading] = useState(0);
-    const [load_flag, setLoadFlag] = useState(0)
+    const [loadFlag, setLoadFlag] = useState(0)
     const route = useRoute()
     let client_type = "Cliente"
-    const [id_cliente, setIdCliente] = useState("")
+    const [idCliente, setIdCliente] = useState("")
     useEffect(() => {
         const backAction = () => {
             if(route.params?.label){
@@ -47,70 +47,51 @@ const FormAvales = ({navigation}) => {
                 return true;
             }
         };
-        if(route.params?.id_cliente){
-            setIdCliente(route.params?.id_cliente)
-        }
         const backHandlerClientes = BackHandler.addEventListener(
             'hardwareBackPress',
             backAction,
         );
-        get_siguiente_id()
+        getSiguienteId()
         
         return () =>
         BackHandler.removeEventListener("hardwareBackPress", backAction);
-    }, [get_detalle_cliente, route.params?.type, setEditable, editable, ]);
+    }, [route.params?.type, setEditable, editable, ]);
 
 
-    const get_siguiente_id = useCallback(async () => {
-        const data = await serviceClientes.get_siguiente_id_aval(route.params?.id_cliente)
-        setIdAval(data.next_id)
+    const getSiguienteId = useCallback(async () => {
+        const data = await serviceClientes.getSiguienteIdAval(route.params?.idCliente)
+        setIdAval(data.nextId)
     }, [])
 
-    const eliminar_preregistro = useCallback(async (id_aval) => {
-        const response = await serviceClientes.eliminar_preregistro_aval(id_aval)
-    }, [])
-
-    const get_detalle_cliente = useCallback(async (id) => {
-        const res = await serviceClientes.get_detalle_cliente(id=id)
-        const data = res.data
-        console.log(data)
-        setLoading(0)   
-        setIdClienteEdit(data.id_cliente)
-        setNombreCliente(data.nom_cliente)
-        setDomCliente(data.dom_cliente)
-        setTelCliente(data.tel_cliente)
-        setRutaEdit(data.ruta.nom_ruta)
-        setGrupoEdit(data.grupo.nom_grupo)
-        if(data.tipo_cliente == 1){
-            setTipoClienteEdit("Normal")
-        }
+    const eliminarPreregistro = useCallback(async (idAval) => {
+        const response = await serviceClientes.eliminarPreregistroAval(idAval)
     }, [])
 
     const registerAval = async (
-        new_id_aval,
-        new_id_cliente,
-        new_nom_aval,
-        new_dom_aval,
-        new_tel_aval) => {
-        nuevo_aval = {
-            "id_aval":new_id_aval,
-            "id_cliente":new_id_cliente,
-            "nombre_aval":new_nom_aval,
-            "domicilio_aval":new_dom_aval,
-            "telefono_aval":new_tel_aval
+        newIdAval,
+        newIdCliente,
+        newNomAval,
+        newDomAval,
+        newTelAval) => {
+        nuevoAval = {
+            "idAval":newIdAval,
+            "idCliente":newIdCliente,
+            "nombreAval":newNomAval,
+            "domicilio_aval":newDomAval,
+            "telefono_aval":newTelAval
         }
-        if(new_tel_aval.length == 10){
-            const data = await serviceClientes.registrar_aval(nuevo_aval)
+        if(newTelAval.length == 10){
+            const data = await serviceClientes.registrar_aval(nuevoAval)
             let toast = Toast.show('Aval Registrado', {
                 duration: Toast.durations.SHORT,
             });
             // let aval_data = {
-            //     id: new_id_aval,
-            //     title: new_nom_aval,
-            //     dom: new_dom_aval,
-            //     tel: new_tel_aval
+            //     id: newIdAval,
+            //     title: newNomAval,
+            //     dom: newDomAval,
+            //     tel: newTelAval
             // }
-            //route.params?.update_aval(aval_data)
+            //route.params?.updateAval(aval_data)
             navigation.goBack()
         }else{
             let toast = Toast.show('Telefono Invalido', {
@@ -134,7 +115,7 @@ const FormAvales = ({navigation}) => {
                             <View style={{width:"50%"}}>
                                 <TouchableOpacity 
                                 style={{alignSelf:"center", width:'70%', backgroundColor:"green", height:50, justifyContent:"center", borderRadius:15}}
-                                onPress={() => {eliminar_preregistro(id_aval); navigation.goBack()}}>
+                                onPress={() => {eliminarPreregistro(idAval); navigation.goBack()}}>
                                     <Text style={{fontSize:22, alignSelf:"center", color:"white"}}>Si</Text>
                                 </TouchableOpacity>
                             </View>
@@ -164,7 +145,7 @@ const FormAvales = ({navigation}) => {
                             editable === true ?
                             <Text style={styles.mainHeadersInverted}>Nuevo Aval</Text>
                             :
-                            <Text style={styles.mainHeadersInverted}>{top_label}</Text>
+                            <Text style={styles.mainHeadersInverted}>{topLabel}</Text>
                         }
                         
                     </View>
@@ -177,14 +158,14 @@ const FormAvales = ({navigation}) => {
                         <View style={styles.textBoxBorder}>
                                     <Text style={styles.textBoxLabel}>ID Aval</Text>
                                     {
-                                        id_aval_edit === '' ?
+                                        idAvalNoEditable === '' ?
                                         <TextInput style={styles.textBox}
                                         onChangeText={value => setIdAval(value)}
-                                        value={String(id_aval)}/>
+                                        value={String(idAval)}/>
                                         :
                                         <TextInput style={styles.textBox}
                                         selection={{start:0, end:0}}
-                                        defaultValue={String(id_aval_edit)}/>
+                                        defaultValue={String(idAvalNoEditable)}/>
                                     }
                                 
                         </View>
@@ -197,7 +178,7 @@ const FormAvales = ({navigation}) => {
                                 <TextInput style={styles.textBox}
                                 placeholder='Nombre Apellido Apellido'
                                 onChangeText={value => setNombreAval(value)}
-                                defaultValue={nombre_aval}/>
+                                defaultValue={nombreAval}/>
                     </View>
                 </View>
                 <View style={styles.spacer20}></View>
@@ -207,7 +188,7 @@ const FormAvales = ({navigation}) => {
                                 <TextInput style={styles.textBox}
                                 placeholder='Calle, Numero, Colonia'
                                 onChangeText={value => setDomAval(value)}
-                                defaultValue={dom_aval}/>
+                                defaultValue={domicilioAval}/>
                     </View>
                 </View>
                 <View style={styles.spacer20}></View>
@@ -219,19 +200,19 @@ const FormAvales = ({navigation}) => {
                                 maxLength={10}
                                 placeholder='Ej. 6681234567'
                                 onChangeText={value => setTelAval(value)}
-                                defaultValue={tel_aval}/>
+                                defaultValue={telefonoAval}/>
                     </View>
                 </View>
                 <View style={styles.spacer20}></View>
                 {
-                    load_flag === 0 &&
+                    loadFlag === 0 &&
                     <View style={styles.formRow}>
                     <TouchableOpacity onPress={() => registerAval(
-                            id_aval,
-                            id_cliente,
-                            nombre_aval,
-                            dom_aval,
-                            tel_aval,
+                            idAval,
+                            idCliente,
+                            nombreAval,
+                            domicilioAval,
+                            telefonoAval,
                         )}
                         style={styles.mainButton}>
                         <Text style={styles.mainButtonText}>Registrar Aval</Text>

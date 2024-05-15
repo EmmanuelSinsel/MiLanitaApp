@@ -11,11 +11,11 @@ const MainScreen = ({navigation}) => {
     useEffect(() => {
         const get_values = async() => {
             try {
-                const id_empleado = await AsyncStorage.getItem('id_empleado');
-                const nombre_empleado = await AsyncStorage.getItem('nombre_empleado');
-                const id_rol = await AsyncStorage.getItem('id_rol');
-                const nombre_rol = await AsyncStorage.getItem('nombre_rol');
-                if(nombre_rol == "ADMINISTRADOR"){
+                const idEmpleado = await AsyncStorage.getItem('idEmpleado');
+                const nombreEmpleado = await AsyncStorage.getItem('nombreEmpleado');
+                const idRol = await AsyncStorage.getItem('idRol');
+                const nombreRol = await AsyncStorage.getItem('nombreRol');
+                if(nombreRol == "ADMINISTRADOR"){
                     setAdmin(true)
                 }
             } catch (error) {
@@ -31,6 +31,13 @@ const MainScreen = ({navigation}) => {
             duration: Toast.durations.SHORT,
         });
         //navigation.navigate("TrackEmpleados");
+    }
+    //CAJA
+    function corteFunc() {
+        navigation.navigate("Corte");
+    }
+    function cajaFunc() {
+        navigation.navigate("ListaCajas");
     }
     //ALTAS
     function nuevoPrestamoFunc() {
@@ -95,8 +102,8 @@ const MainScreen = ({navigation}) => {
             <Text style={styles.mainHeaders}>Caja</Text>
             <View style={styles.horizontalLine}></View>
             <View style={styles.mainRow}>
-                <MainRoundButton func={abonosFunc} title={"Corte"} image={ImageIndex.money}></MainRoundButton>
-                <MainRoundButtonSpacer></MainRoundButtonSpacer>
+                <MainRoundButton func={corteFunc} title={"Corte de Caja"} image={ImageIndex.money}></MainRoundButton>
+                <MainRoundButtonBubble func={cajaFunc} title={"Administrar Cajas"} image={ImageIndex.money} bubbleImage={ImageIndex.add}></MainRoundButtonBubble>
                 <MainRoundButtonSpacer></MainRoundButtonSpacer>
             </View>
 

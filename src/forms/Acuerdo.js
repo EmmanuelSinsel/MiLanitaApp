@@ -8,19 +8,19 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import CurrencyInput from 'react-native-currency-input';
 
 const Acuerdo = ({navigation}) => {
-    const [id_prestamo,         setIdPrestamo] = useState('');
+    const [idPrestamo,         setIdPrestamo] = useState('');
     const [localidad,         setLocalidad] = useState('');
     const [motivo,         setMotivo] = useState('');
-    const [nombre_cliente,      setNombreCliente] = useState('');
-    const [dom_cliente,         setDomCliente] = useState('');
-    const [tel_cliente,         setTelCliente] = useState('');
-    const [saldo_pendiente,         setSaldoPendiente] = useState(null);
+    const [nombreCliente,      setNombreCliente] = useState('');
+    const [domicilioCliente,         setDomCliente] = useState('');
+    const [telefonoCliente,         setTelCliente] = useState('');
+    const [saldoPendiente,         setSaldoPendiente] = useState(null);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [visible,             setVisible] = useState(true)
-    const [fecha_acuerdo,      setFechaAcuerdo] = useState('DD/MM/YYYY');
-    const [intervalo_acuerdo,         setIntervaloAcuerdo] = useState('');
-    const [cantidad_intervalo,         setCantidadIntervalo] = useState(null);
-    const [tipo_intervalo,         setTipoIntervalo] = useState('');
+    const [fechaAcuerdo,      setFechaAcuerdo] = useState('DD/MM/YYYY');
+    const [intervaloAcuerdo,         setIntervaloAcuerdo] = useState('');
+    const [cantidadIntervalo,         setCantidadIntervalo] = useState(null);
+    const [tipoIntervalo,         setTipoIntervalo] = useState('');
     const data = [
         { label: 'Item 1', value: '1' },
         { label: 'Item 2', value: '2' },
@@ -91,8 +91,8 @@ const Acuerdo = ({navigation}) => {
                                 <TextInput style={styles.textBox}
                                 keyboardType='numeric'
                                 placeholder='1234'
-                                onChangeText={id_prestamo => setIdPrestamo(id_prestamo)}
-                                defaultValue={id_prestamo}/>
+                                onChangeText={idPrestamo => setIdPrestamo(idPrestamo)}
+                                defaultValue={idPrestamo}/>
                     </View>
                 </View>
             </View>
@@ -103,7 +103,7 @@ const Acuerdo = ({navigation}) => {
                             <TextInput style={styles.textBox}
                             placeholder='Nombre Apellido Apellido'
                             onChangeText={value => setNombreCliente(value)}
-                            defaultValue={nombre_cliente}/>
+                            defaultValue={nombreCliente}/>
                 </View>
             </View>
             <View style={styles.spacer20}></View>
@@ -113,7 +113,7 @@ const Acuerdo = ({navigation}) => {
                             <TextInput style={styles.textBox}
                             placeholder='Calle, Numero, Colonia'
                             onChangeText={value => setDomCliente(value)}
-                            defaultValue={dom_cliente}/>
+                            defaultValue={domicilioCliente}/>
                 </View>
             </View>
             <View style={styles.spacer20}></View>
@@ -125,7 +125,7 @@ const Acuerdo = ({navigation}) => {
                             placeholder='Ej. 6681234567'
                             maxLength={10}
                             onChangeText={value => setTelCliente(value)}
-                            defaultValue={tel_cliente}/>
+                            defaultValue={telefonoCliente}/>
                 </View>
             </View>
             <View style={styles.spacer20}></View>
@@ -139,7 +139,7 @@ const Acuerdo = ({navigation}) => {
                             maxValue={99999}
                             prefix="$"
                             onChangeValue={(value) => setSaldoPendiente(value)}
-                            value={saldo_pendiente}/>
+                            value={saldoPendiente}/>
                 </View>
             </View>
             <View style={styles.spacer10}></View>
@@ -179,7 +179,7 @@ const Acuerdo = ({navigation}) => {
                         <Pressable style={styles.textBox}
                             onPress={showDatePicker}>
                                 <View style={{ display: !visible ? 'flex' : 'none', paddingTop:8 }}>
-                                    <Text style={styles.date_label}>{fecha_acuerdo}</Text>
+                                    <Text style={styles.date_label}>{fechaAcuerdo}</Text>
                                 </View>
                                 <View style={{ display: visible ? 'flex' : 'none' , paddingTop:8  }}>
                                     <Text style={styles.comboBoxPlaceholder}>DD/MM/YYYY</Text>
@@ -202,7 +202,7 @@ const Acuerdo = ({navigation}) => {
                                 searchPlaceholder="Grupo.." placeholder='Ej. Semanal'
                                 placeholderStyle={styles.comboBoxPlaceholder}
                                 selectedTextStyle={styles.comboBoxSelected}
-                                value={tipo_intervalo}
+                                value={tipoIntervalo}
                                 onChange={item => {setTipoIntervalo(item.value);}}/>
                     </View>
                 </View>
@@ -213,7 +213,7 @@ const Acuerdo = ({navigation}) => {
                     <View style={styles.textBoxBorder}>
                                 <Text style={styles.textBoxLabel}>Intervalo</Text>
                                 <TextInput style={styles.comboBox}
-                                defaultValue={intervalo_acuerdo}
+                                defaultValue={intervaloAcuerdo}
                                 keyboardType='numeric'
                                 maxLength={2}
                                 onChangeText={item => {setIntervaloAcuerdo(item)}}/>
@@ -228,7 +228,7 @@ const Acuerdo = ({navigation}) => {
                                 minValue={0}
                                 maxValue={9999}
                                 prefix="$"
-                                value={cantidad_intervalo}
+                                value={cantidadIntervalo}
                                 onChangeValue={item => {setCantidadIntervalo(item);}}/>
                     </View>
                 </View>
@@ -239,13 +239,13 @@ const Acuerdo = ({navigation}) => {
                 <Text style={styles.mainHeaders}>Intervalos del Acuerdo</Text>
             </View>
             <View style={styles.horizontalLine}></View>
-            { fecha_acuerdo !== "DD/MM/YYYY" && intervalo_acuerdo !== '' && cantidad_intervalo !== null && tipo_intervalo !== '' ?
+            { fechaAcuerdo !== "DD/MM/YYYY" && intervaloAcuerdo !== '' && cantidadIntervalo !== null && tipoIntervalo !== '' ?
                 <View style={{width:"90%", alignSelf:"center"}}>
-                    <DataTable intervalo={intervalo_acuerdo} 
-                    cantidad={cantidad_intervalo} 
-                    fecha_inicio={fecha_acuerdo} 
-                    saldo_pendiente={saldo_pendiente}
-                    tipo_intervalo={tipo_intervalo}></DataTable>
+                    <DataTable intervalo={intervaloAcuerdo} 
+                    cantidad={cantidadIntervalo} 
+                    fecha_inicio={fechaAcuerdo} 
+                    saldoPendiente={saldoPendiente}
+                    tipoIntervalo={tipoIntervalo}></DataTable>
                 </View>:<View>
                 </View>
             }
@@ -260,7 +260,7 @@ const Acuerdo = ({navigation}) => {
         </ScrollView>
     )
 }
-function DataTable({intervalo, cantidad, fecha_inicio, saldo_pendiente, tipo_intervalo}) {
+function DataTable({intervalo, cantidad, fecha_inicio, saldoPendiente, tipoIntervalo}) {
     let valid = 1
     let data = []
     let cont = 0
@@ -276,26 +276,26 @@ function DataTable({intervalo, cantidad, fecha_inicio, saldo_pendiente, tipo_int
     let current_date = new Date(init_year, init_month, init_day);
     let date_cont = 0
     cantidad = Number(cantidad)
-    if(intervalo * cantidad >= saldo_pendiente){
+    if(intervalo * cantidad >= saldoPendiente){
         valid = 1
     }else{
         valid = 0
     }
     for(let i = 0 ; i < Number(intervalo) ; i++){
         let temp = [i+1,0.0,""]
-        if(cont < saldo_pendiente){
-            if(cont+cantidad <= saldo_pendiente){
+        if(cont < saldoPendiente){
+            if(cont+cantidad <= saldoPendiente){
                 temp[1] = cantidad
                 cont += cantidad
             }else{
-                temp[1] = saldo_pendiente-cont
+                temp[1] = saldoPendiente-cont
             }
         }
-        if(tipo_intervalo == "1"){
+        if(tipoIntervalo == "1"){
             current_date.setDate(current_date.getDate()+7)
-        }if(tipo_intervalo == "2"){
+        }if(tipoIntervalo == "2"){
             current_date.setDate(current_date.getDate()+14)
-        }if(tipo_intervalo == "3"){
+        }if(tipoIntervalo == "3"){
             current_date.setDate(current_date.getDate()+30)
         }
         var month = String(current_date.getMonth() + 1)

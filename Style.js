@@ -148,6 +148,11 @@ const styles = StyleSheet.create({
         textAlign:'center',
         fontSize:18
     },
+    textLabel:{
+        
+        fontSize:18,
+        alignSelf:"center",
+    },
     textBoxContainerFull:{
         alignSelf:'center',
         width:"90%",
@@ -594,6 +599,102 @@ const styles = StyleSheet.create({
         opacity:10,
         zIndex:22,
         marginTop:300
+    },
+    corteTabla:{
+        marginLeft:"2%",
+        marginRight:"2%",
+        borderWidth:3,
+        borderRadius:15,
+        borderColor:main_green,
+        width:"96%",
+    },  
+    corteTablaHeader:{
+        height:30,
+        width:"100%",
+        justifyContent:"center",
+        alignItems:"center",
+        flexDirection:"row"
+    },
+    corteMainText:{
+        color:"black",
+        fontSize:18,
+        fontWeight:"bold"
+    },
+    corteVarText:{
+        color:"black",
+        fontSize:18
+    },
+    corteMainCellText:{
+        color:"black",
+        fontWeight:"bold",
+        fontSize:16
+    },
+    corteCellText:{
+        color:"black",
+        fontSize:16
+    },
+    corteInfoCellText:{
+        color:"white",
+        fontSize:18,
+        fontWeight:"bold"
+    },
+    corteRowContainer:{
+        width:"100%",
+        backgroundColor:"#e8ffcf",
+        flexDirection:"row"
+    },
+    corteTopRowContainer:{
+        width:"100%",
+        flexDirection:"row",
+        borderBottomWidth:2,
+        borderColor:main_green,
+    },
+    corteRowCell:{
+        width:"33.3%",
+        height:31,
+        borderRightWidth:2,
+        borderTopWidth:2,
+        borderColor:main_green,
+        alignItems:"center",
+    },
+    corteInfoRowCell:{
+        width:"66.6%",
+        height:31,
+        borderRightWidth:2,
+        borderTopWidth:2,
+        borderBottomWidth:2,
+        backgroundColor:main_green,
+        borderColor:main_green,
+        alignItems:"flex-end",
+    },
+    corteTopRowCell:{
+        width:"25%",
+        height:31,
+        backgroundColor:"#e8ffcf",
+        borderRightWidth:2,
+        borderColor:main_green,
+        alignItems:"flex-end",
+    },
+    corteInfoRowCellValue:{
+        width:"33.3%",
+        height:31,
+        borderRightWidth:2,
+        borderTopWidth:2,
+        borderColor:main_green,
+        alignItems:"flex-start",
+    },
+    corteTopCellValue:{
+        width:"33.3%",
+        height:31,
+        borderColor:main_green,
+        alignItems:"flex-start",
+    },
+    corteColContainer:{
+        width:"100%",
+
+        borderTopWidth:2,
+        borderColor:main_green,
+        alignItems:"center"
     }
 });
 

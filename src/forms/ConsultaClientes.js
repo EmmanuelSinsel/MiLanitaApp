@@ -12,97 +12,86 @@ const ConsultaClientes = ({navigation}) => {
     let servicePrestamos = new ServicePrestamos()
     const [ruta,                setRuta] = useState('');
     const [grupo,               setGrupo] = useState('');
-    const [lista_rutas, setListaRutas] = useState([]);
-    const [lista_grupos, setListaGrupos] = useState([]);
+    const [listaRutas, setListaRutas] = useState([]);
+    const [listaGrupos, setListaGrupos] = useState([]);
     const [page,                setPage] = useState(1);
-    const [filtro_text,           setFiltro] = useState('');
+    const [filtroText,           setFiltro] = useState('');
     const [filteredTableData, setFilteredTableData] = useState(null)
-    const [loading ,setLoading] = useState(0)
-    const data = [
-        { label: 'Item 1', value: '1' },
-        { label: 'Item 2', value: '2' },
-        { label: 'Item 3', value: '3' },
-        { label: 'Item 4', value: '4' },
-        { label: 'Item 5', value: '5' },
-        { label: 'Item 6', value: '6' },
-        { label: 'Item 7', value: '7' },
-        { label: 'Item 8', value: '8' },
-    ];
     const [tableData, setTableData] = useState([])
-    const [max_pages, setMaxPages] = useState([]);
+    const [maxPages, setMaxPages] = useState([]);
     useEffect(() => {
-        get_rutas()
-    }, [ get_rutas]);
+        getRutas()
+    }, [ getRutas]);
 
     const filterTable = (value) =>{
         setPage(1)
         const filtro_upper = value.toUpperCase()
         setFiltro(value)
-        get_clientes(1, 100, grupo, filtro_upper)
+        getClientes(1, 100, grupo, filtro_upper)
         
     }
     function backMainScreen() {
         navigation.goBack()
     }
 
-    const is_close_to_bottom = ({layoutMeasurement, contentOffset, contentSize}) => {
+    const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
         const paddingToBottom = 5;
         return layoutMeasurement.height + contentOffset.y >=
         contentSize.height - paddingToBottom;
     };
 
-    const next_chunk = () => {
+    const nextChunk = () => {
         let pg = page + 1
-        if(pg <= max_pages){
-            add_clientes(pg, 100, grupo, filtro_text)
+        if(pg <= maxPages){
+            addClientes(pg, 100, grupo, filtroText)
         }
     }
 
-    const add_clientes = useCallback(async (p, p_size, id_grupo, filtro) => {
-        const res = await service.get_lista_clientes(p, p_size, id_grupo, filtro)
+    const addClientes = useCallback(async (p, pSize, idGrupo, filtro) => {
+        const res = await service.getListaClientes(p, pSize, idGrupo, filtro)
         const data = res.data
-        let temp_clientes = []
+        let tempClientes = []
         const clientes = data.clientes
         for(let i = 0; i < clientes.length ; i++){
-            temp_clientes.push([clientes[i].id_cliente,clientes[i].nom_cliente])
+            tempClientes.push([clientes[i].idCliente,clientes[i].nomCliente])
         }
-        setTableData(tableData => [...tableData, ...temp_clientes])
+        setTableData(tableData => [...tableData, ...tempClientes])
         setMaxPages(data.paginas)
 
         setPage(p)
     }, [])
 
-    const get_clientes = useCallback(async (p, p_size, id_grupo, filtro) => {
+    const getClientes = useCallback(async (p, pSize, idGrupo, filtro) => {
         setPage(1)
-        const res = await service.get_lista_clientes(p, p_size, id_grupo, filtro)
+        const res = await service.getListaClientes(p, pSize, idGrupo, filtro)
         const data = res.data
-        let temp_clientes = []
+        let tempClientes = []
         const clientes = data.clientes
         for(let i = 0; i < clientes.length ; i++){
-            temp_clientes.push([clientes[i].id_cliente,clientes[i].nom_cliente])
+            tempClientes.push([clientes[i].idCliente,clientes[i].nomCliente])
         }
         setMaxPages(data.paginas)
-        setTableData(temp_clientes)
-        clientes_data = temp_clientes
+        setTableData(tempClientes)
+        clientes_data = tempClientes
     }, [])
 
-    const get_rutas = useCallback(async () => {
-        const res = await servicePrestamos.get_rutas()
+    const getRutas = useCallback(async () => {
+        const res = await servicePrestamos.getRutas()
         const data = res.data
-        let temp_rutas = []
+        let tempRutas = []
         for(let i = 0; i < data.length ; i++){
-            temp_rutas.push({"label":data[i].ruta,"value":data[i].id_ruta})
+            tempRutas.push({"label":data[i].ruta,"value":data[i].idRuta})
         }
-        setListaRutas(temp_rutas)
+        setListaRutas(tempRutas)
     }, [])
-    const get_grupos = useCallback(async (id_ruta) => {
-        const res = await servicePrestamos.get_grupos(id=id_ruta)
+    const getGrupos = useCallback(async (idRuta) => {
+        const res = await servicePrestamos.getGrupos(id=idRuta)
         const data = res.data
-        let temp_grupos = []
+        let tempGrupos = []
         for(let i = 0; i < data.length ; i++){
-            temp_grupos.push({"label":data[i].nom_grupo,"value":Number(data[i].id_grupo)})
+            tempGrupos.push({"label":data[i].nomGrupo,"value":Number(data[i].idGrupo)})
         }
-        setListaGrupos(temp_grupos)
+        setListaGrupos(tempGrupos)
     }, [])
 
 
@@ -128,26 +117,26 @@ const ConsultaClientes = ({navigation}) => {
                     <View style={styles.textBoxBorder}>
                                 <Text style={styles.textBoxLabel}>Ruta</Text>
                                 <Dropdown style={styles.comboBox}
-                                data={lista_rutas} search
+                                data={listaRutas} search
                                 labelField="label" valueField="value"
                                 searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
                                 placeholderStyle={styles.comboBoxPlaceholder}
                                 selectedTextStyle={styles.comboBoxSelected}
                                 value={ruta}
-                                onChange={item => {setRuta(item.value);get_grupos(item.value);}}/>
+                                onChange={item => {setRuta(item.value);getGrupos(item.value);}}/>
                     </View>
                 </View>
                 <View style={styles.textBoxContainerHalf}>
                     <View style={styles.textBoxBorder}>
                                 <Text style={styles.textBoxLabel}>Grupo</Text>
                                 <Dropdown style={styles.comboBox}
-                                data={lista_grupos} search
+                                data={listaGrupos} search
                                 labelField="label" valueField="value"
                                 searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
                                 placeholderStyle={styles.comboBoxPlaceholder}
                                 selectedTextStyle={styles.comboBoxSelected}
                                 value={grupo}
-                                onChange={item => {setGrupo(item.value); get_clientes(page, 100, item.value, "")}}/>
+                                onChange={item => {setGrupo(item.value); getClientes(page, 100, item.value, "")}}/>
                     </View>
                 </View>
             </View>
@@ -158,7 +147,7 @@ const ConsultaClientes = ({navigation}) => {
                             <Text style={styles.textBoxLabel}>Buscador</Text>
                             <TextInput style={styles.textBox}
                             onChangeText={value => {filterTable(value)}}
-                            defaultValue={filtro_text}/>
+                            defaultValue={filtroText}/>
                 </View>
                 {
                     grupo === '' &&
@@ -167,8 +156,8 @@ const ConsultaClientes = ({navigation}) => {
             </View>
             <View style={styles.spacer20}></View>
             <ScrollView style={{height:"76%"}} onScroll={({nativeEvent}) => {
-                if (is_close_to_bottom(nativeEvent)) {
-                    next_chunk();
+                if (isCloseToBottom(nativeEvent)) {
+                    nextChunk();
                 }
             }}>
                 {
@@ -192,8 +181,8 @@ const ConsultaClientes = ({navigation}) => {
     )
 }
 function DataTable({tableData, navigation}) {
-    const editPrestamo = (id_cliente) => {
-        navigation.navigate("FormClientes",{ label:"Cliente #"+String(id_cliente), button:"Actualizar Cliente", id: id_cliente });
+    const editPrestamo = (idCliente) => {
+        navigation.navigate("FormClientes",{ label:"Cliente #"+String(idCliente), button:"Actualizar Cliente", id: idCliente });
     }
     return (
         <View>

@@ -8,19 +8,16 @@ import ServicePrestamos from '../services/ServicePrestamos';
 
 const ConsultaPrestamos = ({navigation}) => {
     service = new ServicePrestamos()
-    const [ruta,                setRuta] = useState('');
-    const [grupo,               setGrupo] = useState('');
     const [page,           setPage] = useState(1);
-    const [filtro_text,           setFiltro] = useState('');
+    const [filtroText,           setFiltro] = useState('');
     const [filteredTableData, setFilteredTableData] = useState(null)
     const [loading, setLoading] = useState(0)
     const [tableData, setTableData] = useState([])
-    const [max_pages, setMaxPages] = useState([]);
-    let prestamos_data = []
+    const [maxPages, setMaxPages] = useState([]);
     useEffect(() => {
         setLoading(1)
-        get_prestamos(p=page, p_size=100, filtro="")
-    }, [get_prestamos]);
+        getPrestamos(p=page, pSize=100, filtro="")
+    }, [getPrestamos]);
 
     const filterTable = (value) =>{
         setPage(1)
@@ -28,57 +25,57 @@ const ConsultaPrestamos = ({navigation}) => {
         if(value.length >= 2){
             const filtro_upper = value.toUpperCase()
             setFiltro(value)
-            get_prestamos(p=1, p_size=100, filtro=filtro_upper)
+            getPrestamos(p=1, pSize=100, filtro=filtro_upper)
         }else{
             setLoading(0)
         }
         if(value.length == 0){
             setLoading(1)
             setFiltro(value)
-            get_prestamos(p=1, p_size=100, filtro="")
+            getPrestamos(p=1, pSize=100, filtro="")
         }
     }
     function backMainScreen() {
         navigation.goBack()
     }
 
-    const is_close_to_bottom = ({layoutMeasurement, contentOffset, contentSize}) => {
+    const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
         const paddingToBottom = 5;
         return layoutMeasurement.height + contentOffset.y >=
         contentSize.height - paddingToBottom;
     };
 
-    const next_chunk = () => {
+    const nextChunk = () => {
         let pg = page + 1
-        if(pg <= max_pages){
-            add_prestamos(p=pg, p_size=100, filtro=filtro_text)
+        if(pg <= maxPages){
+            addPrestamos(p=pg, pSize=100, filtro=filtroText)
         }
     }
 
-    const add_prestamos = useCallback(async (p, p_size, filtro) => {
-        const res = await service.get_prestamos(p=p, p_size=p_size, filtro=filtro)
+    const addPrestamos = useCallback(async (p, pSize, filtro) => {
+        const res = await service.getPrestamos(p=p, pSize=pSize, filtro=filtro)
         const data = res.data
-        let temp_prestamos = []
+        let tempPrestamos = []
         const prestamos = data.prestamos
         for(let i = 0; i < prestamos.length ; i++){
-            temp_prestamos.push([prestamos[i].id_prestamo,prestamos[i].nom_cliente])
+            tempPrestamos.push([prestamos[i].id_prestamo,prestamos[i].nom_cliente])
         }
-        setTableData(tableData => [...tableData, ...temp_prestamos])
+        setTableData(tableData => [...tableData, ...tempPrestamos])
         setMaxPages(data.paginas)
         setPage(p)
     }, [])
 
-    const get_prestamos = useCallback(async (p, p_size, filtro) => {
-        const res = await service.get_prestamos(p=p, p_size=p_size, filtro=filtro)
+    const getPrestamos = useCallback(async (p, pSize, filtro) => {
+        const res = await service.getPrestamos(p=p, pSize=pSize, filtro=filtro)
         const data = res.data
-        let temp_prestamos = []
+        let tempPrestamos = []
         const prestamos = data.prestamos
         for(let i = 0; i < prestamos.length ; i++){
-            temp_prestamos.push([prestamos[i].id_prestamo,prestamos[i].nom_cliente])
+            tempPrestamos.push([prestamos[i].id_prestamo,prestamos[i].nom_cliente])
         }
         setMaxPages(data.paginas)
-        setTableData(temp_prestamos)
-        prestamos_data = temp_prestamos
+        setTableData(tempPrestamos)
+        prestamos_data = tempPrestamos
         setLoading(0)
     }, [])
 
@@ -105,21 +102,21 @@ const ConsultaPrestamos = ({navigation}) => {
                             <TextInput style={styles.textBox}
                             onChangeText={value => {filterTable(value)}}
                             
-                            defaultValue={filtro_text}/>
+                            defaultValue={filtroText}/>
                 </View>
             </View>
             <View style={styles.spacer20}></View>
-                {
-                    loading === 1 &&
-                    <View style={styles.loadingScreen}>
-                        <Image style={[styles.loadingImage,{height:500, width:200, marginTop:-150}]}
-                            source={ImageIndex.loading}>
-                        </Image>
-                    </View>
-                }
+            {
+                loading === 1 &&
+                <View style={styles.loadingScreen}>
+                    <Image style={[styles.loadingImage,{height:500, width:200, marginTop:-150}]}
+                        source={ImageIndex.loading}>
+                    </Image>
+                </View>
+            }
             <ScrollView style={{height:"76%"}} onScroll={({nativeEvent}) => {
-                if (is_close_to_bottom(nativeEvent)) {
-                    next_chunk();
+                if (isCloseToBottom(nativeEvent)) {
+                    nextChunk();
                 }}}>
                 <View>
                     {
@@ -146,8 +143,8 @@ const ConsultaPrestamos = ({navigation}) => {
     )
 }
 function DataTable({tableData, navigation}) {
-    const editPrestamo = (id_prestamo) => {
-        navigation.navigate("FormPrestamos",{ label:"Prestamo #"+String(id_prestamo), button:"Actualizar Prestamo", id: id_prestamo });
+    const editPrestamo = (idPrestamo) => {
+        navigation.navigate("FormPrestamos",{ label:"Prestamo #"+String(idPrestamo), button:"Actualizar Prestamo", id: idPrestamo });
     }
     return (
         <View>

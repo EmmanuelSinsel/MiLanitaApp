@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
+import Entypo from '@expo/vector-icons/Entypo';
+import * as Font from 'expo-font';
 
 import Login from './src/forms/Login';
 import MainScreen from './src/forms/MainScreen';
@@ -18,6 +21,10 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import FormExtraCobranza from './src/forms/FormExtraCobranza';
 import FormAvales from './src/forms/FormAvales';
+import Corte from './src/forms/FormCorte';
+import Cajas from './src/forms/FormCajas';
+import ListaCajas from './src/forms/ListaCajas';
+import FormCajas from './src/forms/FormCajas';
 
 const Stack = createNativeStackNavigator();
 
@@ -85,6 +92,18 @@ export default function App() {
           <Stack.Screen
             name="Preview"
             component={Preview}
+            options={{headerShown: false}}/>
+          <Stack.Screen
+            name="Corte"
+            component={Corte}
+            options={{headerShown: false}}/>
+          <Stack.Screen
+            name="ListaCajas"
+            component={ListaCajas}
+            options={{headerShown: false}}/>
+          <Stack.Screen
+            name="FormCajas"
+            component={FormCajas}
             options={{headerShown: false}}/>
         </Stack.Navigator>
       </NavigationContainer>

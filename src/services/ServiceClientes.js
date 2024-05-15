@@ -3,16 +3,16 @@ import API from "./API";
 class ServiceClientes{
     api = new API()
 
-    get_lista_clientes = async (p, p_size, id_grupo, filtro) => {
-        url = this.api.URL+"clientes/lista_clientes?grupo="+String(id_grupo)
+    getListaClientes = async (p, pSize, idGrupo, filtro) => {
+        url = this.api.URL+"clientes/lista_clientes?grupo="+String(idGrupo)
         if(filtro != ""){
             url += "&filtro="+filtro
         }
         if(p != null){
             url += "&p="+p
         }
-        if(p_size != null){
-            url += "&p_size="+p_size
+        if(pSize != null){
+            url += "&p_size="+pSize
         }
         try {
             const response = await fetch(url);
@@ -42,7 +42,7 @@ class ServiceClientes{
         }
     };
 
-    get_detalle_cliente = async (id) => {
+    getDetalleCliente = async (id) => {
         url = this.api.URL+"clientes/detalle_cliente?id_cliente="+String(id)
         try {
             const response = await fetch(url);
@@ -53,7 +53,7 @@ class ServiceClientes{
         }
     };
 
-    get_siguiente_id = async () => {
+    getSiguienteId = async () => {
         url = this.api.URL+"clientes/siguiente_id"
         try {
             const response = await fetch(url);
@@ -64,8 +64,8 @@ class ServiceClientes{
         }
     };
 
-    get_siguiente_id_aval = async (id_cliente) => {
-        url = this.api.URL+"clientes/siguiente_id_aval?id_cliente="+id_cliente
+    getSiguienteIdAval = async (idCliente) => {
+        url = this.api.URL+"clientes/siguiente_id_aval?id_cliente="+idCliente
         try {
             const response = await fetch(url);
             const json = await response.json();
@@ -75,7 +75,7 @@ class ServiceClientes{
         }
     };
 
-    registrar_cliente = async (nuevo_cliente) => {
+    registrar_cliente = async (nuevoCliente) => {
         url = this.api.URL+"clientes/registrar_cliente"
         try {
             const response = await fetch(url
@@ -85,7 +85,7 @@ class ServiceClientes{
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(nuevo_cliente)});
+                body: JSON.stringify(nuevoCliente)});
             const json = await response.json();
             return json;
         } catch (error) {
@@ -93,7 +93,7 @@ class ServiceClientes{
         }
     }
 
-    registrar_aval = async (nuevo_aval) => {
+    registrar_aval = async (nuevoAval) => {
         url = this.api.URL+"clientes/registrar_aval"
         try {
             const response = await fetch(url
@@ -103,7 +103,7 @@ class ServiceClientes{
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(nuevo_aval)});
+                body: JSON.stringify(nuevoAval)});
             const json = await response.json();
             return json;
         } catch (error) {
@@ -111,8 +111,8 @@ class ServiceClientes{
         }
     }
 
-    eliminar_preregistro = async (id_cliente) => {
-        url = this.api.URL+"clientes/eliminar_preregistro?id_cliente="+id_cliente
+    eliminarPreregistro = async (idCliente) => {
+        url = this.api.URL+"clientes/eliminar_preregistro?id_cliente="+idCliente
         try {
             const response = await fetch(url
                 ,{  
@@ -128,8 +128,8 @@ class ServiceClientes{
         }
     };
 
-    eliminar_preregistro_aval = async (id_aval) => {
-        url = this.api.URL+"clientes/eliminar_preregistro_aval?id_aval="+id_aval
+    eliminarPreregistroAval = async (idAval) => {
+        url = this.api.URL+"clientes/eliminar_preregistro_aval?id_aval="+idAval
         try {
             const response = await fetch(url
                 ,{  

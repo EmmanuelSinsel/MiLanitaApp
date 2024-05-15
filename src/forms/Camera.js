@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TextInput, Button, Pressable, TouchableOpacity,
 import { styles } from '../../Style';
 import React, {useState, useEffect} from 'react';
 import ImageIndex from '../ImageIndex';
-import { AutoFocus, Camera, CameraType, FlashMode} from 'expo-camera';
+import { AutoFocus, Camera, useCameraPermissions, FlashMode, CameraView} from 'expo-camera';
 import { useRoute } from "@react-navigation/native"
 import * as MediaLibrary from "expo-media-library";
 import * as ImagePicker from 'expo-image-picker';
@@ -12,26 +12,26 @@ import * as FileSystem from 'expo-file-system';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 const Camara = ({navigation}) => {
-    const [permission, requestPermission] = Camera.useCameraPermissions();
+    const [permission, requestPermission] = useCameraPermissions();
     const route = useRoute()
     const [preview, setPreview] = useState(0);
-    const [flash_type, setFlashType] = useState(FlashMode.off);
-    const [type, setType] = useState(CameraType.back);
+    const [flashType, setFlashType] = useState('off');
+    const [type, setType] = useState('back');
     const [camera, setCamera] = useState(null);
     const [image, setImage] = useState(null);
-    const [photo_label, setPhotoLabel] = useState('')
-    const [photo_type, setPhotoType] = useState(null)
-    const [id_prestamo, setIdPrestamo] = useState(0)
+    const [photoLabel, setPhotoLabel] = useState('')
+    const [photoType, setPhotoType] = useState(null)
+    const [idPrestamo, setIdPrestamo] = useState(0)
     useEffect(() => {
-        setIdPrestamo(route.params?.id_prestamo)
-        setPhotoType(route.params?.photo_type)
-        if(route.params?.photo_type == 1){
+        setIdPrestamo(route.params?.idPrestamo)
+        setPhotoType(route.params?.photoType)
+        if(route.params?.photoType == 1){
             setPhotoLabel("INE")
         }
-        if(route.params?.photo_type == 2){
+        if(route.params?.photoType == 2){
             setPhotoLabel("Domicilio")
         }
-        if(route.params?.photo_type == 3){
+        if(route.params?.photoType == 3){
             setPhotoLabel("Garantia")
         }
         const backAction = () => {
@@ -55,13 +55,13 @@ const Camara = ({navigation}) => {
     }
 
     function switchFlash(){
-        if(flash_type == FlashMode.off){
-            setFlashType(FlashMode.on)
-        }if(flash_type == FlashMode.on){
-            setFlashType(FlashMode.torch)
+        if(flashType == 'off'){
+            setFlashType('on')
+        }if(flashType == 'on'){
+            setFlashType('torch')
         }
-        if(flash_type == FlashMode.torch){
-            setFlashType(FlashMode.off)
+        if(flashType == 'torch'){
+            setFlashType('off')
         }
     }
 
@@ -82,7 +82,7 @@ const Camara = ({navigation}) => {
     function accept_photo(){
         navigation.navigate({
             name: 'FormPrestamos',
-            params: { type: photo_type, photo: image, id_prestamo_return: id_prestamo },
+            params: { type: photoType, photo: image, idPrestamoReturn: idPrestamo },
             merge: true,
         });
     }
@@ -116,17 +116,17 @@ const Camara = ({navigation}) => {
                                 source={ImageIndex.back}>
                             </Image>
                     </TouchableOpacity>
-                    <Text style={styles.mainHeadersInverted}>Foto de {photo_label}</Text>
+                    <Text style={styles.mainHeadersInverted}>Foto de {photoLabel}</Text>
                 </View>
                 <View style={styles.spacer20}></View>
             </View>
             {
-                photo_type === 1 ?
+                photoType === 1 ?
                 <View style={{flex:1, height:"100%"}}>
                     {
                         preview === 0 ? 
                         <View style={{flex:1, height:"100%"}}>
-                            <Camera ref={ref => setCamera(ref)} CameraPicture style={{height:"100%", aspectRatio:0.56, position:"absolute"}} type={type} flashMode={flash_type} autoFocus={AutoFocus.on} ratio='16:9'></Camera>
+                            <CameraView ref={ref => setCamera(ref)} CameraPicture style={{height:"100%", aspectRatio:0.56, position:"absolute"}} type={type} flashMode={flashType} autoFocus={'on'} ratio='16:9'></CameraView>
                             <View style={styles.cardBlueprint}>
                                 <View style={styles.cardPhoto}></View>
                             </View>
@@ -142,19 +142,19 @@ const Camara = ({navigation}) => {
                                     </View>
                                     <View style={{flexDirection:"column", width:"33.3%", justifyContent:"center"}}>
                                         {
-                                            flash_type === FlashMode.off ?
+                                            flashType === 'off' ?
                                             <TouchableOpacity style={styles.flashSwitch} onPress={switchFlash}>
                                                 <Image source={ImageIndex.noFlash} style={{tintColor:"white", height:40, aspectRatio:1}}></Image>
                                             </TouchableOpacity>:<View></View>
                                         }
                                         {
-                                            flash_type === FlashMode.on ?
+                                            flashType === 'off' ?
                                             <TouchableOpacity style={styles.flashSwitch} onPress={switchFlash}>
                                                 <Image source={ImageIndex.flash} style={{tintColor:"white", height:40, aspectRatio:1}}></Image>
                                             </TouchableOpacity>:<View></View>
                                         }
                                                                         {
-                                            flash_type === FlashMode.torch ?
+                                            flashType === 'torch' ?
                                             <TouchableOpacity style={styles.flashSwitch} onPress={switchFlash}>
                                                 <Image source={ImageIndex.torch} style={{tintColor:"white", height:40, aspectRatio:1}}></Image>
                                             </TouchableOpacity>:<View></View>
@@ -188,7 +188,7 @@ const Camara = ({navigation}) => {
                     {
                         preview === 0 ?
                         <View>
-                            <Camera ref={ref => setCamera(ref)} style={{height:height, width:width}} type={type} flashMode={flash_type} autoFocus={AutoFocus.on}  ratio='4:3'></Camera>
+                            <CameraView ref={ref => setCamera(ref)} style={{height:height, width:width}} type={type} flashMode={flashType} autoFocus={'on'}  ratio='4:3'></CameraView>
                             <View style={styles.cameraControlContainer}>
                                 <View style={{flexDirection:"row", height:0, marginTop:50}}>
                                     <View style={{flexDirection:"row", width:"33.3%", justifyContent:"center"}}>
@@ -201,19 +201,19 @@ const Camara = ({navigation}) => {
                                     </View>
                                     <View style={{flexDirection:"column", width:"33.3%", justifyContent:"center"}}>
                                         {
-                                            flash_type === FlashMode.off ?
+                                            flashType === 'off' ?
                                             <TouchableOpacity style={styles.flashSwitch} onPress={switchFlash}>
                                                 <Image source={ImageIndex.noFlash} style={{tintColor:"white", height:40, aspectRatio:1}}></Image>
                                             </TouchableOpacity>:<View></View>
                                         }
                                         {
-                                            flash_type === FlashMode.on ?
+                                            flashType === 'on' ?
                                             <TouchableOpacity style={styles.flashSwitch} onPress={switchFlash}>
                                                 <Image source={ImageIndex.flash} style={{tintColor:"white", height:40, aspectRatio:1}}></Image>
                                             </TouchableOpacity>:<View></View>
                                         }
                                         {
-                                            flash_type === FlashMode.torch ?
+                                            flashType === 'torch' ?
                                             <TouchableOpacity style={styles.flashSwitch} onPress={switchFlash}>
                                                 <Image source={ImageIndex.torch} style={{tintColor:"white", height:40, aspectRatio:1}}></Image>
                                             </TouchableOpacity>:<View></View>
@@ -244,10 +244,9 @@ const Camara = ({navigation}) => {
                 </View>
                 
             }
-
         </View>
     )
 
 }
 
-export default Camara
+export default Camara;

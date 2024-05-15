@@ -20,26 +20,26 @@ const FormClientes = ({navigation}) => {
         }
 
     }
-    const [top_label, setTopLabel] = useState('')
-    const [button_label, setButtonLabel] = useState('')
+    const [topLabel, setTopLabel] = useState('')
+    const [buttonLabel, setButtonLabel] = useState('')
     const [cancel, setCancel] = useState('')
-    const [id_cliente, setIdCliente] = useState(0)
-    const [id_cliente_edit, setIdClienteEdit] = useState('')
-    const [nombre_cliente,      setNombreCliente] = useState('');
-    const [dom_cliente,         setDomCliente] = useState('');
-    const [tel_cliente,         setTelCliente] = useState('');
-    const [tipo_cliente,        setTipoCliente] = useState('');
+    const [idCliente, setIdCliente] = useState(0)
+    const [idClienteNoEditable, setIdClienteEdit] = useState('')
+    const [nombreCliente,      setNombreCliente] = useState('');
+    const [domicilioCliente,         setDomCliente] = useState('');
+    const [telefonoCliente,         setTelCliente] = useState('');
+    const [tipoCliente,        setTipoCliente] = useState('');
     const [ruta,                setRuta] = useState('');
     const [grupo,               setGrupo] = useState('');
-    const [ruta_edit,                setRutaEdit] = useState('');
-    const [grupo_edit,               setGrupoEdit] = useState('');
-    const [tipo_cliente_edit,               setTipoClienteEdit] = useState('');
-    const [lista_rutas, setListaRutas] = useState([]);
-    const [lista_grupos, setListaGrupos] = useState([]);
+    const [rutaNoEditable,                setRutaEdit] = useState('');
+    const [grupoNoEditable,               setGrupoEdit] = useState('');
+    const [tipoClienteNoEditable,               setTipoClienteEdit] = useState('');
+    const [listaRutas, setListaRutas] = useState([]);
+    const [listaGrupos, setListaGrupos] = useState([]);
     const [editable, setEditable] = useState(true)
     const [loading, setLoading] = useState(0);
-    const [load_flag, setLoadFlag] = useState(0)
-    const client_type_list = [{label:"Normal",value:"1"},{label:"Coordinador",value:"2"}]
+    const [loadFlag, setLoadFlag] = useState(0)
+    const clientTypeList = [{label:"Normal",value:"1"},{label:"Coordinador",value:"2"}]
     const route = useRoute()
     let client_type = "Cliente"
     useEffect(() => {
@@ -67,86 +67,85 @@ const FormClientes = ({navigation}) => {
             setTopLabel(route.params?.label)
             setButtonLabel(route.params?.button)
             setLoading(1)
-            if(load_flag == 0){
-                get_detalle_cliente(route.params?.id)
+            if(loadFlag == 0){
+                getDetalleCliente(route.params?.id)
             }
         }else{
             setEditable(true)
             setTopLabel("Nuevo Prestamo")
             setButtonLabel("Registrar Prestamo")
-            get_rutas()
-            get_siguiente_id()
+            getRutas()
+            getSiguienteId()
         }
         return () =>
         BackHandler.removeEventListener("hardwareBackPress", backAction);
-    }, [get_detalle_cliente, route.params?.type, setEditable, editable, ]);
+    }, [getDetalleCliente, route.params?.type, setEditable, editable, ]);
 
-    const get_rutas = useCallback(async () => {
-        const res = await service.get_rutas()
+    const getRutas = useCallback(async () => {
+        const res = await service.getRutas()
         const data = res.data
-        let temp_rutas = []
+        let tempRutas = []
         for(let i = 0; i < data.length ; i++){
-            temp_rutas.push({"label":data[i].ruta,"value":data[i].id_ruta})
+            tempRutas.push({"label":data[i].ruta,"value":data[i].idRuta})
         }
-        setListaRutas(temp_rutas)
+        setListaRutas(tempRutas)
     }, [])
-    const get_grupos = useCallback(async (id_ruta) => {
-        const res = await service.get_grupos(id=id_ruta)
+    const getGrupos = useCallback(async (idRuta) => {
+        const res = await service.getGrupos(id=idRuta)
         const data = res.data
-        let temp_grupos = []
+        let tempGrupos = []
         for(let i = 0; i < data.length ; i++){
-            temp_grupos.push({"label":data[i].nom_grupo,"value":Number(data[i].id_grupo)})
+            tempGrupos.push({"label":data[i].nomGrupo,"value":Number(data[i].idGrupo)})
         }
-        setListaGrupos(temp_grupos)
+        setListaGrupos(tempGrupos)
     }, [])
 
-    const get_siguiente_id = useCallback(async () => {
-        const data = await serviceClientes.get_siguiente_id()
-        setIdCliente(data.next_id)
+    const getSiguienteId = useCallback(async () => {
+        const data = await serviceClientes.getSiguienteId()
+        setIdCliente(data.nextId)
     }, [])
 
-    const eliminar_preregistro = useCallback(async (id_usuario) => {
-        const response = await serviceClientes.eliminar_preregistro(id_usuario)
+    const eliminarPreregistro = useCallback(async (id_usuario) => {
+        const response = await serviceClientes.eliminarPreregistro(id_usuario)
     }, [])
 
-    const get_detalle_cliente = useCallback(async (id) => {
-        const res = await serviceClientes.get_detalle_cliente(id=id)
+    const getDetalleCliente = useCallback(async (id) => {
+        const res = await serviceClientes.getDetalleCliente(id=id)
         const data = res.data
         console.log(data)
         setLoading(0)   
-        setIdClienteEdit(data.id_cliente)
-        setNombreCliente(data.nom_cliente)
-        setDomCliente(data.dom_cliente)
-        setTelCliente(data.tel_cliente)
+        setIdClienteEdit(data.idCliente)
+        setNombreCliente(data.nomCliente)
+        setDomCliente(data.domicilioCliente)
+        setTelCliente(data.telefonoCliente)
         setRutaEdit(data.ruta.nom_ruta)
-        setGrupoEdit(data.grupo.nom_grupo)
-        if(data.tipo_cliente == 1){
+        setGrupoEdit(data.grupo.nomGrupo)
+        if(data.tipoCliente == 1){
             setTipoClienteEdit("Normal")
         }
     }, [])
 
     const registerCliente = async (
-        new_id_cliente,
-        new_nom_cliente,
-        new_dom_cliente,
-        new_tel_cliente,
-        new_grupo_cliente,
-        new_tipo_cliente) => {
-        nuevo_cliente = {
-            "id_cliente":new_id_cliente,
-            "nom_cliente":new_nom_cliente,
-            "domicilio":new_dom_cliente,
-            "tipo_cliente":new_tipo_cliente,
+        newIdCliente,
+        newNomCliente,
+        newDomCliente,
+        newTelCliente,
+        newGrupoCliente,
+        newTipoCliente) => {
+        nuevoCliente = {
+            "id_cliente":newIdCliente,
+            "nom_cliente":newNomCliente,
+            "domicilio":newDomCliente,
+            "tipo_cliente":newTipoCliente,
             "pagare":"",
-            "celular":new_tel_cliente,
-            "id_grupo":new_grupo_cliente,
+            "celular":newTelCliente,
+            "id_grupo":newGrupoCliente,
             "aval":"",
             "aval_dom":"",
             "aval_tel":"",
             "estatus":"Activo"
         }
-        console.log(nuevo_cliente)
-        const data = await serviceClientes.registrar_cliente(nuevo_cliente)
+        const data = await serviceClientes.registrar_cliente(nuevoCliente)
         let toast = Toast.show('Cliente Registrado', {
             duration: Toast.durations.SHORT,
         });
@@ -167,7 +166,7 @@ const FormClientes = ({navigation}) => {
                             <View style={{width:"50%"}}>
                                 <TouchableOpacity 
                                 style={{alignSelf:"center", width:'70%', backgroundColor:"green", height:50, justifyContent:"center", borderRadius:15}}
-                                onPress={() => {eliminar_preregistro(id_cliente); navigation.goBack()}}>
+                                onPress={() => {eliminarPreregistro(idCliente); navigation.goBack()}}>
                                     <Text style={{fontSize:22, alignSelf:"center", color:"white"}}>Si</Text>
                                 </TouchableOpacity>
                             </View>
@@ -197,7 +196,7 @@ const FormClientes = ({navigation}) => {
                             editable === true ?
                             <Text style={styles.mainHeadersInverted}>Nuevo {client_type}</Text>
                             :
-                            <Text style={styles.mainHeadersInverted}>{top_label}</Text>
+                            <Text style={styles.mainHeadersInverted}>{topLabel}</Text>
                         }
                         
                     </View>
@@ -214,14 +213,14 @@ const FormClientes = ({navigation}) => {
                         <View style={styles.textBoxBorder}>
                                     <Text style={styles.textBoxLabel}>ID Cliente</Text>
                                     {
-                                        id_cliente_edit === '' ?
+                                        idClienteNoEditable === '' ?
                                         <TextInput style={styles.textBox}
                                         onChangeText={value => setIdCliente(value)}
-                                        value={String(id_cliente)}/>
+                                        value={String(idCliente)}/>
                                         :
                                         <TextInput style={styles.textBox}
                                         selection={{start:0, end:0}}
-                                        defaultValue={String(id_cliente_edit)}/>
+                                        defaultValue={String(idClienteNoEditable)}/>
                                     }
                                 
                         </View>
@@ -234,7 +233,7 @@ const FormClientes = ({navigation}) => {
                                 <TextInput style={styles.textBox}
                                 placeholder='Nombre Apellido Apellido'
                                 onChangeText={value => setNombreCliente(value)}
-                                defaultValue={nombre_cliente}/>
+                                defaultValue={nombreCliente}/>
                     </View>
                 </View>
                 <View style={styles.spacer20}></View>
@@ -244,7 +243,7 @@ const FormClientes = ({navigation}) => {
                                 <TextInput style={styles.textBox}
                                 placeholder='Calle, Numero, Colonia'
                                 onChangeText={value => setDomCliente(value)}
-                                defaultValue={dom_cliente}/>
+                                defaultValue={domicilioCliente}/>
                     </View>
                 </View>
                 <View style={styles.spacer20}></View>
@@ -256,7 +255,7 @@ const FormClientes = ({navigation}) => {
                                 maxLength={10}
                                 placeholder='Ej. 6681234567'
                                 onChangeText={value => setTelCliente(value)}
-                                defaultValue={tel_cliente}/>
+                                defaultValue={telefonoCliente}/>
                     </View>
                 </View>
                 <View style={styles.spacer20}></View>
@@ -265,19 +264,19 @@ const FormClientes = ({navigation}) => {
                         <View style={styles.textBoxBorder}>
                                     <Text style={styles.textBoxLabel}>Ruta</Text>
                                     {
-                                        ruta_edit === '' ?
+                                        rutaNoEditable === '' ?
                                         <Dropdown style={styles.comboBox}
-                                        data={lista_rutas}
+                                        data={listaRutas}
                                         labelField="label" valueField="value"
                                         searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
                                         placeholderStyle={styles.comboBoxPlaceholder}
                                         selectedTextStyle={styles.comboBoxSelected}
                                         value={ruta}
-                                        onChange={item => {setRuta(item.value); get_grupos(item.value)}}/>
+                                        onChange={item => {setRuta(item.value); getGrupos(item.value)}}/>
                                         :
                                         <TextInput style={styles.textBox}
                                         selection={{start:0, end:0}}
-                                        defaultValue={String(ruta_edit)}/>
+                                        defaultValue={String(rutaNoEditable)}/>
                                     }
                         </View>
                     </View>
@@ -285,9 +284,9 @@ const FormClientes = ({navigation}) => {
                         <View style={styles.textBoxBorder}>
                                     <Text style={styles.textBoxLabel}>Grupo</Text>
                                     {
-                                        grupo_edit === '' ?
+                                        grupoNoEditable === '' ?
                                         <Dropdown style={styles.comboBox}
-                                        data={lista_grupos}
+                                        data={listaGrupos}
                                         labelField="label" valueField="value"
                                         searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
                                         placeholderStyle={styles.comboBoxPlaceholder}
@@ -297,7 +296,7 @@ const FormClientes = ({navigation}) => {
                                         :
                                         <TextInput style={styles.textBox}
                                         selection={{start:0, end:0}}
-                                        defaultValue={String(grupo_edit)}/>
+                                        defaultValue={String(grupoNoEditable)}/>
                                     }
                         </View>
                     </View>
@@ -307,33 +306,33 @@ const FormClientes = ({navigation}) => {
                         <View style={styles.textBoxBorder}>
                                     <Text style={styles.textBoxLabel}>Tipo de Cliente</Text>
                                     {
-                                        tipo_cliente_edit === '' ?
+                                        tipoClienteNoEditable === '' ?
                                         <Dropdown style={styles.comboBox}
-                                        data={client_type_list}
+                                        data={clientTypeList}
                                         labelField="label" valueField="value"
                                         searchPlaceholder="Grupo.." placeholder='Ej. Normal'
                                         placeholderStyle={styles.comboBoxPlaceholder}
                                         selectedTextStyle={styles.comboBoxSelected}
-                                        value={tipo_cliente}
+                                        value={tipoCliente}
                                         onChange={item => {setTipoCliente(item.value);}}/>
                                         :
                                         <TextInput style={styles.textBox}
                                         selection={{start:0, end:0}}
-                                        defaultValue={String(tipo_cliente_edit)}/>
+                                        defaultValue={String(tipoClienteNoEditable)}/>
                                     }
                         </View>
                     </View>
                 <View style={styles.spacer20}></View>
                 {
-                    load_flag === 0 &&
+                    loadFlag === 0 &&
                     <View style={styles.formRow}>
                     <TouchableOpacity onPress={() => registerCliente(
-                        id_cliente,
-                        nombre_cliente,
-                        dom_cliente,
-                        tel_cliente,
+                        idCliente,
+                        nombreCliente,
+                        domicilioCliente,
+                        telefonoCliente,
                         grupo,
-                        tipo_cliente
+                        tipoCliente
                     )}
                         style={styles.mainButton}>
                         <Text style={styles.mainButtonText}>Registrar Cliente</Text>

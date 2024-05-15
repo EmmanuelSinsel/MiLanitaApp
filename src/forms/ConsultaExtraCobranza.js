@@ -12,85 +12,84 @@ const ConsultaExtraCobranza = ({navigation}) => {
     let servicePrestamos = new ServicePrestamos()
     const [ruta,                setRuta] = useState('');
     const [grupo,               setGrupo] = useState('');
-    const [lista_rutas, setListaRutas] = useState([]);
-    const [lista_grupos, setListaGrupos] = useState([]);
+    const [listaRutas, setListaRutas] = useState([]);
+    const [listaGrupos, setListaGrupos] = useState([]);
     const [page,                setPage] = useState(1);
-    const [filtro_text,           setFiltro] = useState('');
+    const [filtroText,           setFiltro] = useState('');
     const [filteredTableData, setFilteredTableData] = useState(null)
     const [tableData, setTableData] = useState([])
-    const [max_pages, setMaxPages] = useState([]);
+    const [maxPages, setMaxPages] = useState([]);
     useEffect(() => {
-        get_rutas()
-    }, [ get_rutas]);
+        getRutas()
+    }, [ getRutas]);
 
     const filterTable = (value) =>{
         setPage(1)
         const filtro_upper = value.toUpperCase()
         setFiltro(value)
-        get_prestamos(1, 100, grupo, filtro_upper)
+        getPrestamos(1, 100, grupo, filtro_upper)
         
     }
     function backMainScreen() {
         navigation.goBack()
     }
 
-    const is_close_to_bottom = ({layoutMeasurement, contentOffset, contentSize}) => {
+    const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
         const paddingToBottom = 5;
         return layoutMeasurement.height + contentOffset.y >=
         contentSize.height - paddingToBottom;
     };
 
-    const next_chunk = () => {
+    const nextChunk = () => {
         let pg = page + 1
-        if(pg <= max_pages){
-            add_prestamos(pg, 100, grupo, filtro_text)
+        if(pg <= maxPages){
+            addPrestamos(pg, 100, grupo, filtroText)
         }
     }
 
-    const add_prestamos = useCallback(async (p, p_size, id_grupo, filtro) => {
-        const res = await servicePrestamos.get_prestamos_extra_cobranza(p, id_grupo, p_size, filtro)
+    const addPrestamos = useCallback(async (p, pSize, idGrupo, filtro) => {
+        const res = await servicePrestamos.getPrestamosExtraCobranza(p, idGrupo, pSize, filtro)
         const data = res.data
-        let temp_prestamos = []
+        let tempPrestamos = []
         const clientes = data.prestamos
         for(let i = 0; i < clientes.length ; i++){
-            temp_prestamos.push([clientes[i].id_prestamo,clientes[i].nom_cliente])
+            tempPrestamos.push([clientes[i].idPrestamo,clientes[i].nomCliente])
         }
-        setTableData(tableData => [...tableData, ...temp_prestamos])
+        setTableData(tableData => [...tableData, ...tempPrestamos])
         setMaxPages(data.paginas)
-
         setPage(p)
     }, [])
 
-    const get_prestamos = useCallback(async (p, p_size, id_grupo, filtro) => {
+    const getPrestamos = useCallback(async (p, pSize, idGrupo, filtro) => {
         setPage(1)
-        const res = await servicePrestamos.get_prestamos_extra_cobranza(p, id_grupo, p_size, filtro)
+        const res = await servicePrestamos.getPrestamosExtraCobranza(p, idGrupo, pSize, filtro)
         const data = res.data
-        let temp_prestamos = []
+        let tempPrestamos = []
         const clientes = data.prestamos
         for(let i = 0; i < clientes.length ; i++){
-            temp_prestamos.push([clientes[i].id_prestamo,clientes[i].nom_cliente])
+            tempPrestamos.push([clientes[i].idPrestamo,clientes[i].nomCliente])
         }
         setMaxPages(data.paginas)
-        setTableData(temp_prestamos)
+        setTableData(tempPrestamos)
     }, [])
 
-    const get_rutas = useCallback(async () => {
-        const res = await servicePrestamos.get_rutas()
+    const getRutas = useCallback(async () => {
+        const res = await servicePrestamos.getRutas()
         const data = res.data
-        let temp_rutas = []
+        let tempRutas = []
         for(let i = 0; i < data.length ; i++){
-            temp_rutas.push({"label":data[i].ruta,"value":data[i].id_ruta})
+            tempRutas.push({"label":data[i].ruta,"value":data[i].idRuta})
         }
-        setListaRutas(temp_rutas)
+        setListaRutas(tempRutas)
     }, [])
-    const get_grupos = useCallback(async (id_ruta) => {
-        const res = await servicePrestamos.get_grupos(id=id_ruta)
+    const getGrupos = useCallback(async (idRuta) => {
+        const res = await servicePrestamos.getGrupos(id=idRuta)
         const data = res.data
-        let temp_grupos = []
+        let tempGrupos = []
         for(let i = 0; i < data.length ; i++){
-            temp_grupos.push({"label":data[i].nom_grupo,"value":Number(data[i].id_grupo)})
+            tempGrupos.push({"label":data[i].nomGrupo,"value":Number(data[i].idGrupo)})
         }
-        setListaGrupos(temp_grupos)
+        setListaGrupos(tempGrupos)
     }, [])
 
 
@@ -116,26 +115,26 @@ const ConsultaExtraCobranza = ({navigation}) => {
                     <View style={styles.textBoxBorder}>
                                 <Text style={styles.textBoxLabel}>Ruta</Text>
                                 <Dropdown style={styles.comboBox}
-                                data={lista_rutas} search
+                                data={listaRutas} search
                                 labelField="label" valueField="value"
                                 searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
                                 placeholderStyle={styles.comboBoxPlaceholder}
                                 selectedTextStyle={styles.comboBoxSelected}
                                 value={ruta}
-                                onChange={item => {setRuta(item.value);get_grupos(item.value);}}/>
+                                onChange={item => {setRuta(item.value);getGrupos(item.value);}}/>
                     </View>
                 </View>
                 <View style={styles.textBoxContainerHalf}>
                     <View style={styles.textBoxBorder}>
                                 <Text style={styles.textBoxLabel}>Grupo</Text>
                                 <Dropdown style={styles.comboBox}
-                                data={lista_grupos} search
+                                data={listaGrupos} search
                                 labelField="label" valueField="value"
                                 searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
                                 placeholderStyle={styles.comboBoxPlaceholder}
                                 selectedTextStyle={styles.comboBoxSelected}
                                 value={grupo}
-                                onChange={item => {setGrupo(item.value); get_prestamos(page, 100, item.value, "")}}/>
+                                onChange={item => {setGrupo(item.value); getPrestamos(page, 100, item.value, "")}}/>
                     </View>
                 </View>
             </View>
@@ -146,7 +145,7 @@ const ConsultaExtraCobranza = ({navigation}) => {
                             <Text style={styles.textBoxLabel}>Buscador</Text>
                             <TextInput style={styles.textBox}
                             onChangeText={value => {filterTable(value)}}
-                            defaultValue={filtro_text}/>
+                            defaultValue={filtroText}/>
                 </View>
                 {
                     grupo === '' &&
@@ -155,8 +154,8 @@ const ConsultaExtraCobranza = ({navigation}) => {
             </View>
             <View style={styles.spacer20}></View>
             <ScrollView style={{height:"76%"}} onScroll={({nativeEvent}) => {
-                if (is_close_to_bottom(nativeEvent)) {
-                    next_chunk();
+                if (isCloseToBottom(nativeEvent)) {
+                    nextChunk();
                 }
             }}>
                 {
@@ -180,8 +179,8 @@ const ConsultaExtraCobranza = ({navigation}) => {
     )
 }
 function DataTable({tableData, navigation}) {
-    const editPrestamo = (id_cliente) => {
-        navigation.navigate("FormExtraCobranza",{ label:"Cliente #"+String(id_cliente), id: id_cliente });
+    const editPrestamo = (idPrestamo) => {
+        navigation.navigate("FormExtraCobranza",{ label:"Prestamo #"+String(idPrestamo), id: idPrestamo });
     }
     return (
         <View>
