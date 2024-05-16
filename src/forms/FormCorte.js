@@ -80,9 +80,6 @@ const Corte = ({navigation}) => {
                     numero:value.cantidad,
                     total:totalPrestamo})
             }
-            for(let j = 0; j < dataPrestamos.length ; i++){
-
-            }
             data_grupos.push({
                 grupo:grupo, 
                 total:total, 

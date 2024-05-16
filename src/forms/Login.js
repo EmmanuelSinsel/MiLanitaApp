@@ -17,6 +17,7 @@ const Login = ({navigation}) => {
     const inputRef = React.useRef();
     const [showPassword, setShowPassword] = useState(false);
     const [spacer, setSpacer] = useState(0)
+    const [loading, setLoading] = useState(0);
     useEffect(() => {
         console.log(String(Platform.OS))
         if(Platform.OS == "ios"){
@@ -28,7 +29,9 @@ const Login = ({navigation}) => {
     },[])
 
     const login = useCallback(async (usuario, password) => {
+        setLoading(1)
         const res = await serviceAuth.login(usuario, password)
+        setLoading(0)
         console.log(res)
         const auth = res.auth
         print(auth)
@@ -103,6 +106,14 @@ const Login = ({navigation}) => {
 
     return (
         <View style={{height:"100%"}}>
+            {
+                loading === 1 &&
+                <View style={styles.loadingScreen}>
+                    <Image style={[styles.loadingImage,{height:500, width:200, marginTop:-150}]}
+                        source={ImageIndex.loading}>
+                    </Image>
+                </View>
+            }
             <View style={styles.container}>
                 <View style={styles.halfBackground}></View>
                 <StatusBar style="auto" />

@@ -43,7 +43,7 @@ const FormPrestamos = ({navigation}) => {
     const [plazoPrestamo,      setPlazoPrestamo] = useState('');
     const [pagarePrestamo,     setPagarePrestamo] = useState('');
     const [fechaPrestamo,      setFechaPrestamo] = useState('DD/MM/YYYY');
-    const [estatusPrestamo,    setEstatusPrestamo] = useState('');
+    const [estatusPrestamo,    setEstatusPrestamo] = useState('Pendiente');
     const [estatusPrestamoNoEditable,    setEstatusPrestamoText] = useState('');
     const [fotoDomicilio,            setFotoDom] = useState(null);
     const [fotoINE,            setFotoIne] = useState(null);
@@ -64,7 +64,6 @@ const FormPrestamos = ({navigation}) => {
     const [avalesFocus, setAvalesFocus] = useState(false)
     const [openRutas, setOpenRutas] = useState(false)
     const [loading, setLoading] = useState(0);
-    const test = "Hola"
     const estatusPrestamoList = [
         { label: 'Pendiente', value: '1' },
         { label: 'Finalizado', value: '2' },
@@ -905,6 +904,34 @@ const FormPrestamos = ({navigation}) => {
                         <View style={styles.horizontalLine}></View>
                         <View style={styles.spacer10}></View>
                         <View style={styles.formRow}>
+                        <View style={styles.textBoxContainerOneThird}>
+                            <View style={styles.textBoxBorder}>
+                                <Text style={styles.textBoxLabel}>Plazo</Text>
+                                {
+                                    editable === true ?
+                                    <View>
+                                    {
+                                        ruta === 8 ?
+                                        <Text style={styles.comboBox}>{plazoPrestamo}</Text>
+                                        :
+                                        <Dropdown style={styles.comboBox}
+                                        data={plazos}
+                                        labelField="label" valueField="value"
+                                        placeholder='Plazo'
+                                        placeholderStyle={styles.comboBoxPlaceholder}
+                                        selectedTextStyle={styles.comboBoxSelected}
+                                        value={plazoPrestamo}
+                                        onChange={value => update_plazo(plazo=value.value)}/>
+                                    }
+                                    </View>
+                                    :
+                                    <TextInput style={styles.textBox}
+                                    defaultValue={plazoPrestamo}/>
+                                }
+
+                                </View>
+                                {editable == false && <Locker></Locker>}
+                            </View>
                             <View style={styles.textBoxContainerTwoThird}>
                                 {
                                     editable === true ?
@@ -952,34 +979,6 @@ const FormPrestamos = ({navigation}) => {
                                 
                                 {editable == false && <Locker></Locker>}
                             </View>
-                            <View style={styles.textBoxContainerOneThird}>
-                                <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Plazo</Text>
-                                {
-                                    editable === true ?
-                                    <View>
-                                    {
-                                        ruta === 8 ?
-                                        <Text style={styles.comboBox}>{plazoPrestamo}</Text>
-                                        :
-                                        <Dropdown style={styles.comboBox}
-                                        data={plazos}
-                                        labelField="label" valueField="value"
-                                        placeholder='Plazo'
-                                        placeholderStyle={styles.comboBoxPlaceholder}
-                                        selectedTextStyle={styles.comboBoxSelected}
-                                        value={plazoPrestamo}
-                                        onChange={value => update_plazo(plazo=value.value)}/>
-                                    }
-                                    </View>
-                                    :
-                                    <TextInput style={styles.textBox}
-                                    defaultValue={plazoPrestamo}/>
-                                }
-
-                                </View>
-                                {editable == false && <Locker></Locker>}
-                            </View>
                         </View>
                         <View style={styles.spacer20}></View>
                         <View style={styles.formRow}>
@@ -1018,26 +1017,12 @@ const FormPrestamos = ({navigation}) => {
                         </View>
                         <View style={styles.spacer20}></View>
                         <View style={styles.formRow}>
-                            <View style={styles.textBoxContainerHalf}>
-                                <View style={styles.textBoxBorder}>
-                                    <Text style={styles.textBoxLabel}>Estatus</Text>
-                                    {
-                                        estatusPrestamoNoEditable === '' ? 
-                                        <Dropdown style={styles.comboBox}
-                                        data={estatusPrestamoList}
-                                        labelField="label" valueField="value"
-                                        placeholder='Ej. Pendiente'
-                                        value={estatusPrestamo}
-                                        placeholderStyle={styles.comboBoxPlaceholder}
-                                        selectedTextStyle={styles.comboBoxSelected}
-                                        onChange={item => {setEstatusPrestamo(item.label);}}/>
-                                        :
-                                        <TextInput style={styles.textBox}
-                                        defaultValue={estatusPrestamoNoEditable}/>
-                                    }
-                                </View>
-                                {editable == false && <Locker></Locker>}
+                        <View style={[styles.textBoxContainerHalf]}>
+                            <View style={[styles.textBoxBorder]}>
+                                <Text style={styles.textBoxLabel}>Estatus</Text>
+                                <Text style={[styles.textBox,{textAlignVertical:"center"}]}>{estatusPrestamo}</Text>
                             </View>
+                        </View>
                             <View style={styles.textBoxContainerHalf}>
                                 <View style={styles.textBoxBorder}>
                                     <Text style={styles.textBoxLabel}>Ubicacion</Text>
