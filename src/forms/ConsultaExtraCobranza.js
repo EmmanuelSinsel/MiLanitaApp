@@ -6,6 +6,8 @@ import ImageIndex from '../ImageIndex';
 import { Dropdown } from 'react-native-element-dropdown';
 import ServiceClientes from '../services/ServiceClientes';
 import ServicePrestamos from '../services/ServicePrestamos';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Locker } from '../Utils';
 
 const ConsultaExtraCobranza = ({navigation}) => {
     let service = new ServiceClientes()
@@ -17,10 +19,29 @@ const ConsultaExtraCobranza = ({navigation}) => {
     const [page,                setPage] = useState(1);
     const [filtroText,           setFiltro] = useState('');
     const [filteredTableData, setFilteredTableData] = useState(null)
+    const [rutaNoEditable,                setRutaText] = useState('');
     const [tableData, setTableData] = useState([])
     const [maxPages, setMaxPages] = useState([]);
     useEffect(() => {
-        getRutas()
+        const getPermissions = async () => {
+            const tempRutas = await getRutas()
+            const rol = await AsyncStorage.getItem('nombreRol');
+            console.log(rol)
+            if(rol != "ADMINISTRADOR"){
+                const rutaEmpleado = await AsyncStorage.getItem('idRuta');
+                console.log(rutaEmpleado)
+                setRuta(String(rutaEmpleado))
+                getGrupos(Number(rutaEmpleado))
+                for(let r = 0 ; r < tempRutas.length ; r++){
+                    if(tempRutas[r].value == rutaEmpleado){
+                        console.log(tempRutas[r])
+                        setRutaText(String(tempRutas[r].label))
+                        break;
+                    }
+                }
+            }
+        }
+        getPermissions()
     }, [ getRutas]);
 
     const filterTable = (value) =>{
@@ -81,6 +102,7 @@ const ConsultaExtraCobranza = ({navigation}) => {
             tempRutas.push({"label":data[i].ruta,"value":data[i].idRuta})
         }
         setListaRutas(tempRutas)
+        return tempRutas;
     }, [])
     const getGrupos = useCallback(async (idRuta) => {
         const res = await servicePrestamos.getGrupos(id=idRuta)
@@ -114,14 +136,24 @@ const ConsultaExtraCobranza = ({navigation}) => {
                 <View style={styles.textBoxContainerHalf}>
                     <View style={styles.textBoxBorder}>
                                 <Text style={styles.textBoxLabel}>Ruta</Text>
-                                <Dropdown style={styles.comboBox}
-                                data={listaRutas} search
-                                labelField="label" valueField="value"
-                                searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
-                                placeholderStyle={styles.comboBoxPlaceholder}
-                                selectedTextStyle={styles.comboBoxSelected}
-                                value={ruta}
-                                onChange={item => {setRuta(item.value);getGrupos(item.value);}}/>
+                                {
+                                    rutaNoEditable === '' ?
+                                    <Dropdown style={styles.comboBox}
+                                    data={listaRutas}
+                                    labelField="label" valueField="value"
+                                    searchPlaceholder="Ruta.." placeholder='Ej. ML-1'
+                                    placeholderStyle={styles.comboBoxPlaceholder}
+                                    selectedTextStyle={styles.comboBoxSelected}
+                                    value={ruta}
+                                    onChange={item => {setRuta(item.value);getGrupos(item.value);}}/>
+                                    :
+                                    <View>
+                                        <TextInput style={styles.textBox}
+                                        selection={{start:0, end:0}}
+                                        value={rutaNoEditable}/>
+                                        <Locker></Locker>
+                                    </View>
+                                }
                     </View>
                 </View>
                 <View style={styles.textBoxContainerHalf}>
@@ -209,22 +241,6 @@ function DataTable({tableData, navigation}) {
 
                 ))
             }
-        </View>
-    )
-}
-
-function Locker(){
-    return(
-        <View style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            top: 0,
-            left: 0,
-            backgroundColor: 'gray',
-            opacity:0.1,
-            borderRadius:15
-        }}>
         </View>
     )
 }

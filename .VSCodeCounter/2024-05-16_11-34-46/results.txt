@@ -1,0 +1,103 @@
+Date : 2024-05-16 11:34:46
+Directory : c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject
+Total : 52 files,  21573 codes, 237 comments, 399 blanks, all 22209 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| JSON       |          4 |     14,710 |          0 |          5 |     14,715 |
+| JavaScript |         31 |      6,523 |         80 |        318 |      6,921 |
+| XML        |         11 |        147 |         23 |          6 |        176 |
+| Groovy     |          3 |        134 |         72 |         34 |        240 |
+| Batch      |          1 |         41 |         29 |         22 |         92 |
+| Properties |          2 |         18 |         33 |         14 |         65 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                   | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                      |         52 |     21,573 |        237 |        399 |     22,209 |
+| . (Files)                                                                                                              |          8 |     15,520 |          3 |         21 |     15,544 |
+| android                                                                                                                |         16 |        288 |        157 |         76 |        521 |
+| android (Files)                                                                                                        |          4 |        100 |         67 |         45 |        212 |
+| android\app                                                                                                            |         11 |        181 |         90 |         30 |        301 |
+| android\app (Files)                                                                                                    |          1 |         86 |         67 |         24 |        177 |
+| android\app\src                                                                                                        |         10 |         95 |         23 |          6 |        124 |
+| android\app\src\debug                                                                                                  |          1 |          5 |          0 |          3 |          8 |
+| android\app\src\main                                                                                                   |          9 |         90 |         23 |          3 |        116 |
+| android\app\src\main (Files)                                                                                           |          1 |         37 |          0 |          0 |         37 |
+| android\app\src\main\res                                                                                               |          8 |         53 |         23 |          3 |         79 |
+| android\app\src\main\res\drawable                                                                                      |          2 |         14 |         23 |          3 |         40 |
+| android\app\src\main\res\mipmap-anydpi-v26                                                                             |          2 |         10 |          0 |          0 |         10 |
+| android\app\src\main\res\values                                                                                        |          3 |         28 |          0 |          0 |         28 |
+| android\app\src\main\res\values-night                                                                                  |          1 |          1 |          0 |          0 |          1 |
+| android\gradle                                                                                                         |          1 |          7 |          0 |          1 |          8 |
+| android\gradle\wrapper                                                                                                 |          1 |          7 |          0 |          1 |          8 |
+| assets                                                                                                                 |          1 |         52 |          0 |          0 |         52 |
+| assets\icons                                                                                                           |          1 |         52 |          0 |          0 |         52 |
+| src                                                                                                                    |         27 |      5,713 |         77 |        302 |      6,092 |
+| src (Files)                                                                                                            |          3 |        143 |          0 |         15 |        158 |
+| src\forms                                                                                                              |         18 |      5,110 |         75 |        233 |      5,418 |
+| src\services                                                                                                           |          6 |        460 |          2 |         54 |        516 |
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                                                               | language   | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\App.js                                                           | JavaScript |        109 |          0 |          5 |        114 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\Style.js                                                         | JavaScript |        689 |          2 |         10 |        701 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\build.gradle                                         | Groovy     |         86 |         67 |         24 |        177 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\debug\AndroidManifest.xml                        | XML        |          5 |          0 |          3 |          8 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\AndroidManifest.xml                         | XML        |         37 |          0 |          0 |         37 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\drawable\rn_edit_text_material.xml      | XML        |         11 |         23 |          3 |         37 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\drawable\splashscreen.xml               | XML        |          3 |          0 |          0 |          3 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\mipmap-anydpi-v26\ic_launcher.xml       | XML        |          5 |          0 |          0 |          5 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\mipmap-anydpi-v26\ic_launcher_round.xml | XML        |          5 |          0 |          0 |          5 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\values-night\colors.xml                 | XML        |          1 |          0 |          0 |          1 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\values\colors.xml                       | XML        |          6 |          0 |          0 |          6 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\values\strings.xml                      | XML        |          5 |          0 |          0 |          5 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\values\styles.xml                       | XML        |         17 |          0 |          0 |         17 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\build.gradle                                             | Groovy     |         34 |          5 |          5 |         44 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\gradle.properties                                        | Properties |         11 |         33 |         13 |         57 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\gradle\wrapper\gradle-wrapper.properties                 | Properties |          7 |          0 |          1 |          8 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\gradlew.bat                                              | Batch      |         41 |         29 |         22 |         92 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\settings.gradle                                          | Groovy     |         14 |          0 |          5 |         19 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\app.json                                                         | JSON       |         77 |          0 |          1 |         78 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\assets\icons\icon-loading.svg                                    | XML        |         52 |          0 |          0 |         52 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\babel.config.js                                                  | JavaScript |          6 |          0 |          1 |          7 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\eas.json                                                         | JSON       |         21 |          0 |          2 |         23 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\package-lock.json                                                | JSON       |     14,553 |          0 |          1 |     14,554 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\package.json                                                     | JSON       |         59 |          0 |          1 |         60 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\react-native.config.js                                           | JavaScript |          6 |          1 |          0 |          7 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\ImageIndex.js                                                | JavaScript |         32 |          0 |          4 |         36 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\Models.js                                                    | JavaScript |        108 |          0 |          6 |        114 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\Utils.js                                                     | JavaScript |          3 |          0 |          5 |          8 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\Abonos.js                                              | JavaScript |        390 |          4 |         15 |        409 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\Acuerdo.js                                             | JavaScript |        353 |          0 |          7 |        360 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\Camera.js                                              | JavaScript |        240 |          1 |         11 |        252 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\ConsultaAcuerdos.js                                    | JavaScript |        135 |          0 |          5 |        140 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\ConsultaClientes.js                                    | JavaScript |        219 |          0 |         16 |        235 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\ConsultaExtraCobranza.js                               | JavaScript |        218 |          0 |         15 |        233 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\ConsultaPrestamos.js                                   | JavaScript |        167 |          0 |         14 |        181 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\FormAvales.js                                          | JavaScript |        207 |          7 |         16 |        230 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\FormCajas.js                                           | JavaScript |        234 |          0 |         12 |        246 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\FormClientes.js                                        | JavaScript |        335 |          0 |         15 |        350 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\FormCorte.js                                           | JavaScript |        255 |          0 |         12 |        267 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\FormExtraCobranza.js                                   | JavaScript |        291 |          0 |          7 |        298 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\FormPrestamos.js                                       | JavaScript |      1,392 |         55 |         40 |      1,487 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\ListaCajas.js                                          | JavaScript |        116 |          0 |          7 |        123 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\Login.js                                               | JavaScript |        176 |          0 |          9 |        185 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\MainScreen.js                                          | JavaScript |        167 |          7 |         11 |        185 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\Mapa.js                                                | JavaScript |        145 |          1 |         13 |        159 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\forms\Preview.js                                             | JavaScript |         70 |          0 |          8 |         78 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\services\API.js                                              | JavaScript |          4 |          2 |          4 |         10 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\services\ServiceAbonos.js                                    | JavaScript |         32 |          0 |          5 |         37 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\services\ServiceAuth.js                                      | JavaScript |         15 |          0 |          4 |         19 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\services\ServiceClientes.js                                  | JavaScript |        137 |          0 |         12 |        149 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\services\ServiceOtros.js                                     | JavaScript |        112 |          0 |         13 |        125 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src\services\ServicePrestamos.js                                 | JavaScript |        160 |          0 |         16 |        176 |
+| Total                                                                                                                  |            |     21,573 |        237 |        399 |     22,209 |
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+

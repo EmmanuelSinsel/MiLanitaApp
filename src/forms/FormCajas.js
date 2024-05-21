@@ -9,7 +9,7 @@ import ServicePrestamos from '../services/ServicePrestamos';
 import CurrencyInput from 'react-native-currency-input';
 import ServiceOtros from '../services/ServiceOtros';
 import { useRoute } from '@react-navigation/native';
-
+import { Locker } from '../Utils';
 
 const FormCajas = ({navigation}) => {
     function backMainScreen() {
@@ -224,20 +224,6 @@ const FormCajas = ({navigation}) => {
                     </View>
                 }
             </View>
-        </View>
-    )
-}
-
-function Locker(){
-    return(
-        <View style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            top: 0,
-            left: 0,
-            backgroundColor: 'transparent',
-        }}>
         </View>
     )
 }

@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import Entypo from '@expo/vector-icons/Entypo';
 import * as Font from 'expo-font';
+import { AutocompleteDropdownContextProvider } from 'react-native-autocomplete-dropdown';
+import { useHeaderHeight } from '@react-navigation/elements';
 
 import Login from './src/forms/Login';
 import MainScreen from './src/forms/MainScreen';
@@ -29,7 +31,9 @@ import FormCajas from './src/forms/FormCajas';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+
   return (
+    <AutocompleteDropdownContextProvider >
     <RootSiblingParent>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Login" >
@@ -108,6 +112,7 @@ export default function App() {
         </Stack.Navigator>
       </NavigationContainer>
     </RootSiblingParent>
+    </AutocompleteDropdownContextProvider>
   );
 }
 

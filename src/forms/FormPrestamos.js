@@ -11,17 +11,17 @@ import ServicePrestamos from '../services/ServicePrestamos';
 import ServiceClientes from '../services/ServiceClientes';
 import CurrencyInput from 'react-native-currency-input';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
-import { useHeaderHeight } from '@react-navigation/elements';
-import { AutocompleteDropdownContextProvider } from 'react-native-autocomplete-dropdown';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import * as FileSystem from 'expo-file-system';
 import Toast from 'react-native-root-toast';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { XCircle } from 'react-native-feather'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Locker, LockerGray } from '../Utils';
 
 const FormPrestamos = ({navigation}) => {
     let service = new ServicePrestamos()
     let serviceClientes= new ServiceClientes()
-    const headerHeight = useHeaderHeight();
     const [cancel, setCancel] = useState('')
     const [editable, setEditable] = useState(true)
     const [coords, setCoords] = useState(null)
@@ -64,6 +64,7 @@ const FormPrestamos = ({navigation}) => {
     const [avalesFocus, setAvalesFocus] = useState(false)
     const [openRutas, setOpenRutas] = useState(false)
     const [loading, setLoading] = useState(0);
+    const [preselectedAval, setPreselectedAval] = useState(0)
     const estatusPrestamoList = [
         { label: 'Pendiente', value: '1' },
         { label: 'Finalizado', value: '2' },
@@ -116,7 +117,26 @@ const FormPrestamos = ({navigation}) => {
             setEditable(true)
             setTopLabel("Nuevo Prestamo")
             setButtonLabel("Registrar Prestamo")
-            getRutas()
+            const getPermissions = async () => {
+                let tempRutas = await getRutas()
+                const rol = await AsyncStorage.getItem('nombreRol');
+                console.log(rol)
+                if(rol != "ADMINISTRADOR"){
+                    const rutaEmpleado = await AsyncStorage.getItem('idRuta');
+                    console.log(rutaEmpleado)
+                    setRuta(String(rutaEmpleado))
+                    getGrupos(Number(rutaEmpleado))
+                    for(let r = 0 ; r < tempRutas.length ; r++){
+                        if(tempRutas[r].value == rutaEmpleado){
+                            console.log(tempRutas[r])
+                            setRutaText(String(tempRutas[r].label))
+                            break;
+                        }
+                    }
+                    
+                }
+            }
+            getPermissions()
             if(route.params?.idPrestamoReturn){
                 setIdPrestamo(route.params?.idPrestamoReturn)
             }else{
@@ -146,7 +166,7 @@ const FormPrestamos = ({navigation}) => {
         }
         return () =>
         BackHandler.removeEventListener("hardwareBackPress", backAction);
-    }, [getDetallePrestamo, route.params?.lat, route.params?.lon, route.params?.type, route.params?.photo, setEditable, editable]);;
+    }, [ route.params?.lat, route.params?.lon, route.params?.type, route.params?.photo, setEditable, editable]);;
     handleFocus = () => this.setState({isFocused: true})
     handleBlur = () => this.setState({isFocused: false})
     const registrarPrestamo = useCallback(async (
@@ -198,7 +218,7 @@ const FormPrestamos = ({navigation}) => {
             'coords_lon':newCoordsLon
         }
         setLoading(1)
-        const data = await service.registrarPrestamo(nuevo_prestamo=nuevoPrestamo)
+        const data = await service.registrarPrestamo(nuevoPrestamo)
         setLoading(0)
         let toast = Toast.show('Prestamo Registrado', {
             duration: Toast.durations.SHORT,
@@ -214,11 +234,6 @@ const FormPrestamos = ({navigation}) => {
         console.log(idCliente)
         navigation.navigate("FormAvales",{ idCliente: idCliente, updateAval: selectDatosAval });
     }
-
-    const updateAval = (idAval) => {
-        setIdAval(idAval)
-    }
-
     function backMainScreen() {
         if(editable == true){
             setCancel(1)
@@ -303,7 +318,7 @@ const FormPrestamos = ({navigation}) => {
     }
     const calcularPrestamo = useCallback(async (importe, plazo, flag) => {
         if(importe != null && plazo != null && flag == true){
-            const res = await service.calcularPrestamo(importe=importe, plazo=plazo)
+            const res = await service.calcularPrestamo(importe, plazo)
             const data = res.data
             setInteresPrestamo(data.intereses)
             setSeguroPrestamo(data.seguro)
@@ -315,7 +330,7 @@ const FormPrestamos = ({navigation}) => {
     }, [])
 
     const getClientes = useCallback(async (idGrupo, filtro) => {
-        const res = await serviceClientes.getListaClientes(1, 100, idGrupo=idGrupo, filtro=filtro)
+        const res = await serviceClientes.getListaClientes(1, 100, idGrupo, filtro)
         const data = res.data
         const clientes = data.clientes
         let tempClientes = []
@@ -346,7 +361,7 @@ const FormPrestamos = ({navigation}) => {
     }
 
     const get_avales = useCallback(async (id, filtro) => {
-        const res = await serviceClientes.get_lista_avales(filtro=filtro)
+        const res = await serviceClientes.get_lista_avales(filtro)
         const data = res.data
         let temp_avales = []
         for(let i = 0; i < data.length ; i++){
@@ -363,7 +378,7 @@ const FormPrestamos = ({navigation}) => {
         setListaAvales(temp_avales)
     }, [])
 
-    const select_datos_cliente = (data) => {
+    const selectDatosCliente = (data) => {
         if(data){
             console.log(data)
             setIdCliente(data.id)
@@ -391,9 +406,24 @@ const FormPrestamos = ({navigation}) => {
         }
     }
 
-    const getLastAval = async(idCliente) => {
-        const res = await serviceClientes.getLastAval(idCliente)
-        console.log(data)
+    const getLastAval = async(data) => {
+        if(data){
+            const res = await serviceClientes.getLastAval(data.id)
+            console.log(res)
+            selectDatosAval({id:res.aval.id_aval,
+                title:res.aval.nombre_aval,
+                dom:res.aval.domicilio_aval,
+                tel:res.aval.telefono_aval})
+            setPreselectedAval(1)
+        }
+    }
+
+    const clearPreselectedAval = () => {
+        setPreselectedAval(0)
+        setReloadAval(!reload_aval)
+        setNombreAval('')
+        setDomAval('')
+        setTelAval('')
     }
 
     const unlockCliente = () => {
@@ -445,7 +475,7 @@ const FormPrestamos = ({navigation}) => {
     }
 
     const checkAval = useCallback(async (id) => {
-        const res = await service.checkAval(id=id)
+        const res = await service.checkAval(id)
         return res.status
     }, [])
 
@@ -466,10 +496,11 @@ const FormPrestamos = ({navigation}) => {
             tempRutas.push({"label":data[i].ruta,"value":data[i].idRuta})
         }
         setListaRutas(tempRutas)
+        return tempRutas
     }, [])
     const getGrupos = useCallback(async (idRuta) => {
         setGrupo(null)
-        const res = await service.getGrupos(id=idRuta)
+        const res = await service.getGrupos(idRuta)
         const data = res.data
         let tempGrupos = []
         for(let i = 0; i < data.length ; i++){
@@ -481,7 +512,7 @@ const FormPrestamos = ({navigation}) => {
         }
     }, [])
     const getDetallePrestamo = useCallback(async (id) => {
-        const res = await service.getDetallePrestamo(id=id)
+        const res = await service.getDetallePrestamo(id)
         const data = res.data
         setLoading(0)
         setIdPrestamo(String(data.idPrestamo))
@@ -516,8 +547,6 @@ const FormPrestamos = ({navigation}) => {
         const day = String(data.prestamo.fecha).substring(8,10)
         setVisible(false)
         setFechaPrestamo(month+"/"+day+"/"+year)
-        await getRutas()
-        await getGrupos(data.ruta.idRuta)
         await setRutaText(data.ruta.ruta)
         await setRuta(data.ruta.ruta)
         await setGrupoText(data.grupo.grupo)
@@ -531,7 +560,6 @@ const FormPrestamos = ({navigation}) => {
         await setListaAbonos(tempAbonos)
     }, [])
     return (
-        <AutocompleteDropdownContextProvider headerOffset={headerHeight} >
         <View style={styles.background}>
             <StatusBar backgroundColor='#70be44'/>
             {
@@ -626,15 +654,6 @@ const FormPrestamos = ({navigation}) => {
                                         <Text style={styles.textBoxLabel}>Ruta</Text>
                                         {
                                             rutaNoEditable === '' ?
-                                            // <DropDownPicker nestedScrollEnabled
-                                            // style={styles.comboBox}
-                                            // open={openRutas}
-                                            // value={ruta}
-                                            // items={listaRutas}
-                                            // setOpen={setOpenRutas}
-                                            // setValue={item => {setRuta(item.value);getGrupos(item.value);}}
-                                            // // setItems={setItems}
-                                            // />
                                             <Dropdown style={styles.comboBox}
                                             data={listaRutas}
                                             labelField="label" valueField="value"
@@ -644,9 +663,12 @@ const FormPrestamos = ({navigation}) => {
                                             value={ruta}
                                             onChange={item => {setRuta(item.value);getGrupos(item.value);}}/>
                                             :
-                                            <TextInput style={styles.textBox}
-                                            selection={{start:0, end:0}}
-                                            defaultValue={rutaNoEditable}/>
+                                            <View>
+                                                <TextInput style={styles.textBox}
+                                                selection={{start:0, end:0}}
+                                                value={rutaNoEditable}/>
+                                                <Locker></Locker>
+                                            </View>
                                         }
                                         {editable == false && <Locker></Locker>}
                             </View>
@@ -667,7 +689,7 @@ const FormPrestamos = ({navigation}) => {
                                             :
                                             <TextInput style={styles.textBox}
                                             selection={{start:0, end:0}}
-                                            defaultValue={grupoNoEditable}/>
+                                            value={grupoNoEditable}/>
                                         }
                                         {
                                             ruta === null  && <LockerInput></LockerInput>
@@ -707,7 +729,6 @@ const FormPrestamos = ({navigation}) => {
                                     containerStyle={[styles.textBox]}
                                     inputContainerStyle={{backgroundColor:"white", marginTop:2, marginLeft:-10, borderRadius:20, width:"105%"}}
                                     clearOnFocus={false}
-                                    closeOnBlur={true}
                                     onChangeText={value => getClientes(idGrupo=grupo, filtro=value)}
                                     onClear={clear_cliente}
                                     debounce={600}
@@ -720,40 +741,17 @@ const FormPrestamos = ({navigation}) => {
                                     }}
                                     closeOnSubmit={false}
                                     onSelectItem={item => {
-                                        item && setNombreCliente(item); select_datos_cliente(item)}}
+                                        item && setNombreCliente(item);  
+                                        selectDatosCliente(item); 
+                                        getLastAval(item);}}
                                     dataSet={listaClientes}
                                     />
                                     :
                                     <TextInput style={styles.textBox}
                                     selection={{start:0, end:0}}
-                                    defaultValue={nombreCliente}/>
+                                    value={nombreCliente}/>
                                 }
                             </View> 
-                            {/* {
-                                editable === true ?
-                                <View>
-                                    <AutoComplete 
-                                    idGrupo={grupo}
-                                    lista_items={listaClientes}
-                                    default_value={nombreCliente}
-                                    combo_height={clientesHeight}
-                                    focused={setClientesFocus}
-                                    setText={setNombreCliente}
-                                    searchText={getClientes}
-                                    clearText={clear_cliente}
-                                    placeHolder={"Nombre Apellido Apellido"}
-                                    title={"Nombre del Cliente"}
-                                    selectItem={select_datos_cliente}
-                                    ></AutoComplete>
-                                </View>
-                                :
-                                <View>
-                                    <Text style={[styles.textBoxLabel, {zIndex:5}]}>Nombre del Cliente</Text>
-                                    <TextInput style={styles.textBox}
-                                    selection={{start:0, end:0}}
-                                    defaultValue={nombreCliente}/>
-                                </View>
-                            } */}
                             {editable == false && <Locker></Locker>}
                         </View>
                         {
@@ -772,8 +770,9 @@ const FormPrestamos = ({navigation}) => {
                                 <TextInput style={styles.textBox}
                                 placeholder='Calle, Numero, Colonia'
                                 onChangeText={value => setDomCliente(value)}
-                                defaultValue={domicilioCliente}/>
+                                value={domicilioCliente}/>
                             </View>
+                            <Locker></Locker>
                             {editable == false && <Locker></Locker>}
                         </View>
                         <View style={styles.spacer20}></View>
@@ -785,8 +784,9 @@ const FormPrestamos = ({navigation}) => {
                                         placeholder='Ej. 6681234567'
                                         maxLength={10}
                                         onChangeText={value => setTelCliente(value)}
-                                        defaultValue={telefonoCliente}/>
+                                        value={telefonoCliente}/>
                             </View>
+                            <Locker></Locker>
                             {editable == false && <Locker></Locker>}
                         </View>
                         <View style={styles.spacer10}></View>
@@ -815,59 +815,46 @@ const FormPrestamos = ({navigation}) => {
                             <Text style={styles.textBoxLabel}>Nombre del Aval</Text>
                                 {
                                     editable === true ?
-                                    <AutocompleteDropdown
-                                    key={reload_aval}
-                                    style={{zIndex:100}}
-                                    containerStyle={[styles.textBox]}
-                                    inputContainerStyle={{backgroundColor:"white", marginTop:2, marginLeft:-10, borderRadius:20, width:"105%"}}
-                                    textInputProps={{
-                                        placeholder: 'Nombre Apellido Apellido',
-                                        placeholderTextColor:"#a9a9a9",
-                                        style:{fontSize:18, marginLeft:-3},
-                                    }}
-                                    clearOnFocus={false}
-                                    closeOnBlur={true}
-                                    onChangeText={value => get_avales(1, filtro=value)}
-                                    onClear={clear_aval}
-                                    value={nombreAval}
-                                    debounce={600}
-                                    emptyResultText={"Sin resultado"}
-                                    closeOnSubmit={false}
-                                    onSelectItem={item => {
-                                        item && setNombreAval(item.title); selectDatosAval(item)}}
-                                    dataSet={lista_avales}
-                                    />
+                                    <View>
+                                        {
+                                            preselectedAval === 0 ?
+                                            <AutocompleteDropdown
+                                            key={reload_aval}
+                                            style={{zIndex:100}}
+                                            containerStyle={[styles.textBox,{ marginBottom:0, marginTop:0}]}
+                                            inputContainerStyle={{backgroundColor:"white", marginTop:2, marginLeft:-10, borderRadius:20, width:"105%"}}
+                                            textInputProps={{
+                                                placeholder: 'Nombre Apellido Apellido',
+                                                placeholderTextColor:"#a9a9a9",
+                                                style:{fontSize:18, marginLeft:-3},
+                                            }}
+                                            clearOnFocus={false}
+                                            onChangeText={value => get_avales(1, filtro=value)}
+                                            onClear={clear_aval}
+                                            value={nombreAval}
+                                            debounce={600}
+                                            emptyResultText={"Sin resultado"}
+                                            closeOnSubmit={false}
+                                            onSelectItem={item => {
+                                                item && setNombreAval(item.title); selectDatosAval(item)}}
+                                            dataSet={lista_avales}
+                                            />
+                                            :
+                                            <View style={[styles.textBoxRow, {width:"100%"}]}>
+                                                <Text style={[styles.textBox,{textAlignVertical:"center"}]}>{nombreAval}</Text>
+                                                <TouchableOpacity onPress={() => clearPreselectedAval()}>
+                                                    <XCircle width={18} stroke="#aeb4c6" style={{marginLeft:-30}} />
+                                                </TouchableOpacity>
+                                            </View>
+                                            
+                                        }
+                                    </View>
                                     :
-                                    <TextInput style={styles.textBox}
+                                    <TextInput style={[styles.textBox, {zIndex:100}]}
                                     selection={{start:0, end:0}}
-                                    defaultValue={nombreAval}/>
+                                    value={nombreAval}/>
                                 }
-
                             </View>
-                            {/* {
-                                editable === true ?
-                                <AutoComplete
-                                key={reload_aval}
-                                idGrupo={grupo}
-                                lista_items={lista_avales}
-                                default_value={nombreAval}
-                                combo_height={avalesHeight}
-                                focused={setAvalesFocus}
-                                setText={setNombreAval}
-                                searchText={get_avales}
-                                clearText={clear_aval}
-                                placeHolder={"Nombre Apellido Apellido"}
-                                title={"Nombre del Aval"}
-                                selectItem={selectDatosAval}></AutoComplete>
-                                :
-                                <View>
-                                    <Text style={[styles.textBoxLabel, {zIndex:5}]}>Nombre del Aval</Text>
-                                    <TextInput style={styles.textBox}
-                                    selection={{start:0, end:0}}
-                                    defaultValue={nombreAval}/>
-                                </View>
-                            } */}
-
                             {editable == false && <Locker></Locker>}
                         </View>
                         <View style={styles.spacer20}></View>
@@ -877,8 +864,9 @@ const FormPrestamos = ({navigation}) => {
                                         <TextInput style={styles.textBox}
                                         placeholder='Calle, Numero, Colonia'
                                         onChangeText={value => setDomAval(value)}
-                                        defaultValue={domicilioAval}/>
+                                        value={domicilioAval}/>
                             </View>
+                            <Locker></Locker>
                             {editable == false && <Locker></Locker>}
                         </View>
                         <View style={styles.spacer20}></View>
@@ -890,16 +878,17 @@ const FormPrestamos = ({navigation}) => {
                                         placeholder='Ej. 6681234567'
                                         maxLength={10}
                                         onChangeText={value => setTelAval(value)}
-                                        defaultValue={telefonoAval}/>
+                                        value={telefonoAval}/>
                             </View>
+                            <Locker></Locker>
                             {editable == false && <Locker></Locker>}
                         </View>
                         <View style={styles.spacer20}></View>
                     </View>
                     <View>
-                        {/* {
+                        {
                             unlockPrestamo() === true ? <View></View> : <View style={styles.lockUI}></View>
-                        } */}
+                        }
                         <Text style={styles.mainHeaders}>Datos del Prestamo</Text>
                         <View style={styles.horizontalLine}></View>
                         <View style={styles.spacer10}></View>
@@ -926,7 +915,7 @@ const FormPrestamos = ({navigation}) => {
                                     </View>
                                     :
                                     <TextInput style={styles.textBox}
-                                    defaultValue={plazoPrestamo}/>
+                                    value={plazoPrestamo}/>
                                 }
 
                                 </View>
@@ -965,7 +954,7 @@ const FormPrestamos = ({navigation}) => {
                                     </View>
                                     :
                                     <View style={styles.textBoxBorder}>
-                                        <Text style={styles.textBoxLabel}>Pagaré</Text>
+                                        <Text style={styles.textBoxLabel}>Importe</Text>
                                         <CurrencyInput style={styles.textBox}
                                             delimiter=","
                                             precision={0}
@@ -988,8 +977,8 @@ const FormPrestamos = ({navigation}) => {
                                     <TextInput style={styles.textBox}
                                     keyboardType='numeric'
                                     placeholder='Ej. 1234'
-                                    onChangeText={value => setPagarePrestamo(value)}
-                                    defaultValue={pagarePrestamo}/>
+                                    value={pagarePrestamo}
+                                    onChangeText={value => setPagarePrestamo(value)}/>
                                 </View>
                                 {editable == false && <Locker></Locker>}
                             </View>
@@ -1056,7 +1045,7 @@ const FormPrestamos = ({navigation}) => {
                                         }
                                         {coords === '0' && editable == false ?
                                             <View style={styles.textBoxRow}>
-                                            <Image style={[styles.BubbleImage,{tintColor:"red"}]}
+                                            <Image style={[styles.BubbleImage,{tintColor:"orange"}]}
                                                 source={ImageIndex.gps}>
                                             </Image>
                                             <Text style={styles.textBoxError}>No disponible</Text>
@@ -1103,7 +1092,7 @@ const FormPrestamos = ({navigation}) => {
                                         }
                                         {fotoDomicilio === '0' ?
                                             <View style={styles.textBoxRow}>
-                                                <Image style={[styles.BubbleImage,{tintColor:"red"}]}
+                                                <Image style={[styles.BubbleImage,{tintColor:"orange"}]}
                                                     source={ImageIndex.cam}>
                                                 </Image>
                                                 <Text style={styles.textBoxError}>No disponible</Text>
@@ -1147,7 +1136,7 @@ const FormPrestamos = ({navigation}) => {
                                         }
                                         {fotoINE === '0' ?
                                             <View style={styles.textBoxRow}>
-                                                <Image style={[styles.BubbleImage,{tintColor:"red"}]}
+                                                <Image style={[styles.BubbleImage,{tintColor:"orange"}]}
                                                     source={ImageIndex.cam}>
                                                 </Image>
                                                 <Text style={styles.textBoxError}>No disponible</Text>
@@ -1194,7 +1183,7 @@ const FormPrestamos = ({navigation}) => {
                                         }
                                             {fotoGarantia === '0' ?
                                                 <View style={styles.textBoxRow}>
-                                                    <Image style={[styles.BubbleImage,{tintColor:"red"}]}
+                                                    <Image style={[styles.BubbleImage,{tintColor:"orange"}]}
                                                         source={ImageIndex.cam}>
                                                     </Image>
                                                     <Text style={styles.textBoxError}>No disponible</Text>
@@ -1272,7 +1261,7 @@ const FormPrestamos = ({navigation}) => {
                             </View>
                         </View>
                         <View style={styles.spacer20}></View>
-                        <View style={styles.textBoxContainerFull}>
+                        <View style={[styles.textBoxContainerFull,{height:75}]}>
                             <View style={styles.textBoxBorderMoney}>
                                         <Text style={styles.textBoxLabel}>Total</Text>
                                         <CurrencyInput style={styles.textBoxMoney}
@@ -1291,7 +1280,6 @@ const FormPrestamos = ({navigation}) => {
                             editable === false &&
                             <View style={styles.spacer30}></View>
                         }
-                        <View style={styles.spacer20}></View>
                         <View style={styles.spacer20}></View>
                         <View style={styles.formRow}>
                             {
@@ -1329,7 +1317,6 @@ const FormPrestamos = ({navigation}) => {
                 </KeyboardAwareScrollView>
             </View>
         </View>
-        </AutocompleteDropdownContextProvider>
     )
 }
 
@@ -1399,19 +1386,6 @@ function AutoComplete({idGrupo, searchText, clearText, selectItem, lista_items, 
     )
 }
 
-function Locker(){
-    return(
-        <View style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            top: 0,
-            left: 0,
-            backgroundColor: 'transparent',
-        }}>
-        </View>
-    )
-}
 function LockerInput(){
     return(
         <View style={{

@@ -144,6 +144,17 @@ class ServiceClientes{
         console.error(error);
         }
     };
+
+    getLastAval = async (idCliente) => {
+        url = this.api.URL+"prestamos/get_last_aval?id_cliente="+idCliente
+        try {
+            const response = await fetch(url);
+            const json = await response.json();
+            return json;
+        } catch (error) {
+        console.error(error);
+        }
+    }
 }
 
 export default ServiceClientes

@@ -92,18 +92,23 @@ const MainScreen = ({navigation}) => {
                     <View style={styles.horizontalLine}></View>
                     <View style={styles.mainRow}>
                         <MainRoundButton func={trackEmpleadosFunc} title={"Rastreo de empleados"} image={ImageIndex.track}></MainRoundButton>
-                        <MainRoundButtonSpacer></MainRoundButtonSpacer>
-                        <MainRoundButtonSpacer></MainRoundButtonSpacer>
+                        <MainRoundButtonBubble func={nuevoClienteFunc} title={"Nuevo Empleado"} image={ImageIndex.employee} bubbleImage={ImageIndex.add}></MainRoundButtonBubble>
+                        <MainRoundButtonBubble func={consultaClientes} title={"Consulta de Empleados"} image={ImageIndex.employee} bubbleImage={ImageIndex.list}></MainRoundButtonBubble>
                     </View>
                 </View>
             }
 
 
-            <Text style={styles.mainHeaders}>Caja</Text>
+            <Text style={styles.mainHeaders}>Cajas</Text>
             <View style={styles.horizontalLine}></View>
             <View style={styles.mainRow}>
                 <MainRoundButton func={corteFunc} title={"Corte de Caja"} image={ImageIndex.money}></MainRoundButton>
-                <MainRoundButtonBubble func={cajaFunc} title={"Administrar Cajas"} image={ImageIndex.money} bubbleImage={ImageIndex.add}></MainRoundButtonBubble>
+                {
+                    admin === true ?
+                    <MainRoundButtonBubble func={cajaFunc} title={"Administrar Cajas"} image={ImageIndex.money} bubbleImage={ImageIndex.add}></MainRoundButtonBubble>
+                    :
+                    <MainRoundButtonSpacer></MainRoundButtonSpacer>
+                }
                 <MainRoundButtonSpacer></MainRoundButtonSpacer>
             </View>
 

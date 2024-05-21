@@ -8,6 +8,8 @@ import { useRoute } from "@react-navigation/native"
 import ServicePrestamos from '../services/ServicePrestamos';
 import ServiceClientes from '../services/ServiceClientes';
 import Toast from 'react-native-root-toast';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Locker, LockerGray } from '../Utils';
 
 const FormClientes = ({navigation}) => {
     let service = new ServicePrestamos()
@@ -72,9 +74,28 @@ const FormClientes = ({navigation}) => {
             }
         }else{
             setEditable(true)
-            setTopLabel("Nuevo Prestamo")
-            setButtonLabel("Registrar Prestamo")
-            getRutas()
+            setTopLabel("Nuevo Cliente")
+            setButtonLabel("Registrar Cliente")
+            const getPermissions = async () => {
+                let tempRutas = await getRutas()
+                const rol = await AsyncStorage.getItem('nombreRol');
+                console.log(rol)
+                if(rol != "ADMINISTRADOR"){
+                    const rutaEmpleado = await AsyncStorage.getItem('idRuta');
+                    console.log(rutaEmpleado)
+                    setRuta(String(rutaEmpleado))
+                    getGrupos(Number(rutaEmpleado))
+                    for(let r = 0 ; r < tempRutas.length ; r++){
+                        if(tempRutas[r].value == rutaEmpleado){
+                            console.log(tempRutas[r])
+                            setRutaEdit(String(tempRutas[r].label))
+                            break;
+                        }
+                    }
+                    
+                }
+            }
+            getPermissions()
             getSiguienteId()
         }
         return () =>
@@ -89,6 +110,7 @@ const FormClientes = ({navigation}) => {
             tempRutas.push({"label":data[i].ruta,"value":data[i].idRuta})
         }
         setListaRutas(tempRutas)
+        return tempRutas;
     }, [])
     const getGrupos = useCallback(async (idRuta) => {
         const res = await service.getGrupos(id=idRuta)
@@ -116,9 +138,9 @@ const FormClientes = ({navigation}) => {
         setLoading(0)   
         setIdClienteEdit(data.idCliente)
         setNombreCliente(data.nomCliente)
-        setDomCliente(data.domicilioCliente)
-        setTelCliente(data.telefonoCliente)
-        setRutaEdit(data.ruta.nom_ruta)
+        setDomCliente(data.domCliente)
+        setTelCliente(data.telCliente)
+        setRutaEdit(data.ruta.nomRuta)
         setGrupoEdit(data.grupo.nomGrupo)
         if(data.tipoCliente == 1){
             setTipoClienteEdit("Normal")
@@ -214,13 +236,20 @@ const FormClientes = ({navigation}) => {
                                     <Text style={styles.textBoxLabel}>ID Cliente</Text>
                                     {
                                         idClienteNoEditable === '' ?
-                                        <TextInput style={styles.textBox}
-                                        onChangeText={value => setIdCliente(value)}
-                                        value={String(idCliente)}/>
+                                        <View>
+                                            <TextInput style={styles.textBox}
+                                            onChangeText={value => setIdCliente(value)}
+                                            value={String(idCliente)}/>
+                                            <Locker></Locker>
+                                        </View>
                                         :
-                                        <TextInput style={styles.textBox}
-                                        selection={{start:0, end:0}}
-                                        defaultValue={String(idClienteNoEditable)}/>
+                                        <View>
+                                            <TextInput style={styles.textBox}
+                                            selection={{start:0, end:0}}
+                                            defaultValue={String(idClienteNoEditable)}/>
+                                            <Locker></Locker>
+                                        </View>
+
                                     }
                                 
                         </View>
@@ -234,6 +263,10 @@ const FormClientes = ({navigation}) => {
                                 placeholder='Nombre Apellido Apellido'
                                 onChangeText={value => setNombreCliente(value)}
                                 defaultValue={nombreCliente}/>
+                                {
+                                    idClienteNoEditable !== '' &&
+                                    <Locker></Locker>
+                                }
                     </View>
                 </View>
                 <View style={styles.spacer20}></View>
@@ -244,6 +277,10 @@ const FormClientes = ({navigation}) => {
                                 placeholder='Calle, Numero, Colonia'
                                 onChangeText={value => setDomCliente(value)}
                                 defaultValue={domicilioCliente}/>
+                                {
+                                    idClienteNoEditable !== '' &&
+                                    <Locker></Locker>
+                                }
                     </View>
                 </View>
                 <View style={styles.spacer20}></View>
@@ -256,6 +293,10 @@ const FormClientes = ({navigation}) => {
                                 placeholder='Ej. 6681234567'
                                 onChangeText={value => setTelCliente(value)}
                                 defaultValue={telefonoCliente}/>
+                                {
+                                    idClienteNoEditable !== '' &&
+                                    <Locker></Locker>
+                                }
                     </View>
                 </View>
                 <View style={styles.spacer20}></View>
@@ -274,9 +315,12 @@ const FormClientes = ({navigation}) => {
                                         value={ruta}
                                         onChange={item => {setRuta(item.value); getGrupos(item.value)}}/>
                                         :
-                                        <TextInput style={styles.textBox}
-                                        selection={{start:0, end:0}}
-                                        defaultValue={String(rutaNoEditable)}/>
+                                        <View>
+                                            <TextInput style={styles.textBox}
+                                            selection={{start:0, end:0}}
+                                            defaultValue={String(rutaNoEditable)}/>
+                                            <Locker></Locker>
+                                        </View>
                                     }
                         </View>
                     </View>
@@ -294,9 +338,12 @@ const FormClientes = ({navigation}) => {
                                         value={grupo}
                                         onChange={item => {setGrupo(item.value);}}/>
                                         :
-                                        <TextInput style={styles.textBox}
-                                        selection={{start:0, end:0}}
-                                        defaultValue={String(grupoNoEditable)}/>
+                                        <View>
+                                            <TextInput style={styles.textBox}
+                                            selection={{start:0, end:0}}
+                                            defaultValue={String(grupoNoEditable)}/>
+                                            <Locker></Locker>
+                                        </View>
                                     }
                         </View>
                     </View>
@@ -316,9 +363,12 @@ const FormClientes = ({navigation}) => {
                                         value={tipoCliente}
                                         onChange={item => {setTipoCliente(item.value);}}/>
                                         :
-                                        <TextInput style={styles.textBox}
-                                        selection={{start:0, end:0}}
-                                        defaultValue={String(tipoClienteNoEditable)}/>
+                                        <View>
+                                            <TextInput style={styles.textBox}
+                                            selection={{start:0, end:0}}
+                                            defaultValue={String(tipoClienteNoEditable)}/>
+                                            <Locker></Locker>
+                                        </View>
                                     }
                         </View>
                     </View>

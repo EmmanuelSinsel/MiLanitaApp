@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
         marginTop:-5,
         fontSize: 18,
         zIndex:-1,
-        color:"red"
+        color:"orange"
     },
     comboBoxPlaceholder:{
         width:"100%",

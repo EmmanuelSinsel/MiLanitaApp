@@ -23,6 +23,7 @@
     "expo-image-picker": "15.0.5",
     "expo-location": "~17.0.1",
     "expo-media-library": "~16.0.3",
+    "expo-splash-screen": "~0.27.4",
     "expo-status-bar": "~1.12.1",
     "moment": "^2.30.1",
     "react": "18.2.0",
@@ -34,6 +35,7 @@
     "react-native-date-picker": "^4.3.7",
     "react-native-dropdown-picker": "^5.4.6",
     "react-native-element-dropdown": "^2.10.1",
+    "react-native-feather": "^1.1.2",
     "react-native-geolocation-service": "^5.3.1",
     "react-native-image-picker": "^7.1.2",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
@@ -44,8 +46,7 @@
     "react-native-screens": "3.31.1",
     "react-native-splash-screen": "^3.3.0",
     "react-native-svg": "15.2.0",
-    "react-native-table-component": "^1.2.2",
-    "expo-splash-screen": "~0.27.4"
+    "react-native-table-component": "^1.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

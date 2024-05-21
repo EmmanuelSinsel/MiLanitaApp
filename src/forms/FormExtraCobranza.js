@@ -8,6 +8,7 @@ import { useRoute } from "@react-navigation/native"
 import CurrencyInput from 'react-native-currency-input';
 import ServicePrestamos from '../services/ServicePrestamos';
 import ServiceAbonos from '../services/ServiceAbonos';
+import { Locker } from '../Utils';
 
 const FormExtraCobranza = ({navigation}) => {
     let serviceAbonos = new ServiceAbonos()
@@ -280,19 +281,4 @@ const FormExtraCobranza = ({navigation}) => {
         </ScrollView>
     )
 }
-
-function Locker(){
-    return(
-        <View style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            top: 0,
-            left: 0,
-            zIndex:10,
-        }}>
-        </View>
-    )
-}
-
 export default FormExtraCobranza;

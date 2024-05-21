@@ -1,0 +1,73 @@
+Date : 2024-05-16 11:35:02
+Directory : c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\src
+Total : 25 files,  -15860 codes, -160 comments, -97 blanks, all -16117 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| Properties |          2 |        -18 |        -33 |        -14 |        -65 |
+| Batch      |          1 |        -41 |        -29 |        -22 |        -92 |
+| Groovy     |          3 |       -134 |        -72 |        -34 |       -240 |
+| XML        |         11 |       -147 |        -23 |         -6 |       -176 |
+| JavaScript |          4 |       -810 |         -3 |        -16 |       -829 |
+| JSON       |          4 |    -14,710 |          0 |         -5 |    -14,715 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                   | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                      |         25 |    -15,860 |       -160 |        -97 |    -16,117 |
+| ..                                                                                                                     |         25 |    -15,860 |       -160 |        -97 |    -16,117 |
+| .. (Files)                                                                                                             |          8 |    -15,520 |         -3 |        -21 |    -15,544 |
+| ..\android                                                                                                             |         16 |       -288 |       -157 |        -76 |       -521 |
+| ..\android (Files)                                                                                                     |          4 |       -100 |        -67 |        -45 |       -212 |
+| ..\android\app                                                                                                         |         11 |       -181 |        -90 |        -30 |       -301 |
+| ..\android\app (Files)                                                                                                 |          1 |        -86 |        -67 |        -24 |       -177 |
+| ..\android\app\src                                                                                                     |         10 |        -95 |        -23 |         -6 |       -124 |
+| ..\android\app\src\debug                                                                                               |          1 |         -5 |          0 |         -3 |         -8 |
+| ..\android\app\src\main                                                                                                |          9 |        -90 |        -23 |         -3 |       -116 |
+| ..\android\app\src\main (Files)                                                                                        |          1 |        -37 |          0 |          0 |        -37 |
+| ..\android\app\src\main\res                                                                                            |          8 |        -53 |        -23 |         -3 |        -79 |
+| ..\android\app\src\main\res\drawable                                                                                   |          2 |        -14 |        -23 |         -3 |        -40 |
+| ..\android\app\src\main\res\mipmap-anydpi-v26                                                                          |          2 |        -10 |          0 |          0 |        -10 |
+| ..\android\app\src\main\res\values                                                                                     |          3 |        -28 |          0 |          0 |        -28 |
+| ..\android\app\src\main\res\values-night                                                                               |          1 |         -1 |          0 |          0 |         -1 |
+| ..\android\gradle                                                                                                      |          1 |         -7 |          0 |         -1 |         -8 |
+| ..\android\gradle\wrapper                                                                                              |          1 |         -7 |          0 |         -1 |         -8 |
+| ..\assets                                                                                                              |          1 |        -52 |          0 |          0 |        -52 |
+| ..\assets\icons                                                                                                        |          1 |        -52 |          0 |          0 |        -52 |
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                                                               | language   | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\App.js                                                           | JavaScript |       -109 |          0 |         -5 |       -114 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\Style.js                                                         | JavaScript |       -689 |         -2 |        -10 |       -701 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\build.gradle                                         | Groovy     |        -86 |        -67 |        -24 |       -177 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\debug\AndroidManifest.xml                        | XML        |         -5 |          0 |         -3 |         -8 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\AndroidManifest.xml                         | XML        |        -37 |          0 |          0 |        -37 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\drawable\rn_edit_text_material.xml      | XML        |        -11 |        -23 |         -3 |        -37 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\drawable\splashscreen.xml               | XML        |         -3 |          0 |          0 |         -3 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\mipmap-anydpi-v26\ic_launcher.xml       | XML        |         -5 |          0 |          0 |         -5 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\mipmap-anydpi-v26\ic_launcher_round.xml | XML        |         -5 |          0 |          0 |         -5 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\values-night\colors.xml                 | XML        |         -1 |          0 |          0 |         -1 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\values\colors.xml                       | XML        |         -6 |          0 |          0 |         -6 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\values\strings.xml                      | XML        |         -5 |          0 |          0 |         -5 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\app\src\main\res\values\styles.xml                       | XML        |        -17 |          0 |          0 |        -17 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\build.gradle                                             | Groovy     |        -34 |         -5 |         -5 |        -44 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\gradle.properties                                        | Properties |        -11 |        -33 |        -13 |        -57 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\gradle\wrapper\gradle-wrapper.properties                 | Properties |         -7 |          0 |         -1 |         -8 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\gradlew.bat                                              | Batch      |        -41 |        -29 |        -22 |        -92 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\android\settings.gradle                                          | Groovy     |        -14 |          0 |         -5 |        -19 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\app.json                                                         | JSON       |        -77 |          0 |         -1 |        -78 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\assets\icons\icon-loading.svg                                    | XML        |        -52 |          0 |          0 |        -52 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\babel.config.js                                                  | JavaScript |         -6 |          0 |         -1 |         -7 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\eas.json                                                         | JSON       |        -21 |          0 |         -2 |        -23 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\package-lock.json                                                | JSON       |    -14,553 |          0 |         -1 |    -14,554 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\package.json                                                     | JSON       |        -59 |          0 |         -1 |        -60 |
+| c:\MiLanitaExpress\mi_lanita_app_react\AwesomeProject\react-native.config.js                                           | JavaScript |         -6 |         -1 |          0 |         -7 |
+| Total                                                                                                                  |            |    -15,860 |       -160 |        -97 |    -16,117 |
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
