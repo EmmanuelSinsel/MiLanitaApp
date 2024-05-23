@@ -52,6 +52,7 @@ const FormPrestamos = ({navigation}) => {
     const [seguroPrestamo,     setSeguroPrestamo] = useState('');
     const [abonoPrestamo,      setAbonoPrestamo] = useState('');
     const [totalPrestamo,      setTotalPrestamo] = useState('');
+    const [renovacionPrestamo,  setRenovacionPrestamo] = useState(0);
     const [listaRutas, setListaRutas] = useState([]);
     const [listaGrupos, setListaGrupos] = useState([]);
     const [listaClientes, setListaClientes] = useState([]);
@@ -316,14 +317,17 @@ const FormPrestamos = ({navigation}) => {
     const update_plazo = (plazo) => {
         setPlazoPrestamo(plazo)
     }
-    const calcularPrestamo = useCallback(async (importe, plazo, flag) => {
+    const calcularPrestamo = useCallback(async (importe, plazo, flag, id_cliente) => {
+        console.log(id_cliente)
         if(importe != null && plazo != null && flag == true){
-            const res = await service.calcularPrestamo(importe, plazo)
+            const res = await service.calcularPrestamo(importe, plazo, id_cliente)
             const data = res.data
             setInteresPrestamo(data.intereses)
             setSeguroPrestamo(data.seguro)
             setAbonoPrestamo(data.abono)
             setTotalPrestamo(data.total)
+            setRenovacionPrestamo(data.renovacion)
+            console.log(data.renovacion)
             return true
         }
         return false
@@ -388,9 +392,9 @@ const FormPrestamos = ({navigation}) => {
         }
     }
 
-    const selectDatosAval = async(data) => {
+    const selectDatosAval = async(data, id_cliente) => {
         if(data){
-            let flag = await checkAval(data.id)
+            let flag = await checkAval(data.id, id_cliente)
             if(flag == 1){
                 setIdAval(data.id)
                 setNombreAval(data.title)
@@ -474,8 +478,8 @@ const FormPrestamos = ({navigation}) => {
         }
     }
 
-    const checkAval = useCallback(async (id) => {
-        const res = await service.checkAval(id)
+    const checkAval = useCallback(async (id_aval, id_cliente) => {
+        const res = await service.checkAval(id_aval, id_cliente)
         return res.status
     }, [])
 
@@ -836,7 +840,7 @@ const FormPrestamos = ({navigation}) => {
                                             emptyResultText={"Sin resultado"}
                                             closeOnSubmit={false}
                                             onSelectItem={item => {
-                                                item && setNombreAval(item.title); selectDatosAval(item)}}
+                                                item && setNombreAval(item.title); selectDatosAval(item, idCliente)}}
                                             dataSet={lista_avales}
                                             />
                                             :
@@ -910,7 +914,7 @@ const FormPrestamos = ({navigation}) => {
                                         placeholderStyle={styles.comboBoxPlaceholder}
                                         selectedTextStyle={styles.comboBoxSelected}
                                         value={plazoPrestamo}
-                                        onChange={value => update_plazo(plazo=value.value)}/>
+                                        onChange={value => {update_plazo(plazo=value.value); calcularPrestamo(importe_prestamo, value.value, editable, idCliente)}}/>
                                     }
                                     </View>
                                     :
@@ -936,7 +940,7 @@ const FormPrestamos = ({navigation}) => {
                                             placeholderStyle={styles.comboBoxPlaceholder}
                                             selectedTextStyle={styles.comboBoxSelected}
                                             value={importe_prestamo}
-                                            onChange={(value) => setImportePrestamo(value.value) && calcularPrestamo(importe=importe_prestamo, plazo=plazoPrestamo)}/>
+                                            onChange={(value) => {setImportePrestamo(value.value); calcularPrestamo(value.value, plazoPrestamo, editable, idCliente)}}/>
                                         </View>
                                         :
                                         <View style={styles.textBoxBorder}>
@@ -948,7 +952,7 @@ const FormPrestamos = ({navigation}) => {
                                             placeholderStyle={styles.comboBoxPlaceholder}
                                             selectedTextStyle={styles.comboBoxSelected}
                                             value={importe_prestamo}
-                                            onChange={(value) => setImportePrestamo(value.value) && calcularPrestamo(importe=importe_prestamo, plazo=plazoPrestamo)}/>
+                                            onChange={(value) => {setImportePrestamo(value.value); calcularPrestamo(value.value, plazoPrestamo, editable, idCliente)}}/>
                                         </View>
                                     }
                                     </View>
@@ -1200,8 +1204,6 @@ const FormPrestamos = ({navigation}) => {
                     <View>
                         {
                             unlockPreview() === true ? <View>
-                                {calcularPrestamo(importe=importe_prestamo, plazo=plazoPrestamo, flag=editable) === true ?
-                                <View></View> : <View></View>}
                             </View> : <View style={styles.lockUI}></View>
                         }
                         
@@ -1259,6 +1261,25 @@ const FormPrestamos = ({navigation}) => {
                                 </View>
                                 <Locker></Locker>
                             </View>
+                            {
+                                renovacionPrestamo !== 0 &&
+                                <View style={styles.textBoxContainerHalf}>
+                                <View style={styles.textBoxBorder}>
+                                            <Text style={styles.textBoxLabel}>Renovacion</Text>
+                                            <CurrencyInput style={styles.textBox}
+                                            delimiter=","
+                                            precision={0}
+                                            minValue={0}
+                                            maxValue={9999}
+                                            prefix="$"
+                                            placeholder='$0'
+                                            onChangeValue={(value) => setSeguroPrestamo(value)}
+                                            value={renovacionPrestamo}/>
+                                            
+                                </View>
+                                <Locker></Locker>
+                            </View>
+                            }
                         </View>
                         <View style={styles.spacer20}></View>
                         <View style={[styles.textBoxContainerFull,{height:75}]}>

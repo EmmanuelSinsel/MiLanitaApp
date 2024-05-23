@@ -22,8 +22,8 @@ class ServicePrestamos{
         }
     }
 
-    calcularPrestamo = async (importe, plazo) => {
-        url = this.api.URL+"prestamos/calcular_prestamo?importe="+importe+"&plazo="+plazo
+    calcularPrestamo = async (importe, plazo, id_cliente) => {
+        url = this.api.URL+"prestamos/calcular_prestamo?importe="+importe+"&plazo="+plazo+"&id_cliente="+id_cliente
         try {
             const response = await fetch(url);
             const json = await response.json();
@@ -138,8 +138,8 @@ class ServicePrestamos{
         }
     }
 
-    checkAval = async (id) => {
-        url = this.api.URL+"prestamos/check_aval?id_aval="+id
+    checkAval = async (id_aval, id_cliente) => {
+        url = this.api.URL+"prestamos/check_aval?id_aval="+id_aval+"&id_cliente="+id_cliente
         try {
             const response = await fetch(url);
             const json = await response.json();
