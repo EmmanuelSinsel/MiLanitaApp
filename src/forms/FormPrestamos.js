@@ -400,10 +400,16 @@ const FormPrestamos = ({navigation}) => {
                 setNombreAval(data.title)
                 setDomAval(data.dom)
                 setTelAval(data.tel)
-            }else{
+            }if(flag == 0){
                 setNombreAval('')
                 setReloadAval(!reload_aval)
                 let toast = Toast.show('El Aval seleccionado ya es Aval en 3 prestamos activos', {
+                    duration: Toast.durations.SHORT,
+                });
+            }if(flag == 2){
+                setNombreAval('')
+                setReloadAval(!reload_aval)
+                let toast = Toast.show('El Aval y el Cliente se encuentran en prestamo cruzado!', {
                     duration: Toast.durations.SHORT,
                 });
             }
