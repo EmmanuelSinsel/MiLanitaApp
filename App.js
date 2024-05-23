@@ -4,6 +4,8 @@ import Entypo from '@expo/vector-icons/Entypo';
 import * as Font from 'expo-font';
 import { AutocompleteDropdownContextProvider } from 'react-native-autocomplete-dropdown';
 import { useHeaderHeight } from '@react-navigation/elements';
+import * as TaskManager from 'expo-task-manager';
+import * as Location from 'expo-location';
 
 import Login from './src/forms/Login';
 import MainScreen from './src/forms/MainScreen';
@@ -32,6 +34,46 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
 
+  
+  const LOCATION_TASK_NAME = 'background-location-task-buzz-v2';
+
+  useEffect(() => {
+    console.log("jsjsjsj")
+    requestPermissions()
+  })
+
+  const requestPermissions = async () => {
+    const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+    if (foregroundStatus === 'granted') {
+      const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+      if (backgroundStatus === 'granted') {
+        Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+          accuracy: Location.Accuracy.BestForNavigation,
+          timeInterval: 10000, // Check every 10 seconds
+          distanceInterval: 0,
+          showsBackgroundLocationIndicator: true,
+        });
+      }
+    }
+  };
+  
+  const PermissionsButton = () => (
+    <View style={styles.container}>
+      <Button onPress={requestPermissions} title="Enable background location" />
+    </View>
+  );
+  
+  TaskManager.defineTask(LOCATION_TASK_NAME, ({ data, error }) => {
+    if (error) {
+      console.log(error)
+      return;
+    }
+    console.log("ASDASDASDSDASD")
+    if (data) {
+      const { locations } = data;
+      console.log(locations)
+    }
+  });
   return (
     <AutocompleteDropdownContextProvider >
     <RootSiblingParent>

@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import React from 'react';
 
@@ -34,4 +35,13 @@ const LockerGray = () => {
     )
 }
 
-export { Locker, LockerGray }
+const GetUserId = async () => {
+    const get_values = async() => {
+        const idEmpleado = await AsyncStorage.getItem('idEmpleado');
+        return idEmpleado
+    }
+    return get_values()
+
+}
+
+export { Locker, LockerGray, GetUserId }

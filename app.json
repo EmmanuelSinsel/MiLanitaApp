@@ -63,7 +63,10 @@
             "usesCleartextTraffic": true
           },
           "ios": {
-            "flipper": true
+            "flipper": true,
+            "infoPlist": {
+              "UIBackgroundModes": ["location", "fetch", "remote-notification"]
+            }
           }
         }
       ]

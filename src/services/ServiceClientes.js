@@ -1,4 +1,5 @@
 import API from "./API";
+import { GetUserId } from "../Utils";
 
 class ServiceClientes{
     api = new API()

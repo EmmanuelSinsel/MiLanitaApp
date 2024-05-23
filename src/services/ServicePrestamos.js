@@ -1,4 +1,5 @@
 import API from "./API";
+import { GetUserId } from "../Utils";
 
 class ServicePrestamos{
     api = new API()
@@ -41,7 +42,12 @@ class ServicePrestamos{
             url = this.api.URL+"prestamos/lista_prestamos?p="+p+"&p_size="+pSize+"&filtro="+filtro
         }
         try {
-            const response = await fetch(url);
+            const response = await fetch(url,
+                {
+                    headers:{
+                        UserId: await GetUserId()
+                    }
+                });
             const json = await response.json();
             return json;
         } catch (error) {
