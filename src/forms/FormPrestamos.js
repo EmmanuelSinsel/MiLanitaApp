@@ -190,7 +190,8 @@ const FormPrestamos = ({navigation}) => {
         newFotoDomicilio,
         newFotoGarantia,
         newCoordsLat,
-        newCoordsLon
+        newCoordsLon,
+        newRenovacion
         ) => {
         nuevoPrestamo = {
             'id_prestamo':newIdPrestamo,
@@ -216,7 +217,8 @@ const FormPrestamos = ({navigation}) => {
             'foto_dom':newFotoDomicilio,
             'foto_garantia':newFotoGarantia,
             'coords_lat':newCoordsLat,
-            'coords_lon':newCoordsLon
+            'coords_lon':newCoordsLon,
+            'renovacion':newRenovacion
         }
         setLoading(1)
         const data = await service.registrarPrestamo(nuevoPrestamo)
@@ -1313,26 +1315,27 @@ const FormPrestamos = ({navigation}) => {
                                 editable === false ? <View></View> 
                                 :
                                 <TouchableOpacity onPress={() => registrarPrestamo(
-                                    new_id_prestamo=idPrestamo,
+                                    newIdPrestamo=idPrestamo,
                                     newIdCliente=idCliente,
-                                    new_importe=importe_prestamo,
-                                    new_plazo=plazoPrestamo,
-                                    new_abono=abonoPrestamo,
-                                    new_seguro=seguroPrestamo,
-                                    new_num_semana=0,
-                                    new_fecha=fechaPrestamo,
-                                    new_estatus=estatusPrestamo,
-                                    new_intereses=interesesPrestamo,
-                                    new_total_pagar=totalPrestamo,
-                                    new_saldo_pendiente=totalPrestamo,
-                                    new_pagare=pagarePrestamo,
+                                    newImporte=importe_prestamo,
+                                    newPlazo=plazoPrestamo,
+                                    newAbono=abonoPrestamo,
+                                    newSeguro=seguroPrestamo,
+                                    newNumSemana=0,
+                                    newFecha=fechaPrestamo,
+                                    newEstatus=estatusPrestamo,
+                                    newIntereses=interesesPrestamo,
+                                    newTotalPagar=totalPrestamo,
+                                    newSaldoPendiente=totalPrestamo,
+                                    newPagare=pagarePrestamo,
                                     newIdAval=idAval,
-                                    new_id_ruta=ruta,
-                                    new_foto_ine=fotoINE,
-                                    new_foto_dom=fotoDomicilio,
-                                    new_foto_garantia=fotoGarantia,
-                                    new_coords_lat=coords.latitude,
-                                    new_coords_lon=coords.longitude
+                                    newIdRuta=ruta,
+                                    newFotoIne=fotoINE,
+                                    newFotoDom=fotoDomicilio,
+                                    newFotoGarantia=fotoGarantia,
+                                    newCoordsLat=coords.latitude,
+                                    newCoordsLon=coords.longitude,
+                                    newRenovacion=renovacionPrestamo
                                 )}
                                     style={styles.mainButtonFloating}>
                                     <Text style={styles.mainButtonText}>{buttonLabel}</Text>
