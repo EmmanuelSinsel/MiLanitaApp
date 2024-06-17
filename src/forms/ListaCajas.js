@@ -3,14 +3,9 @@ import { Text, View, TextInput, TouchableOpacity, ScrollView, Image, Dimensions,
 import { styles } from '../../Style';
 import React, {useState, useCallback, useEffect,} from 'react';
 import ImageIndex from '../ImageIndex';
-import { Dropdown } from 'react-native-element-dropdown';
-import ServiceAbonos from '../services/ServiceAbonos';
-import ServicePrestamos from '../services/ServicePrestamos';
-import CurrencyInput from 'react-native-currency-input';
-import ServiceOtros from '../services/ServiceOtros';
+import { getStatusCajasAPI } from '../services/ServiceOtros';
 
 const ListaCajas = ({navigation}) => {
-    let serviceCajas = new ServiceOtros()
     const [statusCajas, setStatusCajas] = useState(null)
     const [loading, setLoading] = useState(0)
     let m = ""
@@ -23,7 +18,7 @@ const ListaCajas = ({navigation}) => {
 
     const getEstadoCajas = useCallback(async () => {
         setLoading(1)
-        const res = await serviceCajas.getStatusCajas()
+        const res = await getStatusCajasAPI()
         setLoading(0)
         const data = res.data
         let cajas = []

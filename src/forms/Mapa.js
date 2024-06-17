@@ -46,7 +46,6 @@ const Mapa = ({navigation}) => {
     }
     useEffect(() => {
         getActualRegion()
-        console.log(editable)
         setIdPrestamo(route.params?.idPrestamo)
         setEditable(route.params?.editable)
     }, [])
@@ -60,7 +59,7 @@ const Mapa = ({navigation}) => {
     }
 
     const openMaps = (lat, lon) => {
-        console.log(route.params?.label)
+
         const scheme = Platform.select({ ios: 'maps://0,0?q=', android: 'geo:0,0?q=' });
         const latLng = `${lat},${lon}`;
         const label = route.params?.label;

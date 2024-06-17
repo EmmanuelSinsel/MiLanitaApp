@@ -5,12 +5,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { styles } from '../../Style';
 import React, {useState, useCallback, useEffect, useRef} from 'react';
 import ImageIndex from '../ImageIndex';
-import ServiceAuth from '../services/ServiceAuth';
+import { loginAPI } from '../services/ServiceAuth';
 import Toast from 'react-native-root-toast';
 
 const Login = ({navigation}) => {
     const keyboard = useKeyboard()
-    let serviceAuth = new ServiceAuth()
     const [user, setUser] = useState('');
     const [password, setPassword] = useState('');
     const [keyboardStatus, setKeyboardStatus] = useState('');
@@ -19,7 +18,17 @@ const Login = ({navigation}) => {
     const [spacer, setSpacer] = useState(0)
     const [loading, setLoading] = useState(0);
     useEffect(() => {
-        console.log(String(Platform.OS))
+        const get_values = async() => {
+            try {
+                const usuario = await AsyncStorage.getItem('usuario');
+                if(usuario){
+                    setUser(usuario)
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        get_values()
         if(Platform.OS == "ios"){
             setSpacer(400)
         }
@@ -30,14 +39,17 @@ const Login = ({navigation}) => {
 
     const login = useCallback(async (usuario, password) => {
         setLoading(1)
-        const res = await serviceAuth.login(usuario, password)
+        const res = await loginAPI(usuario, password)
         setLoading(0)
-        console.log(res)
+
         const auth = res.auth
-        print(auth)
-        console.log(auth.idRuta)
+
         if(res.status == 1){
             try {
+                await AsyncStorage.setItem(
+                    'usuario',
+                    String(usuario),
+                );
                 await AsyncStorage.setItem(
                     'idEmpleado',
                     String(auth.idEmpleado),
@@ -99,9 +111,8 @@ const Login = ({navigation}) => {
             { translateY: this.state.animation }
         ]
     }
-    const showPasswordFunction = (state) => {
+    const showPasswordFunction = async(state) => {
         setShowPassword(state)
-        console.log(state)
     }
 
     return (
@@ -143,7 +154,7 @@ const Login = ({navigation}) => {
                                         style={styles.textBox}
                                         onChangeText={password => setPassword(password)}
                                         defaultValue={password}/>
-                                        <TouchableOpacity onPress={() => setShowPassword(!showPasswordFunction)}>
+                                        <TouchableOpacity onPress={() => showPasswordFunction(false)}>
                                             <Image style={[styles.BubbleImage,{ zIndex:10, marginLeft:-50}]}
                                                 source={ImageIndex.hidePassword}>
                                             </Image>
@@ -156,7 +167,7 @@ const Login = ({navigation}) => {
                                         secureTextEntry={true}
                                         onChangeText={password => setPassword(password)}
                                         defaultValue={password}/>
-                                        <TouchableOpacity onPress={() => setShowPassword(!showPasswordFunction)}>
+                                        <TouchableOpacity onPress={() => showPasswordFunction(true)}>
                                             <Image style={[styles.BubbleImage,{tintColor:"black", zIndex:10, marginLeft:-50}]}
                                                 source={ImageIndex.showPassword}>
                                             </Image>

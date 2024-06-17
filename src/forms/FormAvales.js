@@ -3,21 +3,19 @@ import { StyleSheet, Text, View, TextInput, Button, Pressable, TouchableOpacity,
 import { styles } from '../../Style';
 import React, {useState, useEffect, useCallback} from 'react';
 import ImageIndex from '../ImageIndex';
-import { Dropdown } from 'react-native-element-dropdown';
 import { useRoute } from "@react-navigation/native"
-import ServicePrestamos from '../services/ServicePrestamos';
-import ServiceClientes from '../services/ServiceClientes';
+import { eliminarPreregistroAvalAPI, getSiguienteIdAvalAPI } from '../services/ServiceClientes';
 import Toast from 'react-native-root-toast';
 
 import { LogBox } from 'react-native';
+
+import { getSiguienteIdAval, eliminarPreregistroAval, registrar_aval } from '../services/ServiceClientes';
 
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
 ]);
 
 const FormAvales = ({navigation}) => {
-    let service = new ServicePrestamos()
-    let serviceClientes = new ServiceClientes()
     function backMainScreen() {
         if(editable == true){
             setCancel(1)
@@ -59,12 +57,12 @@ const FormAvales = ({navigation}) => {
 
 
     const getSiguienteId = useCallback(async () => {
-        const data = await serviceClientes.getSiguienteIdAval(route.params?.idCliente)
+        const data = await getSiguienteIdAvalAPI(route.params?.idCliente)
         setIdAval(data.nextId)
     }, [])
 
     const eliminarPreregistro = useCallback(async (idAval) => {
-        const response = await serviceClientes.eliminarPreregistroAval(idAval)
+        const response = await eliminarPreregistroAvalAPI(idAval)
     }, [])
 
     const registerAval = async (
@@ -81,7 +79,7 @@ const FormAvales = ({navigation}) => {
             "telefono_aval":newTelAval
         }
         if(newTelAval.length == 10){
-            const data = await serviceClientes.registrar_aval(nuevoAval)
+            const data = await registrar_aval(nuevoAval)
             let toast = Toast.show('Aval Registrado', {
                 duration: Toast.durations.SHORT,
             });
@@ -98,7 +96,6 @@ const FormAvales = ({navigation}) => {
                 duration: Toast.durations.SHORT,
             });
         }
-
     }
 
     return (

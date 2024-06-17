@@ -7,21 +7,25 @@ import { Dropdown } from 'react-native-element-dropdown';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import * as Location from 'expo-location';
 import { useRoute } from "@react-navigation/native"
-import ServicePrestamos from '../services/ServicePrestamos';
-import ServiceClientes from '../services/ServiceClientes';
+import { calcularPrestamoAPI, checkAvalAPI, eliminarPreregistroPrestamoAPI, getDetallePrestamoAPI, getSiguienteIdPrestamoAPI, registrarPrestamoAPI } from '../services/ServicePrestamos';
+import { getLastAvalAPI, getListaClientesAPI, get_lista_avalesAPI } from '../services/ServiceClientes';
 import CurrencyInput from 'react-native-currency-input';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import * as FileSystem from 'expo-file-system';
 import Toast from 'react-native-root-toast';
-import DropDownPicker from 'react-native-dropdown-picker';
 import { XCircle } from 'react-native-feather'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Locker, LockerGray } from '../Utils';
+import { getCajaRutaAPI, getGruposAPI, getRutasAPI } from '../services/ServiceOtros';
+import { LogBox } from 'react-native';
+import * as ImageManipulator from 'expo-image-manipulator'
+
+LogBox.ignoreLogs(['Warning: ...']);
+
+
 
 const FormPrestamos = ({navigation}) => {
-    let service = new ServicePrestamos()
-    let serviceClientes= new ServiceClientes()
     const [cancel, setCancel] = useState('')
     const [editable, setEditable] = useState(true)
     const [coords, setCoords] = useState(null)
@@ -48,6 +52,9 @@ const FormPrestamos = ({navigation}) => {
     const [fotoDomicilio,            setFotoDom] = useState(null);
     const [fotoINE,            setFotoIne] = useState(null);
     const [fotoGarantia,       setFotoGarantia] = useState(null);
+    const [thumbnailDomicilio,            setThumbnailDom] = useState(null);
+    const [thumbnailINE,            setThumbnailIne] = useState(null);
+    const [thumbnailGarantia,       setThumbnailGarantia] = useState(null);
     const [interesesPrestamo,  setInteresPrestamo] = useState('');
     const [seguroPrestamo,     setSeguroPrestamo] = useState('');
     const [abonoPrestamo,      setAbonoPrestamo] = useState('');
@@ -95,41 +102,33 @@ const FormPrestamos = ({navigation}) => {
     const [topLabel, setTopLabel] = useState('')
     const [buttonLabel, setButtonLabel] = useState('')
     const route = useRoute()
+    const [searchLock, setSearchLock] = useState(0)
+    let backHandlerPrestamos = null
     useEffect(() => {
-        const backAction = () => {
-            if(route.params?.label){
-                return false;
-            }else{
-                setCancel(1)
-                return true;
-            }
-        }
-        const backHandlerPrestamos = BackHandler.addEventListener(
+        backHandlerPrestamos = BackHandler.addEventListener(
             'hardwareBackPress',
             backAction,
         );
-        if(route.params?.label){
+        if(route.params?.label && searchLock == 0){
+            setSearchLock(1)
             setEditable(false)
             setTopLabel(route.params?.label)
             setButtonLabel(route.params?.button)
             setLoading(1)
             getDetallePrestamo(route.params?.id)
-        }else{
+        }if(!route.params?.label && searchLock == 0){
             setEditable(true)
             setTopLabel("Nuevo Prestamo")
             setButtonLabel("Registrar Prestamo")
             const getPermissions = async () => {
                 let tempRutas = await getRutas()
                 const rol = await AsyncStorage.getItem('nombreRol');
-                console.log(rol)
                 if(rol != "ADMINISTRADOR"){
                     const rutaEmpleado = await AsyncStorage.getItem('idRuta');
-                    console.log(rutaEmpleado)
                     setRuta(String(rutaEmpleado))
                     getGrupos(Number(rutaEmpleado))
                     for(let r = 0 ; r < tempRutas.length ; r++){
                         if(tempRutas[r].value == rutaEmpleado){
-                            console.log(tempRutas[r])
                             setRutaText(String(tempRutas[r].label))
                             break;
                         }
@@ -153,15 +152,23 @@ const FormPrestamos = ({navigation}) => {
         if(route.params?.type && route.params?.photo){
             (async () => {
                 const base64 = await FileSystem.readAsStringAsync(route.params?.photo, { encoding: 'base64' });
-                //console.log(new Blob([base64]).size * 0.000001)
+                const resizedPhoto = await ImageManipulator.manipulateAsync(
+                    route.params?.photo,
+                    [{ resize: { width: 150 } }],
+                    { compress: 0.7, format: 'png' },
+                );
+                const base64compressed = await FileSystem.readAsStringAsync(resizedPhoto.uri, { encoding: 'base64' });
                 if(route.params?.type == 1){
                     setFotoIne(base64)
+                    setThumbnailIne(base64compressed)
                 }
                 if(route.params?.type == 2){
                     setFotoDom(base64)   
+                    setThumbnailDom(base64compressed)
                 }
                 if(route.params?.type == 3){
                     setFotoGarantia(base64)
+                    setThumbnailGarantia(base64compressed)
                 }
             })();
         }
@@ -170,6 +177,16 @@ const FormPrestamos = ({navigation}) => {
     }, [ route.params?.lat, route.params?.lon, route.params?.type, route.params?.photo, setEditable, editable]);;
     handleFocus = () => this.setState({isFocused: true})
     handleBlur = () => this.setState({isFocused: false})
+
+    const backAction = () => {
+        if(route.params?.label){
+            return false;
+        }else{
+            setCancel(1)
+            return true;
+        }
+    }
+
     const registrarPrestamo = useCallback(async (
         newIdPrestamo,
         newIdCliente,
@@ -189,6 +206,9 @@ const FormPrestamos = ({navigation}) => {
         newFotoINE,
         newFotoDomicilio,
         newFotoGarantia,
+        newThumbnailINE,
+        newThumbnailDomicilio,
+        newThumbnailGarantia,
         newCoordsLat,
         newCoordsLon,
         newRenovacion
@@ -216,25 +236,28 @@ const FormPrestamos = ({navigation}) => {
             'foto_ine':newFotoINE,
             'foto_dom':newFotoDomicilio,
             'foto_garantia':newFotoGarantia,
+            'thumbnail_ine':newThumbnailINE,
+            'thumbnail_dom':newThumbnailDomicilio,
+            'thumbnail_garantia':newThumbnailGarantia,
             'coords_lat':newCoordsLat,
             'coords_lon':newCoordsLon,
             'renovacion':newRenovacion
         }
         setLoading(1)
-        const data = await service.registrarPrestamo(nuevoPrestamo)
+        const data = await registrarPrestamoAPI(nuevoPrestamo)
         setLoading(0)
         let toast = Toast.show('Prestamo Registrado', {
             duration: Toast.durations.SHORT,
         });
-        if(data.status == 1){
+        if(data.status == 1){ 
             navigation.goBack()
-        }
+        } 
     },[])
     function newCliente(){
         navigation.navigate("FormClientes",{ type: 0 });
     }
     function newAval(){
-        console.log(idCliente)
+
         navigation.navigate("FormAvales",{ idCliente: idCliente, updateAval: selectDatosAval });
     }
     function backMainScreen() {
@@ -268,6 +291,7 @@ const FormPrestamos = ({navigation}) => {
     }
     function getINE(){
         if(editable == true){
+            BackHandler.removeEventListener("hardwareBackPress", backAction);
             navigation.navigate("Camara",{ photoType: 1, idPrestamo: idPrestamo, });
         }else{
             if(fotoINE == '1'){
@@ -277,6 +301,7 @@ const FormPrestamos = ({navigation}) => {
     }
     function getDomicilio(){
         if(editable == true){
+            BackHandler.removeEventListener("hardwareBackPress", backAction);
             navigation.navigate("Camara",{ photoType: 2 , idPrestamo: idPrestamo,});
         }else{
             if(fotoDomicilio == '1'){
@@ -286,6 +311,7 @@ const FormPrestamos = ({navigation}) => {
     }
     function getGarantia(){
         if(editable == true){
+            BackHandler.removeEventListener("hardwareBackPress", backAction);
             navigation.navigate("Camara",{ photoType: 3, idPrestamo: idPrestamo, });
         }else{
             if(fotoGarantia == '1'){
@@ -316,27 +342,33 @@ const FormPrestamos = ({navigation}) => {
         setFechaPrestamo(month+"/"+day+"/"+year)
     };
 
+    const checkCajaRuta = async(idRuta) => {
+        const res = await getCajaRutaAPI(idRuta)
+        if(res.caja == -1){
+            setRuta(null)
+            setGrupo(null)
+        }
+    }
+
     const update_plazo = (plazo) => {
         setPlazoPrestamo(plazo)
     }
     const calcularPrestamo = useCallback(async (importe, plazo, flag, id_cliente) => {
-        console.log(id_cliente)
         if(importe != null && plazo != null && flag == true){
-            const res = await service.calcularPrestamo(importe, plazo, id_cliente)
+            const res = await calcularPrestamoAPI(importe, plazo, id_cliente)
             const data = res.data
             setInteresPrestamo(data.intereses)
             setSeguroPrestamo(data.seguro)
             setAbonoPrestamo(data.abono)
             setTotalPrestamo(data.total)
             setRenovacionPrestamo(data.renovacion)
-            console.log(data.renovacion)
             return true
         }
         return false
     }, [])
 
     const getClientes = useCallback(async (idGrupo, filtro) => {
-        const res = await serviceClientes.getListaClientes(1, 100, idGrupo, filtro)
+        const res = await getListaClientesAPI(1, 100, idGrupo, filtro)
         const data = res.data
         const clientes = data.clientes
         let tempClientes = []
@@ -358,6 +390,7 @@ const FormPrestamos = ({navigation}) => {
         setNombreCliente('')
         setDomCliente('')
         setTelCliente('')
+        clearPreselectedAval()
     }
 
     const clear_aval = () => {
@@ -367,7 +400,7 @@ const FormPrestamos = ({navigation}) => {
     }
 
     const get_avales = useCallback(async (id, filtro) => {
-        const res = await serviceClientes.get_lista_avales(filtro)
+        const res = await get_lista_avalesAPI(filtro)
         const data = res.data
         let temp_avales = []
         for(let i = 0; i < data.length ; i++){
@@ -386,7 +419,6 @@ const FormPrestamos = ({navigation}) => {
 
     const selectDatosCliente = (data) => {
         if(data){
-            console.log(data)
             setIdCliente(data.id)
             setNombreCliente(data.title)
             setDomCliente(data.dom)
@@ -396,6 +428,7 @@ const FormPrestamos = ({navigation}) => {
 
     const selectDatosAval = async(data, id_cliente) => {
         if(data){
+            console.log(id_cliente)
             let flag = await checkAval(data.id, id_cliente)
             if(flag == 1){
                 setIdAval(data.id)
@@ -405,6 +438,8 @@ const FormPrestamos = ({navigation}) => {
             }if(flag == 0){
                 setNombreAval('')
                 setReloadAval(!reload_aval)
+                console.log("ASDASD")
+                clearPreselectedAval()
                 let toast = Toast.show('El Aval seleccionado ya es Aval en 3 prestamos activos', {
                     duration: Toast.durations.SHORT,
                 });
@@ -420,12 +455,12 @@ const FormPrestamos = ({navigation}) => {
 
     const getLastAval = async(data) => {
         if(data){
-            const res = await serviceClientes.getLastAval(data.id)
-            console.log(res)
+            const res = await getLastAvalAPI(data.id)
             selectDatosAval({id:res.aval.id_aval,
                 title:res.aval.nombre_aval,
                 dom:res.aval.domicilio_aval,
-                tel:res.aval.telefono_aval})
+                tel:res.aval.telefono_aval},
+            idCliente)
             setPreselectedAval(1)
         }
     }
@@ -487,21 +522,21 @@ const FormPrestamos = ({navigation}) => {
     }
 
     const checkAval = useCallback(async (id_aval, id_cliente) => {
-        const res = await service.checkAval(id_aval, id_cliente)
+        const res = await checkAvalAPI(id_aval, id_cliente)
         return res.status
     }, [])
 
     const getSiguienteId = useCallback(async () => {
-        const data = await service.getSiguienteId()
+        const data = await getSiguienteIdPrestamoAPI()
         setIdPrestamo(String(data.nextId))
     }, [])
 
     const eliminarPreregistro = useCallback(async (idPrestamo) => {
-        const res = await service.eliminarPreregistro(idPrestamo)
+        const res = await eliminarPreregistroPrestamoAPI(idPrestamo)
     }, [])
 
     const getRutas = useCallback(async () => {
-        const res = await service.getRutas()
+        const res = await getRutasAPI()
         const data = res.data
         let tempRutas = []
         for(let i = 0; i < data.length ; i++){
@@ -512,7 +547,7 @@ const FormPrestamos = ({navigation}) => {
     }, [])
     const getGrupos = useCallback(async (idRuta) => {
         setGrupo(null)
-        const res = await service.getGrupos(idRuta)
+        const res = await getGruposAPI(idRuta)
         const data = res.data
         let tempGrupos = []
         for(let i = 0; i < data.length ; i++){
@@ -524,7 +559,7 @@ const FormPrestamos = ({navigation}) => {
         }
     }, [])
     const getDetallePrestamo = useCallback(async (id) => {
-        const res = await service.getDetallePrestamo(id)
+        const res = await getDetallePrestamoAPI(id)
         const data = res.data
         setLoading(0)
         setIdPrestamo(String(data.idPrestamo))
@@ -673,7 +708,7 @@ const FormPrestamos = ({navigation}) => {
                                             placeholderStyle={styles.comboBoxPlaceholder}
                                             selectedTextStyle={styles.comboBoxSelected}
                                             value={ruta}
-                                            onChange={item => {setRuta(item.value);getGrupos(item.value);}}/>
+                                            onChange={item => {setRuta(item.value);getGrupos(item.value); checkCajaRuta(item.value)}}/>
                                             :
                                             <View>
                                                 <TextInput style={styles.textBox}
@@ -1333,6 +1368,9 @@ const FormPrestamos = ({navigation}) => {
                                     newFotoIne=fotoINE,
                                     newFotoDom=fotoDomicilio,
                                     newFotoGarantia=fotoGarantia,
+                                    newThumbnailINE=thumbnailINE,
+                                    newThumbnailDomicilio=thumbnailDomicilio,
+                                    newThumbnailGarantia=thumbnailGarantia,
                                     newCoordsLat=coords.latitude,
                                     newCoordsLon=coords.longitude,
                                     newRenovacion=renovacionPrestamo

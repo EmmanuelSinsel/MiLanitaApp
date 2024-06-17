@@ -5,6 +5,7 @@ import { styles } from '../../Style';
 import { React, useEffect, useState } from 'react';
 import ImageIndex from '../ImageIndex';
 import Toast from 'react-native-root-toast';
+import FormAbonosAcuerdos from './FormAbonosAcuerdos';
 
 const MainScreen = ({navigation}) => {
     const [admin, setAdmin] = useState(false)
@@ -32,6 +33,21 @@ const MainScreen = ({navigation}) => {
         });
         //navigation.navigate("TrackEmpleados");
     }
+    function nuevoEmpleadosFunc() {
+        let toast = Toast.show('AUN NO DISPONIBLE', {
+            duration: Toast.durations.SHORT,
+        });
+        //navigation.navigate("TrackEmpleados");
+    }
+    function consultaEmpleadosFunc() {
+        let toast = Toast.show('AUN NO DISPONIBLE', {
+            duration: Toast.durations.SHORT,
+        });
+        //navigation.navigate("TrackEmpleados");
+    }
+    function galeriaDomiciliosFunc() {
+        navigation.navigate("FormGaleria");
+    }
     //CAJA
     function corteFunc() {
         navigation.navigate("Corte");
@@ -47,7 +63,10 @@ const MainScreen = ({navigation}) => {
         navigation.navigate("FormClientes");
     }
     function nuevoAcuerdoFunc(){
-        navigation.navigate("Acuerdo")
+        navigation.navigate("FormAcuerdos")
+    }
+    function nuevoUsuarioFunc(){
+        navigation.navigate("FormUsuarios")
     }
     //CONSULTAS
     function consultaPrestamos(){
@@ -61,10 +80,13 @@ const MainScreen = ({navigation}) => {
     }
     //ABONOS
     function abonosFunc() {
-        navigation.navigate("Abonos");
+        navigation.navigate("FormAbonos");
     }
     function extraCobranzaFunc() {
         navigation.navigate("ConsultaExtraCobranza");
+    }    
+    function abonosAcuerdosFunc() {
+        navigation.navigate("FormAbonosAcuerdos");
     }
     //LOGOUT
     function logout() {
@@ -92,8 +114,14 @@ const MainScreen = ({navigation}) => {
                     <View style={styles.horizontalLine}></View>
                     <View style={styles.mainRow}>
                         <MainRoundButton func={trackEmpleadosFunc} title={"Rastreo de empleados"} image={ImageIndex.track}></MainRoundButton>
-                        <MainRoundButtonBubble func={nuevoClienteFunc} title={"Nuevo Empleado"} image={ImageIndex.employee} bubbleImage={ImageIndex.add}></MainRoundButtonBubble>
+                        <MainRoundButtonBubble func={nuevoUsuarioFunc} title={"Nuevo Empleado"} image={ImageIndex.employee} bubbleImage={ImageIndex.add}></MainRoundButtonBubble>
                         <MainRoundButtonBubble func={consultaClientes} title={"Consulta de Empleados"} image={ImageIndex.employee} bubbleImage={ImageIndex.list}></MainRoundButtonBubble>
+                    </View>
+                    <View style={styles.spacer10}></View>
+                    <View style={styles.mainRow}>
+                        <MainRoundButton func={galeriaDomiciliosFunc}  title={"Galeria de Domicilios"} image={ImageIndex.gallery} bubbleImage={ImageIndex.list}></MainRoundButton>
+                        <MainRoundButtonSpacer></MainRoundButtonSpacer>
+                        <MainRoundButtonSpacer></MainRoundButtonSpacer>
                     </View>
                 </View>
             }
@@ -137,7 +165,7 @@ const MainScreen = ({navigation}) => {
             <View style={styles.mainRow}>
                 <MainRoundButtonBubble func={nuevoAcuerdoFunc} title={"Nuevo Acuerdo"} image={ImageIndex.handshake} bubbleImage={ImageIndex.add}></MainRoundButtonBubble>
                 <MainRoundButtonBubble func={consultaAcuerdos} title={"Consulta de Acuerdos"} image={ImageIndex.handshake} bubbleImage={ImageIndex.list}></MainRoundButtonBubble>
-                <MainRoundButtonSpacer></MainRoundButtonSpacer>
+                <MainRoundButtonBubble func={abonosAcuerdosFunc} title={"Abonar Acuerdos"} image={ImageIndex.handshake} bubbleImage={ImageIndex.moneySign}></MainRoundButtonBubble>
             </View>
             <View style={styles.spacer30}></View>
         </ScrollView>

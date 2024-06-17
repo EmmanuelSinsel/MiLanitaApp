@@ -22,6 +22,7 @@ const Camara = ({navigation}) => {
     const [photoLabel, setPhotoLabel] = useState('')
     const [photoType, setPhotoType] = useState(null)
     const [idPrestamo, setIdPrestamo] = useState(0)
+    let backHandler = null
     useEffect(() => {
         setIdPrestamo(route.params?.idPrestamo)
         setPhotoType(route.params?.photoType)
@@ -43,7 +44,7 @@ const Camara = ({navigation}) => {
                 return false
             }
         };
-        const backHandler = BackHandler.addEventListener(
+        backHandler = BackHandler.addEventListener(
             'hardwareBackPress',
             backAction,
         );
@@ -105,6 +106,34 @@ const Camara = ({navigation}) => {
             setPreview(1)
         }
     }
+    if (!permission) {
+        // Camera permissions are still loading.
+        return <View />;
+    }
+
+    if (!permission.granted) {
+        // Camera permissions are not granted yet.
+        return (
+            <View style={styles.cameraBackground}>
+                <View style={styles.mainTopBar}>
+                    <View style={styles.spacer30}></View>
+                    <View style={styles.spacer20}></View>
+                    <View style={styles.topBarContainer}>
+                        <TouchableOpacity style={styles.topBarButton} onPress={backMainScreen}>
+                                <Image style={styles.invertedImageTopBar}
+                                    source={ImageIndex.back}>
+                                </Image>
+                        </TouchableOpacity>
+                        <Text style={styles.mainHeadersInverted}>Foto de {photoLabel}</Text>
+                    </View>
+                    <View style={styles.spacer20}></View>
+                </View>
+                <Text style={{ textAlign: 'center', color:"white" }}>Se necesita permiso para utilizar la Camara</Text>
+                <Button onPress={requestPermission} title="Conceder permiso" />
+            </View>
+    );
+    }
+
     return(
         <View style={styles.cameraBackground}>
             <View style={styles.mainTopBar}>

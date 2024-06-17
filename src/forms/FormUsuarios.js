@@ -1,32 +1,37 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, TextInput, TouchableOpacity, ScrollView, Image, BackHandler } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, Pressable, TouchableOpacity, ScrollView, Image, BackHandler, Platform } from 'react-native';
 import { styles } from '../../Style';
 import React, {useState, useEffect, useCallback} from 'react';
 import ImageIndex from '../ImageIndex';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useRoute } from "@react-navigation/native"
-import { eliminarPreregistroClienteAPI, getDetalleClienteAPI, getSiguienteIdClienteAPI, registrar_clienteAPI } from '../services/ServiceClientes';
+import ServiceClientes, {  eliminarPreregistroClienteAPI, getDetalleClienteAPI, getSiguienteIdClienteAPI, registrar_clienteAPI } from '../services/ServiceClientes';
 import Toast from 'react-native-root-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Locker, LockerGray } from '../Utils';
 import { getGruposAPI, getRutasAPI } from '../services/ServiceOtros';
+import { getSiguienteIdEmpleadoAPI } from '../services/ServiceAuth';
 
-const FormClientes = ({navigation}) => {
+const FormUsuarios = ({navigation}) => {
     function backMainScreen() {
         if(editable == true){
             setCancel(1)
         }else{
             navigation.goBack()
         }
+
     }
     const [topLabel, setTopLabel] = useState('')
+    const [buttonLabel, setButtonLabel] = useState('')
     const [cancel, setCancel] = useState('')
-    const [idCliente, setIdCliente] = useState(0)
-    const [idClienteNoEditable, setIdClienteEdit] = useState('')
-    const [nombreCliente,      setNombreCliente] = useState('');
-    const [domicilioCliente,         setDomCliente] = useState('');
-    const [telefonoCliente,         setTelCliente] = useState('');
-    const [tipoCliente,        setTipoCliente] = useState('');
+    const [idEmpleado, setIdEmpleado] = useState(0)
+    const [idEmpleadoNoEditable, setIdEmpleadoEdit] = useState('')
+    const [nombreUsuario,      setNombreUsuario] = useState('');
+    const [nombreEmpleado,      setNombreEmpleado] = useState('');
+    const [rolEmpleado,        setRolEmpleado] = useState('');
+    const [rolEmpleadoNoEditable,        setRolEmpleadoNoEditable] = useState('');
+    const [password,      setPassword] = useState('');
+    const [confirmarPassword,      setConfirmarPassword] = useState('');
     const [ruta,                setRuta] = useState('');
     const [grupo,               setGrupo] = useState('');
     const [rutaNoEditable,                setRutaEdit] = useState('');
@@ -36,10 +41,9 @@ const FormClientes = ({navigation}) => {
     const [listaGrupos, setListaGrupos] = useState([]);
     const [editable, setEditable] = useState(true)
     const [loading, setLoading] = useState(0);
-    const [loadFlag, setLoadFlag] = useState(0);
-    const clientTypeList = [{label:"Normal",value:"1"},{label:"Coordinador",value:"2"}]
+    const [loadFlag, setLoadFlag] = useState(0)
+    const listaRoles = [{label:"Administrador",value:"1"},{label:"Auxiliar",value:"2"}]
     const route = useRoute()
-    let client_type = "Cliente"
     useEffect(() => {
         const backAction = () => {
             if(route.params?.label){
@@ -53,23 +57,17 @@ const FormClientes = ({navigation}) => {
             'hardwareBackPress',
             backAction,
         );
-
-        if(route.params?.type == 1){
-            client_type = "Aval"
-        }else{
-            client_type = "Cliente"
-        }
         if(route.params?.label){
             setLoadFlag(1)
             setEditable(false)
             setTopLabel(route.params?.label)
+            setButtonLabel(route.params?.button)
             setLoading(1)
             if(loadFlag == 0){
-                getDetalleCliente(route.params?.id)
+                getDetalleEmpleado(route.params?.id)
             }
         }else{
             setEditable(true)
-            setTopLabel("Nuevo Cliente")
             const getPermissions = async () => {
                 let tempRutas = await getRutas()
                 const rol = await AsyncStorage.getItem('nombreRol');
@@ -91,7 +89,7 @@ const FormClientes = ({navigation}) => {
         }
         return () =>
         BackHandler.removeEventListener("hardwareBackPress", backAction);
-    }, [getDetalleCliente, route.params?.type, setEditable, editable, ]);
+    }, [getDetalleEmpleado, route.params?.type, setEditable, editable, ]);
 
     const getRutas = useCallback(async () => {
         const res = await getRutasAPI()
@@ -114,19 +112,19 @@ const FormClientes = ({navigation}) => {
     }, [])
 
     const getSiguienteId = useCallback(async () => {
-        const data = await getSiguienteIdClienteAPI()
-        setIdCliente(data.nextId)
+        const data = await getSiguienteIdEmpleadoAPI()
+        setIdEmpleado(data.nextId)
     }, [])
 
     const eliminarPreregistro = useCallback(async (id_usuario) => {
         const response = await eliminarPreregistroClienteAPI(id_usuario)
     }, [])
 
-    const getDetalleCliente = useCallback(async (id) => {
+    const getDetalleEmpleado = useCallback(async (id) => {
         const res = await getDetalleClienteAPI(id=id)
         const data = res.data
         setLoading(0)   
-        setIdClienteEdit(data.idCliente)
+        setIdEmpleadoEdit(data.idCliente)
         setNombreCliente(data.nomCliente)
         setDomCliente(data.domCliente)
         setTelCliente(data.telCliente)
@@ -163,17 +161,6 @@ const FormClientes = ({navigation}) => {
         });
         navigation.goBack()
     }
-
-    const unlockRegistrar = () => {
-        if(nombreCliente != "" && domicilioCliente != "" && telefonoCliente != "" && ruta != "" && grupo != "" && tipoCliente != "" && telefonoCliente.length == 10){
-            return true
-        }else if(editable==false){
-            return true
-        }else{
-            return false
-        }
-    }
-
 
     return (
         <View style={{height:"100%"}}>
@@ -217,7 +204,7 @@ const FormClientes = ({navigation}) => {
                         </TouchableOpacity>
                         {
                             editable === true ?
-                            <Text style={styles.mainHeadersInverted}>Nuevo {client_type}</Text>
+                            <Text style={styles.mainHeadersInverted}>Nuevo Empleado</Text>
                             :
                             <Text style={styles.mainHeadersInverted}>{topLabel}</Text>
                         }
@@ -227,27 +214,102 @@ const FormClientes = ({navigation}) => {
                 </View>
                 <View style={styles.spacer10}></View>
                 <View style={styles.mainHeaderContainer}>
-                    <Text style={styles.mainHeaders}>Datos del {client_type}</Text>
+                    <Text style={styles.mainHeaders}>Datos del Usuario</Text>
+                </View>
+                <View style={styles.horizontalLine}></View>
+                <View style={styles.spacer10}></View>
+                <View style={styles.textBoxContainerFull}>
+                    <View style={styles.textBoxBorder}>
+                                <Text style={styles.textBoxLabel}>Nombre de Usuario</Text>
+                                <TextInput style={styles.textBox}
+                                placeholder='Nombre de Usuario'
+                                onChangeText={value => setNombreCliente(value)}
+                                defaultValue={nombreUsuario}/>
+                                {
+                                    idClienteNoEditable !== '' &&
+                                    <Locker></Locker>
+                                }
+                    </View>
+                </View>
+                <View style={styles.spacer20}></View>
+                <View style={styles.textBoxContainerFull}>
+                    <View style={styles.textBoxBorder}>
+                                <Text style={styles.textBoxLabel}>Contraseña</Text>
+                                <TextInput style={styles.textBox}
+                                placeholder='Contraseña'
+                                secureTextEntry={true}
+                                onChangeText={value => setNombreCliente(value)}
+                                defaultValue={password}/>
+                                {
+                                    idClienteNoEditable !== '' &&
+                                    <Locker></Locker>
+                                }
+                    </View>
+                </View>
+                <View style={styles.spacer20}></View>
+                <View style={styles.textBoxContainerFull}>
+                    <View style={styles.textBoxBorder}>
+                                <Text style={styles.textBoxLabel}>Confirmar Contraseña</Text>
+                                <TextInput style={styles.textBox}
+                                placeholder='Contraseña'
+                                secureTextEntry={true}
+                                onChangeText={value => setNombreCliente(value)}
+                                defaultValue={confirmarPassword}/>
+                                {
+                                    idClienteNoEditable !== '' &&
+                                    <Locker></Locker>
+                                }
+                    </View>
+                </View>
+                <View style={styles.spacer20}></View>
+                <View style={styles.formRow}>
+                    <View style={styles.textBoxContainerHalf}>
+                            <View style={styles.textBoxBorder}>
+                                        <Text style={styles.textBoxLabel}>Rol</Text>
+                                        {
+                                            grupoNoEditable === '' ?
+                                            <Dropdown style={styles.comboBox}
+                                            data={listaRoles}
+                                            labelField="label" valueField="value"
+                                            searchPlaceholder="Grupo.." placeholder='Ej. Admin'
+                                            placeholderStyle={styles.comboBoxPlaceholder}
+                                            selectedTextStyle={styles.comboBoxSelected}
+                                            value={rolEmpleado}
+                                            onChange={item => {setGrupo(item.value);}}/>
+                                            :
+                                            <View>
+                                                <TextInput style={styles.textBox}
+                                                selection={{start:0, end:0}}
+                                                defaultValue={String(rolEmpleadoNoEditable)}/>
+                                                <Locker></Locker>
+                                            </View>
+                                        }
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.spacer10}></View>
+                <View style={styles.mainHeaderContainer}>
+                    <Text style={styles.mainHeaders}>Datos del Empleado</Text>
                 </View>
                 <View style={styles.horizontalLine}></View>
                 <View style={styles.spacer10}></View>
                 <View style={styles.formRow}>
                     <View style={styles.textBoxContainerHalf}>
                         <View style={styles.textBoxBorder}>
-                                    <Text style={styles.textBoxLabel}>ID Cliente</Text>
+                                    <Text style={styles.textBoxLabel}>ID Empleado</Text>
                                     {
-                                        idClienteNoEditable === '' ?
+                                        idEmpleadoNoEditable === '' ?
                                         <View>
                                             <TextInput style={styles.textBox}
                                             onChangeText={value => setIdCliente(value)}
-                                            value={String(idCliente)}/>
+                                            value={String(idEmpleado)}/>
                                             <Locker></Locker>
                                         </View>
                                         :
                                         <View>
                                             <TextInput style={styles.textBox}
                                             selection={{start:0, end:0}}
-                                            defaultValue={String(idClienteNoEditable)}/>
+                                            defaultValue={String(idEmpleadoNoEditable)}/>
                                             <Locker></Locker>
                                         </View>
 
@@ -255,53 +317,6 @@ const FormClientes = ({navigation}) => {
                                 
                         </View>
                     </View>
-                </View>
-                <View style={styles.spacer20}></View>
-                <View style={styles.textBoxContainerFull}>
-                    <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Nombre del Cliente</Text>
-                                <TextInput style={styles.textBox}
-                                placeholder='Nombre Apellido Apellido'
-                                onChangeText={value => setNombreCliente(value)}
-                                defaultValue={nombreCliente}/>
-                                {
-                                    idClienteNoEditable !== '' &&
-                                    <Locker></Locker>
-                                }
-                    </View>
-                </View>
-                <View style={styles.spacer20}></View>
-                <View style={styles.textBoxContainerFull}>
-                    <View style={styles.textBoxBorder} >
-                                <Text style={styles.textBoxLabel}>Domicilio</Text>
-                                <TextInput style={styles.textBox}
-                                placeholder='Calle, Numero, Colonia'
-                                onChangeText={value => setDomCliente(value)}
-                                defaultValue={domicilioCliente}/>
-                                {
-                                    idClienteNoEditable !== '' &&
-                                    <Locker></Locker>
-                                }
-                    </View>
-                </View>
-                <View style={styles.spacer20}></View>
-                <View style={styles.textBoxContainerFull}>
-                    <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Telefono</Text>
-                                <TextInput style={styles.textBox}
-                                keyboardType='numeric'
-                                maxLength={10}
-                                placeholder='Ej. 6681234567'
-                                onChangeText={value => setTelCliente(value)}
-                                defaultValue={telefonoCliente}/>
-                                {
-                                    idClienteNoEditable !== '' &&
-                                    <Locker></Locker>
-                                }
-                    </View>
-                </View>
-                <View style={styles.spacer20}></View>
-                <View style={styles.formRow}>
                     <View style={styles.textBoxContainerHalf}>
                         <View style={styles.textBoxBorder}>
                                     <Text style={styles.textBoxLabel}>Ruta</Text>
@@ -314,7 +329,7 @@ const FormClientes = ({navigation}) => {
                                         placeholderStyle={styles.comboBoxPlaceholder}
                                         selectedTextStyle={styles.comboBoxSelected}
                                         value={ruta}
-                                        onChange={item => {setRuta(item.value); getGrupos(item.value); setGrupo('')}}/>
+                                        onChange={item => {setRuta(item.value); getGrupos(item.value)}}/>
                                         :
                                         <View>
                                             <TextInput style={styles.textBox}
@@ -325,61 +340,29 @@ const FormClientes = ({navigation}) => {
                                     }
                         </View>
                     </View>
-                    <View style={styles.textBoxContainerHalf}>
-                        <View style={styles.textBoxBorder}>
-                                    <Text style={styles.textBoxLabel}>Grupo</Text>
-                                    {
-                                        grupoNoEditable === '' ?
-                                        <Dropdown style={styles.comboBox}
-                                        data={listaGrupos}
-                                        labelField="label" valueField="value"
-                                        searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
-                                        placeholderStyle={styles.comboBoxPlaceholder}
-                                        selectedTextStyle={styles.comboBoxSelected}
-                                        value={grupo}
-                                        onChange={item => {setGrupo(item.value);}}/>
-                                        :
-                                        <View>
-                                            <TextInput style={styles.textBox}
-                                            selection={{start:0, end:0}}
-                                            defaultValue={String(grupoNoEditable)}/>
-                                            <Locker></Locker>
-                                        </View>
-                                    }
-                        </View>
-                    </View>
                 </View>
                 <View style={styles.spacer20}></View>
                 <View style={styles.textBoxContainerFull}>
-                        <View style={styles.textBoxBorder}>
-                                    <Text style={styles.textBoxLabel}>Tipo de Cliente</Text>
-                                    {
-                                        tipoClienteNoEditable === '' ?
-                                        <Dropdown style={styles.comboBox}
-                                        data={clientTypeList}
-                                        labelField="label" valueField="value"
-                                        searchPlaceholder="Grupo.." placeholder='Ej. Normal'
-                                        placeholderStyle={styles.comboBoxPlaceholder}
-                                        selectedTextStyle={styles.comboBoxSelected}
-                                        value={tipoCliente}
-                                        onChange={item => {setTipoCliente(item.value);}}/>
-                                        :
-                                        <View>
-                                            <TextInput style={styles.textBox}
-                                            selection={{start:0, end:0}}
-                                            defaultValue={String(tipoClienteNoEditable)}/>
-                                            <Locker></Locker>
-                                        </View>
-                                    }
-                        </View>
+                    <View style={styles.textBoxBorder}>
+                                <Text style={styles.textBoxLabel}>Nombre del Empleado</Text>
+                                <TextInput style={styles.textBox}
+                                placeholder='Nombre Apellido Apellido'
+                                onChangeText={value => setNombreCliente(value)}
+                                defaultValue={nombreEmpleado}/>
+                                {
+                                    idEmpleadoNoEditable !== '' &&
+                                    <Locker></Locker>
+                                }
                     </View>
+                </View>
+                <View style={styles.spacer20}></View>
+                <View style={styles.formRow}>
+                    
+                </View>
                 <View style={styles.spacer20}></View>
                 {
                     loadFlag === 0 &&
                     <View style={styles.formRow}>
-                    {
-                        unlockRegistrar() === true ? <View></View> : <View style={[styles.lockUI, {borderRadius:15}]}></View>
-                    }
                     <TouchableOpacity onPress={() => registerCliente(
                         idCliente,
                         nombreCliente,
@@ -389,7 +372,7 @@ const FormClientes = ({navigation}) => {
                         tipoCliente
                     )}
                         style={styles.mainButton}>
-                        <Text style={styles.mainButtonText}>Registrar Cliente</Text>
+                        <Text style={styles.mainButtonText}>Registrar Empleado</Text>
                     </TouchableOpacity>
                 </View>
                 }
@@ -401,4 +384,4 @@ const FormClientes = ({navigation}) => {
     )
 }
 
-export default FormClientes;
+export default FormUsuarios;

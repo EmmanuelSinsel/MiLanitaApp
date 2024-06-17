@@ -1,16 +1,16 @@
 import { StatusBar } from 'expo-status-bar';
 import { Text, View, TextInput, TouchableOpacity, ScrollView, Image, Dimensions, BackHandler } from 'react-native';
 import { styles } from '../../Style';
-import React, {useState, useCallback, useEffect,} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import ImageIndex from '../ImageIndex';
 import { Dropdown } from 'react-native-element-dropdown';
-import ServiceAbonos from '../services/ServiceAbonos';
-import ServicePrestamos from '../services/ServicePrestamos';
 import CurrencyInput from 'react-native-currency-input';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Locker } from '../Utils';
+import { getGruposAPI, getRutasAPI } from '../services/ServiceOtros';
+import { getListaAbonosAPI, guardar_abonosAPI } from '../services/ServiceAbonos';
 
-const Abonos = ({navigation}) => {
+const FormAbonos = ({navigation}) => {
     //TABLA
     const [tipoAbono, setTipoAbono] = useState([]);
     const [listaAbonos, setAbono] = useState(null);
@@ -32,8 +32,6 @@ const Abonos = ({navigation}) => {
     }
 
     //FORMULARIO
-    let serviceAbonos = new ServiceAbonos()
-    let servicePrestamos = new ServicePrestamos()
     const topControlsHeight = 110 + 150 - 10
     const windowHeight = Dimensions.get('window').height;
     const [filtro,      setFiltro] = useState('');
@@ -61,15 +59,12 @@ const Abonos = ({navigation}) => {
         const getPermissions = async () => {
             const tempRutas = await getRutas()
             const rol = await AsyncStorage.getItem('nombreRol');
-            console.log(rol)
             if(rol != "ADMINISTRADOR"){
                 const rutaEmpleado = await AsyncStorage.getItem('idRuta');
-                console.log(rutaEmpleado)
                 setRuta(String(rutaEmpleado))
                 getGrupos(Number(rutaEmpleado))
                 for(let r = 0 ; r < tempRutas.length ; r++){
                     if(tempRutas[r].value == rutaEmpleado){
-                        console.log(tempRutas[r])
                         setRutaText(String(tempRutas[r].label))
                         break;
                     }
@@ -86,7 +81,7 @@ const Abonos = ({navigation}) => {
     }
 
     const getRutas = useCallback(async () => {
-        const res = await servicePrestamos.getRutas()
+        const res = await getRutasAPI()
         const data = res.data
         let tempRutas = []
         for(let i = 0; i < data.length ; i++){
@@ -97,7 +92,7 @@ const Abonos = ({navigation}) => {
     }, [])
 
     const getGrupos = useCallback(async (idRuta) => {
-        const res = await servicePrestamos.getGrupos(id=idRuta)
+        const res = await getGruposAPI(id=idRuta)
         const data = res.data
         let tempGrupos = []
         for(let i = 0; i < data.length ; i++){
@@ -109,7 +104,7 @@ const Abonos = ({navigation}) => {
     const getListaAbonos = useCallback(async (idGrupo) => {
         setLoadingForm(1)
         setLoading(1)
-        const res = await serviceAbonos.getListaAbonos(idGrupo)
+        const res = await getListaAbonosAPI(idGrupo)
         const data = res.data
         let tempAbonos = []
         for(let i = 0; i < data.length ; i++){
@@ -155,7 +150,7 @@ const Abonos = ({navigation}) => {
             })
         }
         data = {"abonos":data}   
-        const res = await serviceAbonos.guardar_abonos(data)
+        const res = guardar_abonosAPI(data)
         if(res.status == 1){
             setLoaded(1)
         }
@@ -439,4 +434,4 @@ function DataTable({tableData, updateAbono, updateType, listaAbonos, lista_tipos
     )
 }
 
-export default Abonos
+export default FormAbonos

@@ -695,6 +695,11 @@ const styles = StyleSheet.create({
         borderTopWidth:2,
         borderColor:main_green,
         alignItems:"center"
+    },
+    imageCell:{
+        flexDirection:"row",
+        aspectRatio:1,
+        borderWidth:1
     }
 });
 

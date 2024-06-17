@@ -4,14 +4,12 @@ import { styles } from '../../Style';
 import React, {useState, useEffect, useCallback} from 'react';
 import ImageIndex from '../ImageIndex';
 import { Dropdown } from 'react-native-element-dropdown';
-import ServiceClientes from '../services/ServiceClientes';
-import ServicePrestamos from '../services/ServicePrestamos';
+import { getPrestamosExtraCobranzaAPI} from '../services/ServicePrestamos';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Locker } from '../Utils';
+import { getGruposAPI, getRutasAPI } from '../services/ServiceOtros';
 
 const ConsultaExtraCobranza = ({navigation}) => {
-    let service = new ServiceClientes()
-    let servicePrestamos = new ServicePrestamos()
     const [ruta,                setRuta] = useState('');
     const [grupo,               setGrupo] = useState('');
     const [listaRutas, setListaRutas] = useState([]);
@@ -22,19 +20,18 @@ const ConsultaExtraCobranza = ({navigation}) => {
     const [rutaNoEditable,                setRutaText] = useState('');
     const [tableData, setTableData] = useState([])
     const [maxPages, setMaxPages] = useState([]);
+
     useEffect(() => {
         const getPermissions = async () => {
             const tempRutas = await getRutas()
             const rol = await AsyncStorage.getItem('nombreRol');
-            console.log(rol)
+
             if(rol != "ADMINISTRADOR"){
                 const rutaEmpleado = await AsyncStorage.getItem('idRuta');
-                console.log(rutaEmpleado)
                 setRuta(String(rutaEmpleado))
                 getGrupos(Number(rutaEmpleado))
                 for(let r = 0 ; r < tempRutas.length ; r++){
                     if(tempRutas[r].value == rutaEmpleado){
-                        console.log(tempRutas[r])
                         setRutaText(String(tempRutas[r].label))
                         break;
                     }
@@ -69,7 +66,7 @@ const ConsultaExtraCobranza = ({navigation}) => {
     }
 
     const addPrestamos = useCallback(async (p, pSize, idGrupo, filtro) => {
-        const res = await servicePrestamos.getPrestamosExtraCobranza(p, idGrupo, pSize, filtro)
+        const res = await getPrestamosExtraCobranzaAPI(p, idGrupo, pSize, filtro)
         const data = res.data
         let tempPrestamos = []
         const clientes = data.prestamos
@@ -83,7 +80,7 @@ const ConsultaExtraCobranza = ({navigation}) => {
 
     const getPrestamos = useCallback(async (p, pSize, idGrupo, filtro) => {
         setPage(1)
-        const res = await servicePrestamos.getPrestamosExtraCobranza(p, idGrupo, pSize, filtro)
+        const res = await getPrestamosExtraCobranzaAPI(p, idGrupo, pSize, filtro)
         const data = res.data
         let tempPrestamos = []
         const clientes = data.prestamos
@@ -95,7 +92,7 @@ const ConsultaExtraCobranza = ({navigation}) => {
     }, [])
 
     const getRutas = useCallback(async () => {
-        const res = await servicePrestamos.getRutas()
+        const res = await getRutasAPI()
         const data = res.data
         let tempRutas = []
         for(let i = 0; i < data.length ; i++){
@@ -105,7 +102,7 @@ const ConsultaExtraCobranza = ({navigation}) => {
         return tempRutas;
     }, [])
     const getGrupos = useCallback(async (idRuta) => {
-        const res = await servicePrestamos.getGrupos(id=idRuta)
+        const res = await getGruposAPI(id=idRuta)
         const data = res.data
         let tempGrupos = []
         for(let i = 0; i < data.length ; i++){

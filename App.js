@@ -11,11 +11,11 @@ import Login from './src/forms/Login';
 import MainScreen from './src/forms/MainScreen';
 import FormPrestamos from './src/forms/FormPrestamos';
 import FormClientes from './src/forms/FormClientes';
-import Abonos from './src/forms/Abonos';
+import FormAbonos from './src/forms/FormAbonos';
 import ConsultaExtraCobranza from './src/forms/ConsultaExtraCobranza';
 import Camara from './src/forms/Camera';
 import Mapa from './src/forms/Mapa';
-import Acuerdo from './src/forms/Acuerdo';
+import FormAcuerdos from './src/forms/FormAcuerdos';
 import ConsultaPrestamos from './src/forms/ConsultaPrestamos';
 import ConsultaClientes from './src/forms/ConsultaClientes';
 import ConsultaAcuerdos from './src/forms/ConsultaAcuerdos';
@@ -29,8 +29,23 @@ import Corte from './src/forms/FormCorte';
 import Cajas from './src/forms/FormCajas';
 import ListaCajas from './src/forms/ListaCajas';
 import FormCajas from './src/forms/FormCajas';
+import FormGaleria from './src/forms/FormGaleria';
+import GaleriaPreview from './src/forms/GaleriaPreview';
+import ComparePreview from './src/forms/ComparePreview';
+import FormUsuarios from './src/forms/FormUsuarios';
+import FormAbonosAcuerdos from './src/forms/FormAbonosAcuerdos';
+
+// import { LogBox } from 'react-native';
+
+// // Ignore log notification by message
+// LogBox.ignoreLogs(['Warning: ...']);
+
+// //Ignore all log notifications
+// LogBox.ignoreAllLogs();
 
 const Stack = createNativeStackNavigator();
+
+console.disableYellowBox = true; 
 
 export default function App() {
 
@@ -38,7 +53,7 @@ export default function App() {
   const LOCATION_TASK_NAME = 'background-location-task-buzz-v2';
 
   useEffect(() => {
-    console.log("jsjsjsj")
+
     requestPermissions()
   })
 
@@ -68,10 +83,8 @@ export default function App() {
       console.log(error)
       return;
     }
-    console.log("ASDASDASDSDASD")
     if (data) {
       const { locations } = data;
-      console.log(locations)
     }
   });
   return (
@@ -100,8 +113,8 @@ export default function App() {
             component={FormAvales}
             options={{headerShown: false}}/>
           <Stack.Screen
-            name="Abonos"
-            component={Abonos}
+            name="FormAbonos"
+            component={FormAbonos}
             options={{headerShown: false}}/>
           <Stack.Screen
             name="ConsultaExtraCobranza"
@@ -120,8 +133,8 @@ export default function App() {
             component={Mapa}
             options={{headerShown: false}}/>
           <Stack.Screen
-            name="Acuerdo"
-            component={Acuerdo}
+            name="FormAcuerdos"
+            component={FormAcuerdos}
             options={{headerShown: false}}/>
           <Stack.Screen
             name="ConsultaPrestamos"
@@ -150,6 +163,26 @@ export default function App() {
           <Stack.Screen
             name="FormCajas"
             component={FormCajas}
+            options={{headerShown: false}}/>
+          <Stack.Screen
+            name="FormGaleria"
+            component={FormGaleria}
+            options={{headerShown: false}}/>
+          <Stack.Screen
+            name="GaleriaPreview"
+            component={GaleriaPreview}
+            options={{headerShown: false}}/>
+          <Stack.Screen
+            name="ComparePreview"
+            component={ComparePreview}
+            options={{headerShown: false}}/>
+          <Stack.Screen
+            name="FormUsuarios"
+            component={FormUsuarios}
+            options={{headerShown: false}}/>
+          <Stack.Screen
+            name="FormAbonosAcuerdos"
+            component={FormAbonosAcuerdos}
             options={{headerShown: false}}/>
         </Stack.Navigator>
       </NavigationContainer>

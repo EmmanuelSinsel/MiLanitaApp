@@ -4,16 +4,13 @@ import { styles } from '../../Style';
 import React, {useState, useCallback, useEffect } from 'react';
 import ImageIndex from '../ImageIndex';
 import { Dropdown } from 'react-native-element-dropdown';
-import ServiceOtros from '../services/ServiceOtros';
+import { getCorteAPI, getRutasAPI } from '../services/ServiceOtros';
 import { useRoute } from "@react-navigation/native"
-import ServicePrestamos from '../services/ServicePrestamos';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Locker } from '../Utils';
 
 const Corte = ({navigation}) => {
     const route = useRoute()
-    let servicePrestamos = new ServicePrestamos()
-    let service = new ServiceOtros()
     const [topLabel, setTopLabel] = useState("Corte de Caja")
     const [corteData, setCorteData] = useState(null)
     const [estatusCaja, setEstatusCaja] = useState('')
@@ -35,15 +32,12 @@ const Corte = ({navigation}) => {
         const getPermissions = async () => {
             const tempRutas = await getRutas()
             const rol = await AsyncStorage.getItem('nombreRol');
-            console.log(rol)
             if(rol != "ADMINISTRADOR"){
                 const rutaEmpleado = await AsyncStorage.getItem('idRuta');
-                console.log(rutaEmpleado)
                 setRuta(String(rutaEmpleado))
                 getCorte(Number(rutaEmpleado))
                 for(let r = 0 ; r < tempRutas.length ; r++){
                     if(tempRutas[r].value == rutaEmpleado){
-                        console.log(tempRutas[r])
                         setRutaText(String(tempRutas[r].label))
                         break;
                     }
@@ -59,7 +53,7 @@ const Corte = ({navigation}) => {
     }
 
     const getRutas = useCallback(async () => {
-        const res = await servicePrestamos.getRutas()
+        const res = await getRutasAPI()
         const data = res.data
         let tempRutas = []
         for(let i = 0; i < data.length ; i++){
@@ -71,8 +65,7 @@ const Corte = ({navigation}) => {
 
     const getCorte = useCallback(async (idRuta) => {
         setLoading(1)
-        const res = await service.getCorte(idRuta)
-        console.log(res)
+        const res = await getCorteAPI(idRuta)
         setLoading(0)
         const data = res.data
         const caja = res.data_caja

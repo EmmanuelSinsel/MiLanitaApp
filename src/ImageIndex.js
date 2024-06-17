@@ -32,6 +32,7 @@ const ImageIndex = {
     hidePassword: require('../assets/icons/icon-hide-password.png'),
     clear: require('../assets/icons/icon-clear.png'),
     employee: require('../assets/icons/icon-employee.png'),
+    moneySign: require('../assets/icons/icon-money-sign.png'),
 };
 
 export default ImageIndex

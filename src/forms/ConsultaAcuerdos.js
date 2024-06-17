@@ -1,52 +1,86 @@
 import { StatusBar } from 'expo-status-bar';
 import { Text, View, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { styles } from '../../Style';
-import React, {useState} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import ImageIndex from '../ImageIndex';
 import { Dropdown } from 'react-native-element-dropdown';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Locker } from '../Utils';
+import { getListaClientesAPI } from '../services/ServiceClientes';
+import { getGruposAPI, getRutasAPI } from '../services/ServiceOtros';
+import { getListaAcuerdosAPI } from '../services/ServiceAcuerdos';
 
-const ConsultaAcuerdos = ({navigation}) => {
+const ConsultaClientes = ({navigation}) => {
+    const [ruta,                setRuta] = useState('');
+    const [grupo,               setGrupo] = useState('');
+    const [listaRutas, setListaRutas] = useState([]);
+    const [listaGrupos, setListaGrupos] = useState([]);
+    const [page,                setPage] = useState(1);
+    const [filtroText,           setFiltro] = useState('');
+    const [filteredTableData, setFilteredTableData] = useState(null)
+    const [rutaNoEditable,                setRutaText] = useState('');
+    const [tableData, setTableData] = useState([])
+    const [maxPages, setMaxPages] = useState([]);
+    useEffect(() => {
+        const getPermissions = async () => {
+            const rol = await AsyncStorage.getItem('nombreRol');
+        }
+        getAcuerdos(1, 100, grupo, "")
+        getPermissions()
+    }, []);
+
+    const filterTable = (value) =>{
+        setPage(1)
+        const filtro_upper = value.toUpperCase()
+        setFiltro(value)
+        getAcuerdos(1, 100, grupo, filtro_upper)
+        
+    }
     function backMainScreen() {
         navigation.goBack()
     }
-    
-    const [ruta,                setRuta] = useState('');
-    const [grupo,               setGrupo] = useState('');
-    const [filtro,      setFiltro] = useState('');
-    const data = [
-        { label: 'Item 1', value: '1' },
-        { label: 'Item 2', value: '2' },
-        { label: 'Item 3', value: '3' },
-        { label: 'Item 4', value: '4' },
-        { label: 'Item 5', value: '5' },
-        { label: 'Item 6', value: '6' },
-        { label: 'Item 7', value: '7' },
-        { label: 'Item 8', value: '8' },
-    ];
-    const [tableData, setTableData] = useState([['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel'],
-                                                ['2343', '1','Jesus EmmSDASanuel Hernandez Sinsel']]);
+
+    const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
+        const paddingToBottom = 5;
+        return layoutMeasurement.height + contentOffset.y >=
+        contentSize.height - paddingToBottom;
+    };
+
+    const nextChunk = () => {
+        let pg = page + 1
+        if(pg <= maxPages){
+            addAcuerdos(pg, 100, grupo, filtroText)
+        }
+    }
+
+    const addAcuerdos = useCallback(async (p, pSize, idGrupo, filtro) => {
+        const res = await getListaAcuerdosAPI(p, pSize, idGrupo, filtro)
+        const data = res.data
+        let tempAcuerdos = []
+        const acuerdos = data.acuerdos
+        for(let i = 0; i < acuerdos.length ; i++){
+            tempAcuerdos.push([acuerdos[i].idAcuerdo, acuerdos[i].nomCliente])
+        }
+        setTableData(tableData => [...tableData, ...tempClientes])
+        setMaxPages(data.paginas)
+        setPage(p)
+    }, [])
+
+    const getAcuerdos = useCallback(async (p, pSize, idGrupo, filtro) => {
+        setPage(1)
+        const res = await getListaAcuerdosAPI(p, pSize, idGrupo, filtro)
+        const data = res.data
+        let tempAcuerdos = []
+        const acuerdos = data.acuerdos
+        for(let i = 0; i < acuerdos.length ; i++){
+            tempAcuerdos.push([acuerdos[i].idAcuerdo, acuerdos[i].nomCliente])
+        }
+        setMaxPages(data.paginas)
+        setTableData(tempAcuerdos)
+    }, [])
+
     return (
-        <ScrollView style={styles.background}>
+        <View style={styles.background}>
             <StatusBar backgroundColor='#70be44'/>
             <View style={styles.mainTopBar}>
                 <View style={styles.spacer30}></View>
@@ -57,78 +91,78 @@ const ConsultaAcuerdos = ({navigation}) => {
                                 source={ImageIndex.back}>
                             </Image>
                     </TouchableOpacity>
-                    <Text style={styles.mainHeadersInverted}>Consulta de Acuerdos</Text>
+                    <Text style={styles.mainHeadersInverted}>Consulta de Clientes</Text>
                 </View>
                 <View style={styles.spacer20}></View>
             </View>
             <View style={styles.spacer30}></View>
-            <View style={styles.formRow}>
-                <View style={styles.textBoxContainerHalf}>
-                    <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Ruta</Text>
-                                <Dropdown style={styles.comboBox}
-                                data={data} search
-                                labelField="label" valueField="value"
-                                searchPlaceholder="Grupo.." placeholder='Ej. ML-1'
-                                placeholderStyle={styles.comboBoxPlaceholder}
-                                selectedTextStyle={styles.comboBoxSelected}
-                                value={ruta}
-                                onChange={item => {setRuta(item.value);}}/>
-                    </View>
-                </View>
-                <View style={styles.textBoxContainerHalf}>
-                    <View style={styles.textBoxBorder}>
-                                <Text style={styles.textBoxLabel}>Grupo</Text>
-                                <Dropdown style={styles.comboBox}
-                                data={data} search
-                                labelField="label" valueField="value"
-                                searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
-                                placeholderStyle={styles.comboBoxPlaceholder}
-                                selectedTextStyle={styles.comboBoxSelected}
-                                value={grupo}
-                                onChange={item => {setGrupo(item.value);}}/>
-                    </View>
-                </View>
-            </View>
-            <View style={styles.spacer20}></View>
             <View style={styles.textBoxContainerFull}>
-                <View style={styles.textBoxBorder}>
+
+                <View style={[styles.textBoxBorder, {}]}>
                             <Text style={styles.textBoxLabel}>Buscador</Text>
                             <TextInput style={styles.textBox}
-                            onChangeText={value => setFiltro(value)}
-                            defaultValue={filtro}/>
+                            onChangeText={value => {filterTable(value)}}
+                            defaultValue={filtroText}/>
                 </View>
+                {
+                    grupo === '' &&
+                    <Locker></Locker>
+                }
             </View>
             <View style={styles.spacer20}></View>
-            <DataTable tableData={tableData}></DataTable>
-            <View style={styles.spacer30}></View>
-        </ScrollView>
+            <ScrollView style={{height:"76%"}} onScroll={({nativeEvent}) => {
+                if (isCloseToBottom(nativeEvent)) {
+                    nextChunk();
+                }
+            }}>
+                {
+                    filteredTableData === null ?
+                    <DataTable tableData={tableData} navigation={navigation}></DataTable>:
+                    <DataTable tableData={filteredTableData} navigation={navigation}></DataTable>
+                }
+                <View style={styles.spacer10}></View>
+                {
+                    tableData.length >= page * 100 ? 
+                    <View style={[styles.textBoxContainerFull,{ height:50 }]}>
+                        <Image style={[styles.loadingImage,{height:50, marginLeft:5}]}
+                            source={ImageIndex.loading}>
+                        </Image>
+                    </View>
+                    :
+                    <View></View>
+                }
+            </ScrollView>
+        </View>
     )
 }
-function DataTable({tableData}) {
-    const [ruta,                setRuta] = useState('');
-    const data1 = [
-        { label: 'Normal', value: '1' },
-        { label: 'Recuperado', value: '2' },
-    ];
+function DataTable({tableData, navigation}) {
+    const editPrestamo = (idAcuerdo) => {
+        navigation.navigate("FormAcuerdos",{ label:"Acuerdo #"+String(idAcuerdo), button:"Actualizar Acuerdo", id: idAcuerdo });
+    }
     return (
         <View>
+            <View style={[styles.tableRowOdd,{height:50, flexDirection:"row",alignItems:"center"}]}>
+                <Text style={[styles.cell,{fontWeight:"bold", width:50}]}>ID. C</Text>
+                <View>
+                    <Text style={[styles.cell,{fontWeight:"bold", width:320}]}>Cliente</Text>
+                </View>
+            </View>
             {
                 tableData.map((data,i) => (
                     i % 2 === 0 ?
-                    <View key={i} style={[styles.tableRowEven,{height:50, flexDirection:"row",alignItems:"center"}]}>
-                        <Text style={styles.cell}>{data[0]}</Text>
+                    <TouchableOpacity onPress={() => editPrestamo(data[0])} key={i} style={[styles.tableRowEven,{height:50, flexDirection:"row",alignItems:"center"}]}>
+                        <Text style={[styles.cell,{ width:50}]}>{data[0]}</Text>
                         <View>
-                            <Text style={styles.cell}>{data[2]}</Text>
+                            <Text style={[styles.cell,{ width:320}]}>{data[1]}</Text>
                         </View>
-                    </View>
+                    </TouchableOpacity>
                     :
-                    <View key={i} style={[styles.tableRowOdd,{height:50, flexDirection:"row",alignItems:"center"}]}> 
-                        <Text style={styles.cell}>{data[0]}</Text>
+                    <TouchableOpacity onPress={() => editPrestamo(data[0])} key={i} style={[styles.tableRowOdd,{height:50, flexDirection:"row",alignItems:"center"}]}> 
+                        <Text style={[styles.cell,{ width:50}]}>{data[0]}</Text>
                         <View>
-                            <Text style={styles.cell}>{data[2]}</Text>
+                            <Text style={[styles.cell,{ width:320}]}>{data[1]}</Text>
                         </View>
-                    </View>
+                    </TouchableOpacity>
 
                 ))
             }
@@ -137,4 +171,4 @@ function DataTable({tableData}) {
 }
 
 
-export default ConsultaAcuerdos;
+export default ConsultaClientes;

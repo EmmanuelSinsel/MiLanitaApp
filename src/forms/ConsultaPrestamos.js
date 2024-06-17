@@ -3,11 +3,9 @@ import { Text, View, TextInput, TouchableOpacity, ScrollView, Image, Alert } fro
 import { styles } from '../../Style';
 import React, {useState, useEffect, useCallback} from 'react';
 import ImageIndex from '../ImageIndex';
-import ServicePrestamos from '../services/ServicePrestamos';
-
+import { getPrestamosAPI } from '../services/ServicePrestamos';
 
 const ConsultaPrestamos = ({navigation}) => {
-    service = new ServicePrestamos()
     const [page,           setPage] = useState(1);
     const [filtroText,           setFiltro] = useState('');
     const [filteredTableData, setFilteredTableData] = useState(null)
@@ -53,7 +51,7 @@ const ConsultaPrestamos = ({navigation}) => {
     }
 
     const addPrestamos = useCallback(async (p, pSize, filtro) => {
-        const res = await service.getPrestamos(p=p, pSize=pSize, filtro=filtro)
+        const res = await getPrestamosAPI(p=p, pSize=pSize, filtro=filtro)
         const data = res.data
         let tempPrestamos = []
         const prestamos = data.prestamos
@@ -66,7 +64,7 @@ const ConsultaPrestamos = ({navigation}) => {
     }, [])
 
     const getPrestamos = useCallback(async (p, pSize, filtro) => {
-        const res = await service.getPrestamos(p=p, pSize=pSize, filtro=filtro)
+        const res = await getPrestamosAPI(p=p, pSize=pSize, filtro=filtro)
         const data = res.data
         let tempPrestamos = []
         const prestamos = data.prestamos

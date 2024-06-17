@@ -3,14 +3,12 @@ import { Text, View, TextInput, TouchableOpacity, ScrollView, Image, Dimensions,
 import { styles } from '../../Style';
 import React, {useState, useCallback, useEffect,} from 'react';
 import ImageIndex from '../ImageIndex';
-import { Dropdown } from 'react-native-element-dropdown';
-import ServiceAbonos from '../services/ServiceAbonos';
-import ServicePrestamos from '../services/ServicePrestamos';
 import CurrencyInput from 'react-native-currency-input';
-import ServiceOtros from '../services/ServiceOtros';
+import { abrirCajaAPI, cerrarCajaAPI, eliminarPreregistroCajaAPI, getIdCajaRutaAPI, getPreregistroCajaAPI } from '../services/ServiceOtros';
 import { useRoute } from '@react-navigation/native';
 import { Locker } from '../Utils';
-
+import { Navigation } from 'react-native-feather';
+import Toast from 'react-native-root-toast';
 const FormCajas = ({navigation}) => {
     function backMainScreen() {
         if(route.params?.status == "Cerrada"){
@@ -19,7 +17,6 @@ const FormCajas = ({navigation}) => {
             navigation.goBack()
         }
     }
-    const serviceCajas = new ServiceOtros()
     const [listaRutas, setListaRutas] = useState([]);
     const [ruta,                setRuta] = useState('');
     const [statusCaja, setStatusCaja] = useState('');
@@ -59,21 +56,20 @@ const FormCajas = ({navigation}) => {
     }, []);
 
     const eliminarPreregistro = useCallback(async (id_caja, cancelMode) => {
-        const res = await serviceCajas.eliminarPreregistroCaja(id_caja)
+        const res = await eliminarPreregistroCajaAPI(id_caja)
         if(cancelMode == 1){
             navigation.goBack()
         }
     })
 
     const getIdCajaRuta = useCallback(async (ruta) => {
-        const res = await serviceCajas.getIdCajaRuta(ruta)
+        const res = await getIdCajaRutaAPI(ruta)
         const id_caja = res.id_caja
-        console.log(res)
         setIdCaja(String(id_caja))
     })
 
     const getSiguienteIdCaja = useCallback(async () => {
-        const res = await serviceCajas.getPreregistroCaja()
+        const res = await getPreregistroCajaAPI()
         const id_caja = res.nextId
         setIdCaja(String(id_caja))
     })
@@ -84,11 +80,20 @@ const FormCajas = ({navigation}) => {
             ruta: route.params?.idRuta,
             monto_apertura: newMontoApertura,
         }
-        const res = await serviceCajas.abrirCaja(caja)
+        const res = await abrirCajaAPI(caja)
+        let toast = Toast.show('Caja Abierta', {
+            duration: Toast.durations.SHORT,
+        });
+        navigation.goBack()
+
     })
 
     const cerrarCaja = useCallback(async (newIdCaja, newMontoFinal, newMontoEntregado) => {
-        const res = await serviceCajas.cerrarCaja(newIdCaja, newMontoFinal, newMontoEntregado)
+        const res = await cerrarCajaAPI(newIdCaja, newMontoFinal, newMontoEntregado)
+        let toast = Toast.show('Caja Abierta', {
+            duration: Toast.durations.SHORT,
+        });
+        navigation.goBack()
     })
     return (
         <View style={{backgroundColor:"white", height:"100%"}}>

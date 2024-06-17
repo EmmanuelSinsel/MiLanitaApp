@@ -6,13 +6,11 @@ import ImageIndex from '../ImageIndex';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useRoute } from "@react-navigation/native"
 import CurrencyInput from 'react-native-currency-input';
-import ServicePrestamos from '../services/ServicePrestamos';
-import ServiceAbonos from '../services/ServiceAbonos';
+import { get_detalle_abono_extraAPI } from '../services/ServicePrestamos';
+import { guardar_abonosAPI } from '../services/ServiceAbonos';
 import { Locker } from '../Utils';
 
 const FormExtraCobranza = ({navigation}) => {
-    let serviceAbonos = new ServiceAbonos()
-    let servicePrestamos = new ServicePrestamos()
     function backMainScreen() {
         navigation.goBack()
     }
@@ -36,7 +34,7 @@ const FormExtraCobranza = ({navigation}) => {
     }, []);
 
     const getAbonoExtra = async (id) => {
-        const res = await servicePrestamos.get_detalle_abono_extra(id)
+        const res = await get_detalle_abono_extraAPI(id)
         const data = res.data
         const cliente = data.cliente
         const prestamo = data.prestamo
@@ -86,8 +84,7 @@ const FormExtraCobranza = ({navigation}) => {
             "fecha":fecha
         })
         data = {"abonos":data}  
-        console.log(data)
-        const res = await serviceAbonos.guardar_abonos(data)
+        const res = await guardar_abonosAPI(data)
         if(res.status == 1){
             navigation.goBack()
         }
