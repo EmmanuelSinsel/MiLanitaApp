@@ -149,7 +149,6 @@ const styles = StyleSheet.create({
         fontSize:18
     },
     textLabel:{
-        
         fontSize:18,
         alignSelf:"center",
     },

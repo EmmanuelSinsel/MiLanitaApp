@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Locker } from '../Utils';
 import { getGruposAPI, getRutasAPI } from '../services/ServiceOtros';
 import { getListaAbonosAPI, guardar_abonosAPI } from '../services/ServiceAbonos';
+import { getListaAbonosAcuerdoAPI, registrarAbonosAcuerdoAPI } from '../services/ServiceAcuerdos';
 
 const FormAbonosAcuerdos = ({navigation}) => {
     //TABLA
@@ -101,24 +102,22 @@ const FormAbonosAcuerdos = ({navigation}) => {
         setListaGrupos(tempGrupos)
     }, [])
 
-    const getListaAbonos = useCallback(async (idGrupo) => {
+    const getListaAbonos = useCallback(async (idRuta) => {
         setLoadingForm(1)
         setLoading(1)
-        const res = await getListaAbonosAPI(idGrupo)
+        const res = await getListaAbonosAcuerdoAPI(idRuta)
         const data = res.data
         let tempAbonos = []
+        console.log(data)
         for(let i = 0; i < data.length ; i++){
-            tempAbonos.push([data[i].idPrestamo,data[i].nomCliente,data[i].numAbono,data[i].abono, data[i].numSemana])
+            tempAbonos.push([data[i].idAcuerdo,data[i].nomCliente,data[i].numAbono,data[i].abono])
         }
         setTableData(tempAbonos)
         setTableDataFiltered(tempAbonos)
-        let list = []
         let listaAbonos = []
         for(let i = 0; i < tempAbonos.length ; i++){
-            list.push('2')
             listaAbonos.push({ "id": i, "value": tempAbonos[i][3] })
         }
-        setTipoAbono(list)
         setAbono(listaAbonos)
         setLoadingForm(0)
         setLoading(0)
@@ -141,18 +140,17 @@ const FormAbonosAcuerdos = ({navigation}) => {
         fecha = month+"/"+day+"/"+year
         for(let i = 0 ; i < newTableData.length ; i++){
             data.push({
-                "id_prestamo":newTableData[i][0],
-                "no_abono":newTableData[i][2]+1,
-                "abono":newListaAbonos[i].value,
-                "tipo_abono":newTipoAbono[i],
-                "no_semana":Number(newTableData[i][4])+1,
+                "id_acuerdo":newTableData[i][0],
+                "id_abono_acuerdo":newTableData[i][2],
+                "cantidad":newListaAbonos[i].value,
                 "fecha":fecha
             })
         }
         data = {"abonos":data}   
-        const res = guardar_abonosAPI(data)
+        const res = registrarAbonosAcuerdoAPI(data)
         if(res.status == 1){
             setLoaded(1)
+            setLoading(0)
         }
     }
 
@@ -254,42 +252,27 @@ const FormAbonosAcuerdos = ({navigation}) => {
             }
             <View style={styles.spacer30}></View>
             <View style={{height:150}}>
-                <View style={styles.formRow}>
-                    <View style={styles.textBoxContainerHalf}>
-                        <View style={styles.textBoxBorder}>
-                        <Text style={styles.textBoxLabel}>Ruta</Text>
-                            {
-                                rutaNoEditable === '' ?
-                                <Dropdown style={styles.comboBox}
-                                data={listaRutas}
-                                labelField="label" valueField="value"
-                                searchPlaceholder="Ruta.." placeholder='Ej. ML-1'
-                                placeholderStyle={styles.comboBoxPlaceholder}
-                                selectedTextStyle={styles.comboBoxSelected}
-                                value={ruta}
-                                onChange={item => {setRuta(item.value);getGrupos(item.value);}}/>
-                                :
-                                <View>
-                                    <TextInput style={styles.textBox}
-                                    selection={{start:0, end:0}}
-                                    value={rutaNoEditable}/>
-                                    <Locker></Locker>
-                                </View>
-                            }
-                        </View>
-                    </View>
-                    <View style={styles.textBoxContainerHalf}>
-                        <View style={styles.textBoxBorder}>
-                                    <Text style={styles.textBoxLabel}>Grupo</Text>
-                                    <Dropdown style={styles.comboBox}
-                                    data={listaGrupos}
-                                    labelField="label" valueField="value"
-                                    searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
-                                    placeholderStyle={styles.comboBoxPlaceholder}
-                                    selectedTextStyle={styles.comboBoxSelected}
-                                    value={grupo}
-                                    onChange={item => {setGrupo(item.value); getListaAbonos(item.value)}}/>
-                        </View>
+                <View style={styles.textBoxContainerFull}>
+                    <View style={styles.textBoxBorder}>
+                    <Text style={styles.textBoxLabel}>Ruta</Text>
+                        {
+                            rutaNoEditable === '' ?
+                            <Dropdown style={styles.comboBox}
+                            data={listaRutas}
+                            labelField="label" valueField="value"
+                            searchPlaceholder="Ruta.." placeholder='Ej. ML-1'
+                            placeholderStyle={styles.comboBoxPlaceholder}
+                            selectedTextStyle={styles.comboBoxSelected}
+                            value={ruta}
+                            onChange={item => {setRuta(item.value);getListaAbonos(item.value);}}/>
+                            :
+                            <View>
+                                <TextInput style={styles.textBox}
+                                selection={{start:0, end:0}}
+                                value={rutaNoEditable}/>
+                                <Locker></Locker>
+                            </View>
+                        }
                     </View>
                 </View>
                 <View style={styles.spacer20}></View>
@@ -327,43 +310,6 @@ const FormAbonosAcuerdos = ({navigation}) => {
 }
 
 function DataTable({tableData, updateAbono, updateType, listaAbonos, lista_tipos, filtro }) {
-    const [comboColor, setComboColor] = useState([]);
-    const data1 = [
-        { label: 'Normal', value: '2' },
-        { label: 'Recuperado', value: '5' },
-        { label: 'Parcial', value: '4' },
-        { label: 'Adelantado', value: '6' },
-    ];
-
-    useEffect(() => {
-        let colores = []
-        for(let i = 0; i < listaAbonos.length ; i++){
-            colores.push('transparent')
-        }
-        setComboColor(colores)
-    },[])
-
-    const changeColor = (key, type) => {
-        let color = ''
-        if(type.value == "2"){
-            color = 'transparent'
-        }else if(type.value == '4'){
-            color = 'pink'
-        }else if(type.value == '5'){
-            color = 'green'
-        }else if(type.value == '6'){
-            color = 'orange'
-        }
-        const nextColors = comboColor.map((c, i) => {
-            if (i === key) {
-                return color;
-            } else {
-                return comboColor[i];
-            }
-        });
-        setComboColor(nextColors);
-    }
-    
     return (
         <View>
             <View>
@@ -372,12 +318,12 @@ function DataTable({tableData, updateAbono, updateType, listaAbonos, lista_tipos
                         i % 2 === 0 ?
                         <View key={i} >
                             <View style={[styles.tableRowEven]}>
-                                <Text style={[styles.cell, {marginLeft:20}]}>{data[0]}</Text>
+                                <Text style={[styles.cell, {marginLeft:20}]}>#{data[0]}</Text>
                                 <View>
                                     <Text style={styles.cell}>{data[1]}</Text>
                                     <View style={[styles.cellHorizontal,{marginTop:-20}]}>
-                                        <Text style={[styles.cell,{marginLeft:-40, marginTop:17}]}>Abono #{String(data[2]+1)}:</Text>
-                                        <CurrencyInput style={[styles.cellInput,{width:70,  backgroundColor:comboColor[i]}]}
+                                        <Text style={[styles.cell,{marginLeft:-40, marginTop:17}]}>  Abono #{String(data[2])}:</Text>
+                                        <CurrencyInput style={[styles.cellInput,{width:70}]}
                                                 delimiter=","
                                                 precision={0}
                                                 minValue={0}
@@ -386,14 +332,6 @@ function DataTable({tableData, updateAbono, updateType, listaAbonos, lista_tipos
                                                 placeholder='$0'
                                                 onChangeValue={(value) => {updateAbono(i, value);}}
                                                 value={String(listaAbonos[i].value)}/>
-                                        <Text style={[styles.cell, {marginTop:17}]}>Tipo:</Text>
-                                        <Dropdown style={[styles.cellCombo, {width:140}]}
-                                        data={data1} 
-                                        labelField="label" valueField="value"
-                                        placeholderStyle={styles.comboBoxPlaceholder}
-                                        selectedTextStyle={[styles.cellComboBoxSelected,{marginTop:5}]}
-                                        value={lista_tipos[i]}
-                                        onChange={item => {updateType(i, item); changeColor(i,item);}}/>
                                     </View>
                                 </View>
                             </View>
@@ -405,8 +343,8 @@ function DataTable({tableData, updateAbono, updateType, listaAbonos, lista_tipos
                                 <View>
                                     <Text style={styles.cell}>{data[1]}</Text>
                                     <View style={[styles.cellHorizontal,{marginTop:-20}]}>
-                                        <Text style={[styles.cell,{marginLeft:-40, marginTop:17}]}>Abono #{String(data[2]+1)}:</Text>
-                                        <CurrencyInput style={[styles.cellInput,{width:70,backgroundColor:comboColor[i]}]}
+                                        <Text style={[styles.cell,{marginLeft:-40, marginTop:17}]}>  Abono #{String(data[2])}:</Text>
+                                        <CurrencyInput style={[styles.cellInput,{width:70}]}
                                                 delimiter=","
                                                 precision={0}
                                                 minValue={0}
@@ -415,14 +353,6 @@ function DataTable({tableData, updateAbono, updateType, listaAbonos, lista_tipos
                                                 placeholder='$0'
                                                 onChangeValue={(value) => {updateAbono(i, value);}}
                                                 value={String(listaAbonos[i].value)}/>
-                                        <Text style={[styles.cell, {marginTop:17}]}>Tipo:</Text>
-                                        <Dropdown style={[styles.cellCombo, {width:140}]}
-                                        data={data1}
-                                        labelField="label" valueField="value"
-                                        placeholderStyle={styles.comboBoxPlaceholder}
-                                        selectedTextStyle={[styles.cellComboBoxSelected,{marginTop:5}]}
-                                        value={lista_tipos[i]}
-                                        onChange={item => {updateType(i, item); changeColor(i,item);}}/>
                                     </View>
                                 </View>
                             </View>

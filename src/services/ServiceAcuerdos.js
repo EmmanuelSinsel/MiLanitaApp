@@ -76,9 +76,38 @@ const getSiguienteIdAcuerdoAPI = async () => {
     console.error(error);
     }
 };
+const registrarAbonosAcuerdoAPI = async (nuevoAbonosAcuerdo) => {
+    url = APIURL+"acuerdos/guardar_lista_abonos_acuerdo"
+    try {
+        const response = await fetch(url
+            ,{  
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(nuevoAbonosAcuerdo)});
+        const json = await response.json();
+        return json;
+    } catch (error) {
+    console.error(error);
+    }
+}
+const getListaAbonosAcuerdoAPI = async (id_ruta) => {
+    url = APIURL+"acuerdos/get_lista_abonos_acuerdo?id_ruta="+String(id_ruta)
+    try {
+        const response = await fetch(url);
+        const json = await response.json();
+        return json;
+    } catch (error) {
+    console.error(error);
+    }
+};
 
 export {getListaAcuerdosAPI,
         getSiguienteIdAcuerdoAPI,
         getDetalleAcuerdoAPI,
         registrarAcuerdoAPI,
-        eliminarPreregistroAcuerdoAPI}
+        eliminarPreregistroAcuerdoAPI,
+        registrarAbonosAcuerdoAPI,
+        getListaAbonosAcuerdoAPI}

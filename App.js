@@ -49,6 +49,7 @@ console.disableYellowBox = true;
 
 export default function App() {
 
+
   
   const LOCATION_TASK_NAME = 'background-location-task-buzz-v2';
 

@@ -1,12 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { Text, View, TextInput, Pressable, TouchableOpacity, ScrollView, Image, BackHandler } from 'react-native';
+import Checkbox from 'expo-checkbox';
 import { styles } from '../../Style';
-import React, {useState, useCallback, useEffect} from 'react';
+import React, {useState, useCallback, useEffect, useSyncExternalStore} from 'react';
 import ImageIndex from '../ImageIndex';
 import { Dropdown } from 'react-native-element-dropdown';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import CurrencyInput from 'react-native-currency-input';
-import { Locker } from '../Utils';
+import { Locker, LockerGray } from '../Utils';
 import { getPrestamoAcuerdoAPI } from '../services/ServicePrestamos';
 import { getRutasAPI } from '../services/ServiceOtros';
 import { eliminarPreregistroAcuerdoAPI, getDetalleAcuerdoAPI, getSiguienteIdAcuerdoAPI, registrarAcuerdoAPI } from '../services/ServiceAcuerdos';
@@ -14,6 +15,20 @@ import { useRoute } from "@react-navigation/native"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Acuerdo = ({navigation}) => {
+    const [rows, setRows] = useState([{id:1, cantidad:0, fecha:""}])
+
+    const addItem = (oldRows) => {
+        const lastItem = oldRows.at(-1)
+        const newItem = {id:lastItem.id+1, cantidad:0 , fecha:""}
+        setRows(oldRows => [...oldRows, newItem])
+        console.log(rows)
+    }
+
+
+
+
+
+
     const [cancel, setCancel] = useState('')
     const [idPrestamo,         setIdPrestamo] = useState('');
     const [idAcuerdo,         setIdAcuerdo] = useState('');
@@ -39,6 +54,7 @@ const Acuerdo = ({navigation}) => {
     const [buttonLabel, setButtonLabel] = useState('')
     const [loading, setLoading] = useState(0);
     const [abonos, setAbonos] = useState(null)
+    const [customSelected,         setCustomSelected] = useState(false);
     const route = useRoute()
     const intervalos = [
         { label: 'Semanal', value: '1' },
@@ -419,9 +435,10 @@ const Acuerdo = ({navigation}) => {
                                         value={fechaAcuerdoNoEditable}/>
                                         <Locker></Locker>
                                     </View>
-
                                 }
-
+                                {
+                                    customSelected === true && <LockerGray></LockerGray>
+                                }
                             </View>
                         </View>
                         <View style={styles.textBoxContainerHalf}>
@@ -437,6 +454,9 @@ const Acuerdo = ({navigation}) => {
                                         onChange={item => {setTipoIntervalo(item.value);}}/>
                                         {
                                             editable === false && <Locker></Locker>
+                                        }
+                                        {
+                                            customSelected === true && <LockerGray></LockerGray>
                                         }
                             </View>
                         </View>
@@ -456,6 +476,9 @@ const Acuerdo = ({navigation}) => {
                             {
                                 editable === false && <Locker></Locker>
                             }
+                            {
+                                customSelected === true && <LockerGray></LockerGray>
+                            }
                         </View>
                         <View style={styles.textBoxContainerHalf}>
                             <View style={styles.textBoxBorder}>
@@ -473,26 +496,48 @@ const Acuerdo = ({navigation}) => {
                             {
                                 editable === false && <Locker></Locker>
                             }
+                            {
+                                customSelected === true && <LockerGray></LockerGray>
+                            }
                         </View>
                     </View>
-
+                    <View style={styles.spacer10}></View>
+                    <View style={styles.formRow}>
+                        <View style={{flexDirection:"row"}}>
+                            <Checkbox
+                                value={customSelected}
+                                onValueChange={() => {setCustomSelected(!customSelected); console.log(customSelected)}}
+                                color={"#70be44"}
+                                />
+                            <Text style={{fontSize:18, height:"100%"}}> Intervalos Personalizados</Text>
+                        </View>
+                    </View>
                     <View style={styles.spacer10}></View>
                     <View style={styles.mainHeaderContainer}>
                         <Text style={styles.mainHeaders}>Intervalos del Acuerdo</Text>
                     </View>
                     <View style={styles.horizontalLine}></View>
-                    { fechaAcuerdo !== "DD/MM/YYYY" && intervaloAcuerdo !== '' && cantidadIntervalo !== null && tipoIntervalo !== '' ?
-                        <View style={{width:"90%", alignSelf:"center"}}>
-                            <DataTable intervalo={intervaloAcuerdo} 
-                            cantidad={cantidadIntervalo} 
-                            fecha_inicio={fechaAcuerdo} 
-                            saldoPendiente={saldoPendiente}
-                            tipoIntervalo={tipoIntervalo}
-                            setData={setData}
-                            flagdata={data}
-                            editable={editable}
-                            editableData={abonos}></DataTable>
-                        </View>:<View>
+                    {
+                        customSelected === false ?
+                        <View>
+                            { fechaAcuerdo !== "DD/MM/YYYY" && intervaloAcuerdo !== '' && cantidadIntervalo !== null && tipoIntervalo !== '' ?
+                                <View style={{width:"90%", alignSelf:"center"}}>
+                                    <DataTable intervalo={intervaloAcuerdo} 
+                                    cantidad={cantidadIntervalo} 
+                                    fecha_inicio={fechaAcuerdo} 
+                                    saldoPendiente={saldoPendiente}
+                                    tipoIntervalo={tipoIntervalo}
+                                    setData={setData}
+                                    flagdata={data}
+                                    editable={editable}
+                                    editableData={abonos}></DataTable>
+                                </View>:<View>
+                                </View>
+                            }
+                        </View>
+                        :
+                        <View>
+                            <CustomDataTable rows={rows} addItem={addItem}></CustomDataTable>
                         </View>
                     }
                     <View style={styles.spacer20}></View>
@@ -524,7 +569,6 @@ function DataTable({intervalo, cantidad, fecha_inicio, saldoPendiente, tipoInter
     let valid = 1
     let cont = 0
     if(editableData == null){
-
         const options = {
             weekday: 'long',
             year: 'numeric',
@@ -664,6 +708,116 @@ function DataTable({intervalo, cantidad, fecha_inicio, saldoPendiente, tipoInter
                     </View>
                 </View>:<View></View>
             }
+        </View>
+    )
+}
+
+function CustomDataTable({rows, addItem}){
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [visible,             setVisible] = useState(true)
+    const [fechaAcuerdo, setFechaAcuerdo] = useState("")
+    const [cantidadIntervalo, setCantidadIntervalo] = useState(0)
+
+    const showDatePicker = () => {
+        setDatePickerVisibility(true);
+    };
+    const hideDatePicker = () => {
+        setDatePickerVisibility(false);
+    };
+    const handleConfirm = (date) => {
+        hideDatePicker();
+        var month = String(date.getMonth() + 1)
+        if(month.length==1){
+            month = "0"+month
+        }
+        var day = String(date.getDate())
+        if(day.length==1){
+            day = "0"+day
+        }
+        setVisible(false)
+        var year = date.getFullYear()
+        setFechaAcuerdo(month+"/"+day+"/"+year)
+    };
+
+    return(
+        <View>
+            {
+                rows.map((data, i) => (
+                    <View>
+                        {
+                            i % 2 === 0 ?
+                            <View style={[styles.tableRowOdd,{height:50, flexDirection:"row",alignItems:"center"}]}>
+                                <Text style={[styles.cell,{marginLeft:20, height:40, marginRight:20}]}>#{data.id}</Text>
+                                <View>
+                                    <CurrencyInput style={[{borderWidth:1, paddingLeft:5, borderRadius:10, width:100, height:40, fontSize:16}]}
+                                        delimiter=","
+                                        precision={0}
+                                        minValue={0}
+                                        maxValue={9999}
+                                        prefix="$"
+                                        placeholder='Ej. $450'
+                                        value={cantidadIntervalo}
+                                        onChangeValue={item => {setCantidadIntervalo(item);}}
+                                        />
+                                </View>
+                                <Pressable style={[{borderWidth:1, paddingLeft:5, borderRadius:10, width:160, height:40, fontSize:14, marginLeft:20}]}
+                                            onPress={showDatePicker}>
+                                                <View style={{ display: !visible ? 'flex' : 'none', paddingTop:10 }}>
+                                                    <Text style={[styles.date_label,{fontSize:16}]}>{fechaAcuerdo}</Text>
+                                                </View>
+                                                <View style={{ display: visible ? 'flex' : 'none' , paddingTop:12  }}>
+                                                    <Text style={[styles.comboBoxPlaceholder, {fontSize:16}]}>DD/MM/YYYY</Text>
+                                                </View>
+                                        </Pressable>
+                                        <DateTimePickerModal
+                                            isVisible={isDatePickerVisible}
+                                            mode="date"
+                                            onConfirm={handleConfirm}
+                                            onCancel={hideDatePicker}
+                                        />
+                            </View>
+                            :
+                            <View style={[styles.tableRowEven,{height:50, flexDirection:"row",alignItems:"center"}]}>
+                                <Text style={[styles.cell,{marginLeft:20, height:40, marginRight:20}]}>#{data.id}</Text>
+                                <View>
+                                    <CurrencyInput style={[{borderWidth:1, paddingLeft:5, borderRadius:10, width:100, height:40, fontSize:16}]}
+                                        delimiter=","
+                                        precision={0}
+                                        minValue={0}
+                                        maxValue={9999}
+                                        prefix="$"
+                                        placeholder='Ej. $450'
+                                        value={cantidadIntervalo}
+                                        onChangeValue={item => {setCantidadIntervalo(item);}}
+                                        />
+                                </View>
+                                <Pressable style={[{borderWidth:1, paddingLeft:5, borderRadius:10, width:160, height:40, fontSize:14, marginLeft:20}]}
+                                            onPress={showDatePicker}>
+                                                <View style={{ display: !visible ? 'flex' : 'none', paddingTop:10 }}>
+                                                    <Text style={[styles.date_label,{fontSize:16}]}>{fechaAcuerdo}</Text>
+                                                </View>
+                                                <View style={{ display: visible ? 'flex' : 'none' , paddingTop:12  }}>
+                                                    <Text style={[styles.comboBoxPlaceholder, {fontSize:16}]}>DD/MM/YYYY</Text>
+                                                </View>
+                                        </Pressable>
+                                        <DateTimePickerModal
+                                            isVisible={isDatePickerVisible}
+                                            mode="date"
+                                            onConfirm={handleConfirm}
+                                            onCancel={hideDatePicker}
+                                        />
+                            </View>
+                        }
+                    </View>
+                ))
+            }
+            <View style={{width:"100%"}}>
+                <View style={styles.spacer10}></View>
+                <TouchableOpacity style={{alignSelf:"center"}} onPress={() => addItem(rows)}>
+                    <Image style={{height:30, aspectRatio:1}} source={ImageIndex.add}></Image>
+                </TouchableOpacity>
+            </View>
+
         </View>
     )
 }

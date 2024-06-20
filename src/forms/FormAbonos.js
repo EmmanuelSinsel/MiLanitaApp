@@ -153,6 +153,7 @@ const FormAbonos = ({navigation}) => {
         const res = guardar_abonosAPI(data)
         if(res.status == 1){
             setLoaded(1)
+            navigation.goBack()
         }
     }
 
