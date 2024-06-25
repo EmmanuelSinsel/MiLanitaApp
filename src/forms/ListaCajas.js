@@ -4,16 +4,23 @@ import { styles } from '../../Style';
 import React, {useState, useCallback, useEffect,} from 'react';
 import ImageIndex from '../ImageIndex';
 import { getStatusCajasAPI } from '../services/ServiceOtros';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ListaCajas = ({navigation}) => {
     const [statusCajas, setStatusCajas] = useState(null)
     const [loading, setLoading] = useState(0)
+    const [rol, setRol] = useState(null)
     let m = ""
     function backMainScreen() {
         navigation.goBack()
     }
     useEffect(() => {
         getEstadoCajas()
+        const getPermissions = async () => {
+            const rol = await AsyncStorage.getItem('nombreRol');
+            setRol(rol)
+        }
+        getPermissions()
     }, []);
 
     const getEstadoCajas = useCallback(async () => {
@@ -28,8 +35,14 @@ const ListaCajas = ({navigation}) => {
         setStatusCajas(cajas)
     },[])
 
-    const administrarCaja = (idRuta, ruta, status) => {
-        navigation.navigate("FormCajas",{ idRuta: idRuta, ruta: ruta, status: status });
+    const administrarCaja = (idRuta, ruta, status, edit) => {
+        if(edit && status == "Abierta" && rol == "ADMINISTRADOR"){
+            console.log(rol)
+            navigation.navigate("FormCajas",{ idRuta: idRuta, ruta: ruta, status: "Editar" });
+        }else{
+            navigation.navigate("FormCajas",{ idRuta: idRuta, ruta: ruta, status: status });
+        }
+
     }
     
     return(
@@ -63,7 +76,8 @@ const ListaCajas = ({navigation}) => {
                         statusCajas.map((data,i) => (
                             i % 2 === 0 ?
                             <TouchableOpacity key={i} style={[styles.tableRowEven,{height:50, flexDirection:"row",alignItems:"center"}]} 
-                            onPress={() => administrarCaja(data.idRuta, data.ruta, data.status)}>
+                            onPress={() => administrarCaja(data.idRuta, data.ruta, data.status)}
+                            onLongPress={() => {administrarCaja(data.idRuta, data.ruta, data.status, true)}}>
                                 <View style={{width:"90%", height:"100%"}}>
                                     <Text style={[styles.cell,{}]}>   {data.ruta}</Text>
                                 </View>
@@ -78,7 +92,8 @@ const ListaCajas = ({navigation}) => {
                             </TouchableOpacity>
                             :
                             <TouchableOpacity  key={i} style={[styles.tableRowOdd,{height:50, flexDirection:"row",alignItems:"center"}]}
-                            onPress={() => administrarCaja(data.idRuta, data.ruta, data.status)}> 
+                            onPress={() => administrarCaja(data.idRuta, data.ruta, data.status)}
+                            onLongPress={() => {administrarCaja(data.idRuta, data.ruta, data.status, true)}}> 
                                 <View style={{width:"90%", height:"100%"}}>
                                     <Text style={[styles.cell,{justifyContent:"center"}]}>   {data.ruta}</Text>
                                 </View>

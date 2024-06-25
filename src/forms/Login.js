@@ -38,10 +38,12 @@ const Login = ({navigation}) => {
     },[])
 
     const login = useCallback(async (usuario, password) => {
+        console.log("LOGIN")
         setLoading(1)
         const res = await loginAPI(usuario, password)
         setLoading(0)
 
+        console.log(res)
         const auth = res.auth
 
         if(res.status == 1){

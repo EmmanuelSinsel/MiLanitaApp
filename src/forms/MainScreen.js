@@ -10,6 +10,7 @@ import FormAbonosAcuerdos from './FormAbonosAcuerdos';
 const MainScreen = ({navigation}) => {
     const [admin, setAdmin] = useState(false)
     useEffect(() => {
+        console.log("MAIN")
         const get_values = async() => {
             try {
                 const idEmpleado = await AsyncStorage.getItem('idEmpleado');

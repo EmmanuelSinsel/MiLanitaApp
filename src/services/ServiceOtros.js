@@ -107,8 +107,30 @@ const abrirCajaAPI = async(caja) => {
     }
 }
 
+const actualizarCajaAPI = async(idCaja, montoInicial) => {
+    url = APIURL+"caja/actualizar_caja?id_caja="+idCaja+"&monto_inicial="+String(montoInicial)
+    try {
+        const response = await fetch(url);
+        const json = await response.json();
+        return json;
+    } catch (error) {
+    console.error(error);
+    }
+}
+
 const cerrarCajaAPI = async(idCaja, montoFinal, montoEntregado) => {
     url = APIURL+"caja/cerrar_caja?id_caja="+idCaja+"&monto_final="+montoFinal+"&monto_entregado="+montoEntregado
+    try {
+        const response = await fetch(url);
+        const json = await response.json();
+        return json;
+    } catch (error) {
+    console.error(error);
+    }
+}
+
+const detalleCajaAPI = async(idCaja) => {
+    url = APIURL+"caja/detalle_caja?id_caja="+idCaja
     try {
         const response = await fetch(url);
         const json = await response.json();
@@ -154,4 +176,6 @@ export {getRutasAPI,
         abrirCajaAPI, 
         cerrarCajaAPI,
         getGaleriaAPI,
-        getThumbnailAPI}
+        getThumbnailAPI,
+        actualizarCajaAPI,
+        detalleCajaAPI}

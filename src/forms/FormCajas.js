@@ -4,7 +4,7 @@ import { styles } from '../../Style';
 import React, {useState, useCallback, useEffect,} from 'react';
 import ImageIndex from '../ImageIndex';
 import CurrencyInput from 'react-native-currency-input';
-import { abrirCajaAPI, cerrarCajaAPI, eliminarPreregistroCajaAPI, getIdCajaRutaAPI, getPreregistroCajaAPI } from '../services/ServiceOtros';
+import { abrirCajaAPI, actualizarCajaAPI, cerrarCajaAPI, detalleCajaAPI, eliminarPreregistroCajaAPI, getIdCajaRutaAPI, getPreregistroCajaAPI } from '../services/ServiceOtros';
 import { useRoute } from '@react-navigation/native';
 import { Locker } from '../Utils';
 import { Navigation } from 'react-native-feather';
@@ -31,26 +31,32 @@ const FormCajas = ({navigation}) => {
     const route = useRoute()
     useEffect(() => {
         const backAction = () => {
-            if(route.params?.status == "Abierta"){
+            if(route.params?.status == "Abierta" || route.params?.status == "Editar"){
                 return false;
             }else{
                 setCancel(1)
                 return true;
             }
         }
-        if(route.params?.status == "Cerrada"){
-            getSiguienteIdCaja()
-            setLabel("Abrir Caja")
-        }if(route.params?.status == "Abierta"){
-            getIdCajaRuta(route.params?.idRuta)
-            setLabel("Cerrar Caja")
+        const getData = async() => {
+            if(route.params?.status == "Cerrada"){
+                getSiguienteIdCaja()
+                setLabel("Abrir Caja")
+            }if(route.params?.status == "Abierta"){
+                getIdCajaRuta(route.params?.idRuta)
+                setLabel("Cerrar Caja")
+            }
+            if(route.params?.status == "Editar"){
+                const id_caja = await getIdCajaRuta(route.params?.idRuta)
+                await getDetalleCaja(id_caja)
+                setLabel("Actualizar Caja")
+            }
         }
+        getData()
         const backHandlerPrestamos = BackHandler.addEventListener(
             'hardwareBackPress',
             backAction,
         );
-
-
         return () =>
             BackHandler.removeEventListener("hardwareBackPress", backAction);
     }, []);
@@ -66,12 +72,19 @@ const FormCajas = ({navigation}) => {
         const res = await getIdCajaRutaAPI(ruta)
         const id_caja = res.id_caja
         setIdCaja(String(id_caja))
+        return id_caja
     })
 
     const getSiguienteIdCaja = useCallback(async () => {
         const res = await getPreregistroCajaAPI()
         const id_caja = res.nextId
         setIdCaja(String(id_caja))
+    })
+
+    const getDetalleCaja = useCallback(async (id_caja) => {
+        const res = await detalleCajaAPI(id_caja)
+        console.log(res)
+        setMontoApertura(res.data.monto_apertura)
     })
 
     const abrirCaja = useCallback(async (newIdCaja, newMontoApertura) => {
@@ -95,6 +108,15 @@ const FormCajas = ({navigation}) => {
         });
         navigation.goBack()
     })
+
+    const actualizarCaja = useCallback(async (newIdCaja, newMontoInicial) => {
+        const res = await actualizarCajaAPI(newIdCaja, newMontoInicial)
+        let toast = Toast.show('Caja Actualizada', {
+            duration: Toast.durations.SHORT,
+        });
+        navigation.goBack()
+    })
+
     return (
         <View style={{backgroundColor:"white", height:"100%"}}>
             {
@@ -228,6 +250,42 @@ const FormCajas = ({navigation}) => {
                         </View>
                     </View>
                 }
+                {
+                    route.params?.status == "Editar" &&
+                    <View>
+                        <View style={styles.formRow}>
+                            <View style={styles.textBoxContainerHalf}>
+                                <View style={styles.textBoxBorder}>
+                                    <Text style={styles.textBoxLabel}>ID Caja</Text>
+                                    <TextInput style={styles.textBox}
+                                    value={idCaja}/>
+                                </View>
+                                {<Locker></Locker>}
+                            </View>
+                        </View>
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.textBoxContainerFull}>
+                            <View style={styles.textBoxBorder}>
+                                <Text style={styles.textBoxLabel}>Monto de Apertura</Text>
+                                <CurrencyInput style={styles.textBox}
+                                delimiter=","
+                                precision={0}
+                                minValue={0}
+                                maxValue={999999}
+                                prefix="$"
+                                onChangeValue={value => {setMontoApertura(value)}}
+                                value={montoApertura}/>
+                            </View>
+                        </View>
+                        <View style={styles.spacer20}></View>
+                        <View style={styles.formRow}>
+                            <TouchableOpacity onPress={() => actualizarCaja(idCaja, montoApertura)}
+                            style={styles.mainButtonFloating}>
+                                <Text style={styles.mainButtonText}>Actualizar Caja</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                }  
             </View>
         </View>
     )

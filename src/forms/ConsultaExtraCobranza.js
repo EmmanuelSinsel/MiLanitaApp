@@ -45,7 +45,9 @@ const ConsultaExtraCobranza = ({navigation}) => {
         setPage(1)
         const filtro_upper = value.toUpperCase()
         setFiltro(value)
-        getPrestamos(1, 100, grupo, filtro_upper)
+        if(filtro_upper.length != 1){
+            getPrestamos(1, 100, grupo, filtro_upper)
+        }
         
     }
     function backMainScreen() {
@@ -157,7 +159,7 @@ const ConsultaExtraCobranza = ({navigation}) => {
                     <View style={styles.textBoxBorder}>
                                 <Text style={styles.textBoxLabel}>Grupo</Text>
                                 <Dropdown style={styles.comboBox}
-                                data={listaGrupos} search
+                                data={listaGrupos}
                                 labelField="label" valueField="value"
                                 searchPlaceholder="Grupo.." placeholder='Ej. Grupo 1'
                                 placeholderStyle={styles.comboBoxPlaceholder}
@@ -174,7 +176,7 @@ const ConsultaExtraCobranza = ({navigation}) => {
                             <Text style={styles.textBoxLabel}>Buscador</Text>
                             <TextInput style={styles.textBox}
                             onChangeText={value => {filterTable(value)}}
-                            defaultValue={filtroText}/>
+                            value={filtroText}/>
                 </View>
                 {
                     grupo === '' &&
